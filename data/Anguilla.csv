@@ -1,0 +1,6 @@
+"location","date","variant","num_sequences","perc_sequences","num_sequences_total"
+"Anguilla","2021-03-21","Alpha (VOC)","0,25","0,8333333333333333","0,25"
+"Anguilla","2021-03-21","Epsilon (AFM)","1,0","0,6666666666666666","1,0"
+"Anguilla","2021-04-04","Alpha (VOC)","0,5","1,0","0,5"
+"Anguilla","2021-05-02","B (Lineage)","1,0","1,0","1,0"
+"Anguilla","2021-05-02","Delta (VOC)","1,0","1,0","1,0"

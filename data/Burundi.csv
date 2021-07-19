@@ -1,0 +1,6 @@
+"location","date","variant","num_sequences","perc_sequences","num_sequences_total"
+"Burundi","2021-05-30","Alpha (VOC)","1,0","0,25","4,0"
+"Burundi","2021-05-30","Beta (VOC)","0,6","0,3333333333333333","1,6"
+"Burundi","2021-05-30","Delta (VOC)","0,5","0,5208333333333333","1,0"
+"Burundi","2021-06-13","Beta (VOC)","2,0","0,7142857142857143","3,0"
+"Burundi","2021-06-13","Delta (VOC)","1,0","0,2857142857142857","3,0"

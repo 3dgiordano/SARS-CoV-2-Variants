@@ -107,5 +107,11 @@ def main():
 
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    # Save a file for each location
+    for location in locations:
+        print(f"Save Location: {location['country']}")
+        df[df["location"] == location['country']].to_csv(f"../data/{location['country']}.csv", index=False,
+                                                         quoting=csv.QUOTE_ALL, decimal=",")
+
 
 main()
