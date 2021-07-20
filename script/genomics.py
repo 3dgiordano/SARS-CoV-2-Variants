@@ -107,11 +107,15 @@ def main():
 
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    # Save a file for each location
+    df_pivoted = df.pivot(index=["location", "date"], columns=["variant"], values="perc_sequences").reset_index()
+    df_pivoted = df_pivoted.fillna(0)
+
+    # Save a file for each location generating pivot table
     for location in locations:
         print(f"Save Location: {location['country']}")
-        df[df["location"] == location['country']].to_csv(f"../data/{location['country']}.csv", index=False,
-                                                         quoting=csv.QUOTE_ALL, decimal=",")
+        df_pivoted[df_pivoted["location"] == location['country']].to_csv(f"../data/{location['country']}.csv",
+                                                                         index=False,
+                                                                         quoting=csv.QUOTE_ALL, decimal=",")
 
 
 main()
