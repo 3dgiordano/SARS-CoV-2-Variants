@@ -93,6 +93,8 @@ def main():
 
     df["variant"].replace(lineage_map, inplace=True, regex=True)
 
+    df["perc_sequences"] = df["perc_sequences"] * 100
+
     main_lineage = [v for k, v in lineage_map.items()]
     other_lineage = [l for l in df["variant"].unique() if l not in main_lineage]
     lineage_to_parent = {}
