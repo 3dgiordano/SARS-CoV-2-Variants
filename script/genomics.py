@@ -55,48 +55,49 @@ def main():
 
     lineage_map = {
         # VOC
-        "^B\\.1\\.1\\.7(.*)": "Alpha (VOC)",
+        "^B\\.1\\.1\\.7$": "Alpha (VOC)",
         "^B\\.1\\.351(.*)": "Beta (VOC)",
         "^P\\.1(.*)": "Gamma - P.1 (VOC)",
-        "^B\\.1\\.617\\.2": "Delta (VOC)",
+        "^B\\.1\\.617\\.2$": "Delta (VOC)",
         # VOI
         "^B\\.1\\.617\\.1": "Kappa (VOI)",
-        "^B\\.1\\.525": "Eta (VOI)",
-        "^B\\.1\\.526": "Iota (VOI)",
-        "^C\\.37": "Lambda (VOI)",
+        "^B\\.1\\.525(.*)": "Eta (VOI)",
+        "^B\\.1\\.526(.*)": "Iota (VOI)",
+        "^C\\.37(.*)": "Lambda (VOI)",
         # Alerts for Further Monitoring
-        "^B\\.1\\.427": "Epsilon (AFM)",
-        "^B\\.1\\.429": "Epsilon (AFM)",
+        "^B\\.1\\.427(.*)": "Epsilon (AFM)",
+        "^B\\.1\\.429(.*)": "Epsilon (AFM)",
         "^P\\.2(.*)": "Zeta - P.2 (AFM)",
         "^P\\.3(.*)": "Theta - P.3 (AFM)",
         "^R\\.1(.*)": "R.1 (AFM)",
         "^R\\.2(.*)": "R.2 (AFM)",
         "^B\\.1\\.466\\.2": "B.1.466.2 (AFM)",
-        "^B\\.1\\.621": "B.1.621 (AFM)",
-        "^AV\\.1": "AV.1 (AFM)",
+        "^B\\.1\\.621(.*)": "B.1.621 (AFM)",
+        "^AV\\.1(.*)": "AV.1 (AFM)",
         "^B\\.1\\.1\\.318": "B.1.1.318 (AFM)",
         "^B\\.1\\.1\\.519": "B.1.1.519 (AFM)",
-        "^AT\\.1": "AT.1 (AFM)",
-        "^C\\.36\\.3": "C.36.3 (AFM)",
+        "^AT\\.1(.*)": "AT.1 (AFM)",
+        "^C\\.36\\.3$": "C.36.3 (AFM)",
         "^C\\.36\\.3\\.1": "C.36.3.1 (AFM)",
         "^B\\.1\\.214\\.2": "B.1.214.2 (AFM)",
         # Others
         "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
-        "^B\\.1\\.1\\.28": "B.1.1.28",
-        "^OTHER": "Other"
+        "^B\\.1\\.1\\.28$": "B.1.1.28",
+        "^OTHER$": "Other"
     }
 
     # Clear zeroes
     df = df[df.perc_sequences != 0]
 
+    df["perc_sequences"] = df["perc_sequences"] * 100
+
     df['variant'] = df['variant'].str.upper()
 
     df["variant"].replace(lineage_map, inplace=True, regex=True)
 
-    df["perc_sequences"] = df["perc_sequences"] * 100
+    main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
+    other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
 
-    main_lineage = [v for k, v in lineage_map.items()]
-    other_lineage = [l for l in df["variant"].unique() if l not in main_lineage]
     lineage_to_parent = {}
     for o in other_lineage:
         lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
@@ -104,7 +105,8 @@ def main():
     df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
 
     df['date'] = pd.to_datetime(df['date'])
-    df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).mean().reset_index().sort_values(
+    df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).agg(
+        {'num_sequences': 'sum', 'num_sequences_total': 'sum', 'perc_sequences': 'mean'}).reset_index().sort_values(
         ['location', 'date'])
 
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
