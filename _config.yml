@@ -1,0 +1,12 @@
+title: SARS-CoV-2 Variants
+author:
+  name: David Giordano
+  email: 3dgiordano@gmail.com
+description: SARS-CoV-2 Variants by @3dgiordano
+remote_theme: jekyll/minima
+
+minima:
+  social_links:
+    twitter: 3dgiordano
+    github: 3dgiordano
+    linkedin: davidgiordano
