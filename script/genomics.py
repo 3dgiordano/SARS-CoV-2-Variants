@@ -90,8 +90,6 @@ def main():
     # Clear zeroes
     df = df[df.perc_sequences != 0]
 
-    df["perc_sequences"] = df["perc_sequences"] * 100
-
     df['variant'] = df['variant'].str.upper()
 
     df["variant"].replace(lineage_map, inplace=True, regex=True)
@@ -106,9 +104,20 @@ def main():
     df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
 
     df['date'] = pd.to_datetime(df['date'])
+
     df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).agg(
-        {'num_sequences': 'sum', 'num_sequences_total': 'sum', 'perc_sequences': 'mean'}).reset_index().sort_values(
-        ['location', 'date'])
+        {'num_sequences': 'sum'}).reset_index()
+
+    dfb = df.groupby(['location', 'date']).agg(
+        {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
+
+    df = pd.merge(df, dfb, on=['location', 'date'])
+
+    df["perc_sequences"] = (df["num_sequences"] / df["num_sequences_total"]) * 100
+
+    df = df.drop(df[df.perc_sequences.isnull()].index)
+
+    df = df.sort_values(['location', 'date', 'variant'])
 
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
