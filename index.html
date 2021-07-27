@@ -33,6 +33,23 @@ p {
 	padding: 15px;
 	margin: 5px;
 }
+
+@media screen and (max-width: 1024px) {
+       table {
+           width:100%;
+       }
+       tbody td {
+           display: block;
+		   width:100% !important;
+       }
+       tbody td:before {
+           content: attr(data-th);
+           display: block;
+		   width:100% !important;
+           
+       }
+}
+
 </style>
 
 <div style="margin: 20px;">
