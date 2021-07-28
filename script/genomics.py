@@ -92,8 +92,9 @@ def get_lineage_map():
 
     who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
 
-    # WA: generate spaces to solve new lines and unexpected new lines with divs inside column values
-    who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;")
+    # WA: generate spaces to solve new lines and unexpected new lines with div/p inside column values
+    who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;").replace("</p>",
+                                                                                                    "</p>&nbsp;")
 
     (who_voc, who_voi, who_afm) = pd.read_html(who_body, match=r'GISAID\sclade')
 
@@ -121,7 +122,6 @@ def main():
     locations = get_locations().to_dict('records')
 
     for location in locations:
-
         print(f"Location: {location['country']}")
         df = get_location_data(location["country_id"], location["country"])
         df.rename(
@@ -133,7 +133,6 @@ def main():
             columns=['location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
 
         locations_list.append(df)
-
 
     df = pd.concat(locations_list)
 
