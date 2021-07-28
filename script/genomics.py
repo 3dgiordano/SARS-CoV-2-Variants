@@ -1,14 +1,31 @@
 import csv
 import json
+import re
 from urllib.request import urlopen
 
 import pandas as pd
-
 
 # Data Sources
 # https://outbreak.info/situation-reports/methods
 # https://cov-lineages.org/index.html
 # https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
+
+lineage_map = {
+    "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
+    "^B\\.1\\.1\\.28$": "B.1.1.28",
+    "^OTHER$": "Other"
+}
+
+who_detail_map = {
+    "Gamma": "Gamma - P.1",
+}
+
+who_pango_map = {
+    "^B\\.1\\.427(.*)": "Epsilon",
+    "^B\\.1\\.429(.*)": "Epsilon",
+    "^P\\.2(.*)": "Zeta - P.2",
+    "^P\\.3(.*)": "Theta - P.3"
+}
 
 
 def get_locations():
@@ -33,12 +50,78 @@ def get_location_data(location_id, location):
     return loc_df
 
 
+def who_detail(who_name):
+    for k, v in who_detail_map.items():
+        who_name = who_name.replace(k, v)
+    return who_name
+
+
+def who_pango_rename(pango):
+    for k, v in who_pango_map.items():
+        pango = re.sub(k, v, pango)
+    return pango
+
+
+def pango_regex(pango):
+    sub_depth = pango.count(".")
+    pango = pango.replace("*", "").replace(".", "\\.")
+    return f"^{pango}$" if sub_depth == 3 else f"^{pango}(.*)"
+
+
+def who_to_dict(data, who_type):
+    who_label = 'WHO\xa0label'
+    if who_label in data.columns:
+        return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
+                ind, row in
+                data.iterrows()}
+    else:
+        return {
+            pango_regex(row['pango']):
+                f"{who_pango_rename(row['pango'].replace('*', ''))} {who_type}" for ind, row in
+            data.iterrows()}
+
+
+def who_expand(data):
+    return data.assign(pango=data['Pango lineages'].str.split()).explode('pango')
+
+
+def get_lineage_map():
+    from urllib.request import Request, urlopen
+
+    who_variants_tracking_url = "https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/"
+
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+
+    # WA: generate spaces to solve new lines and unexpected new lines with divs inside column values
+    who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;")
+
+    (who_voc, who_voi, who_afm) = pd.read_html(who_body, match=r'GISAID\sclade')
+
+    who_voc = who_expand(who_voc)
+    who_voi = who_expand(who_voi)
+    who_afm = who_expand(who_afm)
+
+    who_voc_dict = who_to_dict(who_voc, "(VOC)")
+    who_voi_dict = who_to_dict(who_voi, "(VOI)")
+    who_afm_dict = who_to_dict(who_afm, "(AFM)")
+
+    who_dict_map = dict(
+        list(who_voc_dict.items()) +
+        list(who_voi_dict.items()) +
+        list(who_afm_dict.items())
+    )
+    who_dict_map.update(lineage_map)
+
+    return who_dict_map
+
+
 def main():
     locations_list = []
 
     locations = get_locations().to_dict('records')
 
     for location in locations:
+
         print(f"Location: {location['country']}")
         df = get_location_data(location["country_id"], location["country"])
         df.rename(
@@ -51,50 +134,19 @@ def main():
 
         locations_list.append(df)
 
-    df = pd.concat(locations_list)
 
-    lineage_map = {
-        # VOC
-        "^B\\.1\\.1\\.7$": "Alpha (VOC)",
-        "^B\\.1\\.351(.*)": "Beta (VOC)",
-        "^P\\.1(.*)": "Gamma - P.1 (VOC)",
-        "^B\\.1\\.617\\.2$": "Delta (VOC)",
-        # VOI
-        "^B\\.1\\.617\\.1": "Kappa (VOI)",
-        "^B\\.1\\.525(.*)": "Eta (VOI)",
-        "^B\\.1\\.526(.*)": "Iota (VOI)",
-        "^C\\.37(.*)": "Lambda (VOI)",
-        # Alerts for Further Monitoring
-        "^B\\.1\\.427(.*)": "Epsilon (AFM)",
-        "^B\\.1\\.429(.*)": "Epsilon (AFM)",
-        "^P\\.2(.*)": "Zeta - P.2 (AFM)",
-        "^P\\.3(.*)": "Theta - P.3 (AFM)",
-        "^R\\.1(.*)": "R.1 (AFM)",
-        "^R\\.2(.*)": "R.2 (AFM)",
-        "^B\\.1\\.466\\.2": "B.1.466.2 (AFM)",
-        "^B\\.1\\.621(.*)": "B.1.621 (AFM)",
-        "^AV\\.1(.*)": "AV.1 (AFM)",
-        "^AY\\.3(.*)": "AY.3 - Delta",
-        "^B\\.1\\.1\\.318": "B.1.1.318 (AFM)",
-        "^B\\.1\\.1\\.519": "B.1.1.519 (AFM)",
-        "^AT\\.1(.*)": "AT.1 (AFM)",
-        "^C\\.36\\.3$": "C.36.3 (AFM)",
-        "^C\\.36\\.3\\.1": "C.36.3.1 (AFM)",
-        "^B\\.1\\.214\\.2": "B.1.214.2 (AFM)",
-        # Others
-        "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
-        "^B\\.1\\.1\\.28$": "B.1.1.28",
-        "^OTHER$": "Other"
-    }
+    df = pd.concat(locations_list)
 
     # Clear zeroes
     df = df[df.perc_sequences != 0]
 
     df['variant'] = df['variant'].str.upper()
 
-    df["variant"].replace(lineage_map, inplace=True, regex=True)
+    who_lineage_map = get_lineage_map()
 
-    main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
+    df["variant"].replace(who_lineage_map, inplace=True, regex=True)
+
+    main_lineage = list(dict.fromkeys([v for k, v in who_lineage_map.items()]))
     other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
 
     lineage_to_parent = {}
