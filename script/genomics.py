@@ -9,10 +9,19 @@ import pandas as pd
 # https://outbreak.info/situation-reports/methods
 # https://cov-lineages.org/index.html
 # https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
-
+# https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
+# https://www.ecdc.europa.eu/en/covid-19/variants-concern
 lineage_map = {
     "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
+    "^A\\.23\\.1(.*)": "A.23.1 (ECDC VUM)",
+    "^A\\.27(.*)": "A.27 (ECDC VUM)",
+    "^A\\.28(.*)": "A.28 (ECDC VUM)",
+    "^AT\\.1(.*)": "AT.1 (ECDC VUM)",
+    "^AV\\.1(.*)": "AV.1 (ECDC VUM)",
+    "^B\\.1\\.617\\.3$": "B.1.617.3 (CDC VOI)",
+    "^B\\.1\\.671\\.2$": "B.1.671.2 (ECDC VUM)",
+    "^C\\.16(.*)": "C.16 (ECDC VUM)",
     "^OTHER$": "Other"
 }
 
