@@ -20,7 +20,7 @@ lineage_map = {
     "^A\\.28(.*)": "A.28 (ECDC VUM)",
     "^AT\\.1(.*)": "AT.1 (ECDC VUM)",
     "^AV\\.1(.*)": "AV.1 (ECDC VUM)",
-    "^B\\.1\\.617\\.3$": "B.1.617.3 (CDC VOI)",
+    # "^B\\.1\\.617\\.3$": "B.1.617.3 (CDC VOI)",
     "^B\\.1\\.671\\.2$": "B.1.671.2 (ECDC VUM)",
     "^C\\.16(.*)": "C.16 (ECDC VUM)",
     "^OTHER$": "Other"
@@ -95,7 +95,7 @@ def who_expand(data):
     return data.assign(pango=data['Pango lineages'].str.split()).explode('pango')
 
 
-def get_lineage_map():
+def get_who_variants():
     from urllib.request import Request, urlopen
 
     who_variants_tracking_url = "https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/"
@@ -105,8 +105,44 @@ def get_lineage_map():
     # WA: generate spaces to solve new lines and unexpected new lines with div/p inside column values
     who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;").replace("</p>",
                                                                                                     "</p>&nbsp;")
+    return pd.read_html(who_body, match=r'GISAID\sclade')
 
-    (who_voc, who_voi, who_afm) = pd.read_html(who_body, match=r'GISAID\sclade')
+
+def cdc_filter_variants(table):
+    return [row.find_all(role="cell")[0].find_all('strong')[0].text.strip() for row in table.find_all(role='row')]
+
+
+def get_cdc_variants():
+    from urllib.request import Request, urlopen
+    from bs4 import BeautifulSoup
+
+    cdc_variants_tracking_url = "https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html"
+
+    cdc_body = urlopen(Request(cdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+
+    soup = BeautifulSoup(cdc_body, 'lxml')
+    variants_tables = soup.find_all(
+        'div', role="table")
+
+    return cdc_filter_variants(variants_tables[0]), cdc_filter_variants(variants_tables[1])
+
+
+def cdc_to_dict(who_dict_map, cdc_variants, cdc_type):
+    variants = {}
+    for cdc_variant in cdc_variants:
+        match = False
+        for k, v in who_dict_map.items():
+            if re.match(k, cdc_variant):
+                match = True
+                break
+        if not match:
+            variants[pango_regex(cdc_variant)] = f"{cdc_variant} {cdc_type}"
+    return variants
+
+
+def get_lineage_map():
+    (who_voc, who_voi, who_afm) = get_who_variants()
+    (cdc_voi, cdc_voc) = get_cdc_variants()
 
     who_voc = who_expand(who_voc)
     who_voi = who_expand(who_voi)
@@ -122,6 +158,11 @@ def get_lineage_map():
         list(who_afm_dict.items())
     )
     who_dict_map.update(lineage_map)
+
+    cdc_voi_dict = cdc_to_dict(who_dict_map, cdc_voi, "(CDC VOI)")
+    cdc_voc_dict = cdc_to_dict(who_dict_map, cdc_voc, "(CDC VOC)")
+    who_dict_map.update(cdc_voi_dict)
+    who_dict_map.update(cdc_voc_dict)
 
     return who_dict_map
 
