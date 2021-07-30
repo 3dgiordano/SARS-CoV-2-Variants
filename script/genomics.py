@@ -15,13 +15,6 @@ lineage_map = {
     "^B\\.1\\.160(.*)": "B.1.160 (20A/EU2)",
     "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
-    "^A\\.23\\.1(.*)": "A.23.1 (ECDC VUM)",
-    "^A\\.27(.*)": "A.27 (ECDC VUM)",
-    "^A\\.28(.*)": "A.28 (ECDC VUM)",
-    "^AT\\.1(.*)": "AT.1 (ECDC VUM)",
-    "^AV\\.1(.*)": "AV.1 (ECDC VUM)",
-    "^B\\.1\\.671\\.2$": "B.1.671.2 (ECDC VUM)",
-    "^C\\.16(.*)": "C.16 (ECDC VUM)",
     "^OTHER$": "Other"
 }
 
@@ -126,7 +119,7 @@ def get_cdc_variants():
     return cdc_filter_variants(variants_tables[0]), cdc_filter_variants(variants_tables[1])
 
 
-def cdc_to_dict(who_dict_map, cdc_variants, cdc_type):
+def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
     variants = {}
     for cdc_variant in cdc_variants:
         match = False
@@ -135,13 +128,47 @@ def cdc_to_dict(who_dict_map, cdc_variants, cdc_type):
                 match = True
                 break
         if not match:
-            variants[pango_regex(cdc_variant)] = f"{cdc_variant} {cdc_type}"
+            variant_regex = pango_regex(cdc_variant)
+            # Invert, check if this match on who variant, if match try to fix on that lineage
+            match = False
+            k_normal = ""
+            for k, v in who_dict_map.items():
+                k_normal = k.replace("\\", "").replace("^", "").replace("$", "").replace("(.*)", "")
+                if re.match(variant_regex, k_normal):
+                    match = True
+                    break
+            if match:
+                variant_regex = variant_regex.replace("(.*)", "$")
+            if k_normal != variant_regex:
+                variants[variant_regex] = f"{cdc_variant} {cdc_type}"
+
     return variants
+
+
+def ecdc_filter_values(table):
+    return list(set([x.split("+")[0].strip() for x in table['Lineage + additional mutations'].tolist()]))
+
+
+def get_ecdc_variants():
+    from urllib.request import Request, urlopen
+
+    ecdc_variants_tracking_url = "https://www.ecdc.europa.eu/en/covid-19/variants-concern"
+
+    ecdc_body = urlopen(Request(ecdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode(
+        'UTF-8')
+
+    ecdc_tables = pd.read_html(ecdc_body, match=r'WHO\slabel')
+
+    ecdc_voc = ecdc_filter_values(ecdc_tables[0])
+    ecdc_voi = list(set(ecdc_filter_values(ecdc_tables[1])) - set(ecdc_voc))
+    ecdc_vum = list((set(ecdc_filter_values(ecdc_tables[2])) - set(ecdc_voi)) - set(ecdc_voi))
+    return ecdc_voc, ecdc_voi, ecdc_vum
 
 
 def get_lineage_map():
     (who_voc, who_voi, who_afm) = get_who_variants()
     (cdc_voi, cdc_voc) = get_cdc_variants()
+    (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
 
     who_voc = who_expand(who_voc)
     who_voi = who_expand(who_voi)
@@ -158,11 +185,19 @@ def get_lineage_map():
     )
     lineage_dict_map.update(lineage_map)
 
-    cdc_voi_dict = cdc_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
-    cdc_voc_dict = cdc_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
+    cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
 
     lineage_dict_map.update(cdc_voi_dict)
     lineage_dict_map.update(cdc_voc_dict)
+
+    ecdc_voi_dict = filter_to_dict(lineage_dict_map, ecdc_voi, "(ECDC VOI)")
+    ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
+    ecdc_vum_dict = filter_to_dict(lineage_dict_map, ecdc_vum, "(ECDC VUM)")
+
+    lineage_dict_map.update(ecdc_voi_dict)
+    lineage_dict_map.update(ecdc_voc_dict)
+    lineage_dict_map.update(ecdc_vum_dict)
 
     return lineage_dict_map
 
