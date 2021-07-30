@@ -20,7 +20,6 @@ lineage_map = {
     "^A\\.28(.*)": "A.28 (ECDC VUM)",
     "^AT\\.1(.*)": "AT.1 (ECDC VUM)",
     "^AV\\.1(.*)": "AV.1 (ECDC VUM)",
-    # "^B\\.1\\.617\\.3$": "B.1.617.3 (CDC VOI)",
     "^B\\.1\\.671\\.2$": "B.1.671.2 (ECDC VUM)",
     "^C\\.16(.*)": "C.16 (ECDC VUM)",
     "^OTHER$": "Other"
@@ -152,19 +151,20 @@ def get_lineage_map():
     who_voi_dict = who_to_dict(who_voi, "(VOI)")
     who_afm_dict = who_to_dict(who_afm, "(AFM)")
 
-    who_dict_map = dict(
+    lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voi_dict.items()) +
         list(who_afm_dict.items())
     )
-    who_dict_map.update(lineage_map)
+    lineage_dict_map.update(lineage_map)
 
-    cdc_voi_dict = cdc_to_dict(who_dict_map, cdc_voi, "(CDC VOI)")
-    cdc_voc_dict = cdc_to_dict(who_dict_map, cdc_voc, "(CDC VOC)")
-    who_dict_map.update(cdc_voi_dict)
-    who_dict_map.update(cdc_voc_dict)
+    cdc_voi_dict = cdc_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    cdc_voc_dict = cdc_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
 
-    return who_dict_map
+    lineage_dict_map.update(cdc_voi_dict)
+    lineage_dict_map.update(cdc_voc_dict)
+
+    return lineage_dict_map
 
 
 def main():
@@ -192,17 +192,17 @@ def main():
 
     df['variant'] = df['variant'].str.upper()
 
-    who_lineage_map = get_lineage_map()
+    main_lineage_map = get_lineage_map()
 
-    df["variant"].replace(who_lineage_map, inplace=True, regex=True)
+    df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
-    main_lineage = list(dict.fromkeys([v for k, v in who_lineage_map.items()]))
+    main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
     other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
 
+    # Transform no specific lineage to parent lineage
     lineage_to_parent = {}
     for o in other_lineage:
         lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
-
     df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
 
     df['date'] = pd.to_datetime(df['date'])
