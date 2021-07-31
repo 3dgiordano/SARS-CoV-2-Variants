@@ -262,9 +262,10 @@ def main():
     df_pivoted = df_pivoted.fillna(0)
 
     # Save a file for each location generating pivot table
+    # Exclude the last register because is noisy
     for location in locations:
         print(f"Save Location: {location['country']}")
-        df_pivoted[df_pivoted["location"] == location['country']].to_csv(f"../data/{location['country']}.csv",
+        df_pivoted[df_pivoted["location"] == location['country']][:-1].to_csv(f"../data/{location['country']}.csv",
                                                                          index=False,
                                                                          quoting=csv.QUOTE_ALL, decimal=",")
 
