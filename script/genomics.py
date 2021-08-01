@@ -11,9 +11,10 @@ import pandas as pd
 # https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
 # https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
+
 lineage_map = {
-    "^B\\.1\\.160(.*)": "B.1.160 (20A/EU2)",
-    "^B\\.1\\.177(.*)": "B.1.177 (20E/EU1)",
+    "^B\\.1\\.160(.*)": "B.1.160 - 20A/EU2",
+    "^B\\.1\\.177(.*)": "B.1.177 - 20E/EU1",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
     "^OTHER$": "Other"
 }
@@ -174,32 +175,78 @@ def get_lineage_map():
     who_voi = who_expand(who_voi)
     who_afm = who_expand(who_afm)
 
-    who_voc_dict = who_to_dict(who_voc, "(VOC)")
-    who_voi_dict = who_to_dict(who_voi, "(VOI)")
-    who_afm_dict = who_to_dict(who_afm, "(AFM)")
+    who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
+    who_voi_dict = who_to_dict(who_voi, "(WHO VOI)")
+    who_afm_dict = who_to_dict(who_afm, "(WHO AFM)")
 
     lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voi_dict.items()) +
         list(who_afm_dict.items())
     )
-    lineage_dict_map.update(lineage_map)
 
-    cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
     cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
+    cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
 
     lineage_dict_map.update(cdc_voi_dict)
     lineage_dict_map.update(cdc_voc_dict)
 
-    ecdc_voi_dict = filter_to_dict(lineage_dict_map, ecdc_voi, "(ECDC VOI)")
     ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
+    ecdc_voi_dict = filter_to_dict(lineage_dict_map, ecdc_voi, "(ECDC VOI)")
     ecdc_vum_dict = filter_to_dict(lineage_dict_map, ecdc_vum, "(ECDC VUM)")
 
     lineage_dict_map.update(ecdc_voi_dict)
     lineage_dict_map.update(ecdc_voc_dict)
     lineage_dict_map.update(ecdc_vum_dict)
 
-    return lineage_dict_map
+    lineage_dict_map.update(lineage_map)
+
+    data = {
+        "map": lineage_dict_map,
+        "data": {
+            "who": {"voc": who_voc, "voi": who_voc, "afm": who_afm},
+            "cdc": {"voi": cdc_voi, "voc": cdc_voc},
+            "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
+        }
+    }
+    return data
+
+
+def get_sort_order(interest, interest_type, label):
+    interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "": 9000}
+    interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
+    return str(interest_map[interest] + interest_type_map[interest_type]) + label
+
+
+def export_variants(main_lineage_map):
+    main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
+    variant_records = []
+
+    for lineage in main_lineage:
+        if lineage == "Other":
+            continue
+
+        label = lineage.split("(")[0].strip()
+        pango_list = ",".join([k.replace("\\", "").replace("(.*)", ".*").replace("^", "").replace("$", "") for k, v in
+                               main_lineage_map.items() if v == lineage])
+
+        interest = lineage.split("(")[1].replace(")", "").split()[0] if \
+            lineage.find("(") > -1 else "" if ["VUM", "VOI", "VOC", "AFM"] else ""
+
+        interest_type = ""
+        if "(" in lineage and len(lineage.split("(")[1].replace(")", "").split()) > 0:
+            interest_type = lineage.split("(")[1].replace(")", "").split()[1]
+
+        variant_records.append({
+            "label": label,
+            "pango": pango_list,
+            "interest": interest,
+            "type": interest_type,
+            "sort_order": get_sort_order(interest, interest_type, label)
+        })
+    pd.json_normalize(variant_records).sort_values(["sort_order"]).drop(columns=['sort_order']).to_csv(
+        f"../data/variants.csv", index=False,
+        quoting=csv.QUOTE_ALL, decimal=",")
 
 
 def main():
@@ -227,12 +274,15 @@ def main():
 
     df['variant'] = df['variant'].str.upper()
 
-    main_lineage_map = get_lineage_map()
+    data = get_lineage_map()
+    main_lineage_map = data["map"]
 
     df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
     main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
     other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
+
+    export_variants(main_lineage_map)
 
     # Transform no specific lineage to parent lineage
     lineage_to_parent = {}
@@ -266,8 +316,8 @@ def main():
     for location in locations:
         print(f"Save Location: {location['country']}")
         df_pivoted[df_pivoted["location"] == location['country']][:-1].to_csv(f"../data/{location['country']}.csv",
-                                                                         index=False,
-                                                                         quoting=csv.QUOTE_ALL, decimal=",")
+                                                                              index=False,
+                                                                              quoting=csv.QUOTE_ALL, decimal=",")
 
 
 main()
