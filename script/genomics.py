@@ -227,7 +227,7 @@ def export_variants(main_lineage_map):
             continue
 
         label = lineage.split("(")[0].strip()
-        pango_list = ",".join([k.replace("\\", "").replace("(.*)", ".*").replace("^", "").replace("$", "") for k, v in
+        pango_list = ", ".join([k.replace("\\", "").replace("(.*)", ".*").replace("^", "").replace("$", "") for k, v in
                                main_lineage_map.items() if v == lineage])
 
         interest = lineage.split("(")[1].replace(")", "").split()[0] if \
