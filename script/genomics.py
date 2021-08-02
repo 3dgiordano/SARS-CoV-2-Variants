@@ -12,10 +12,14 @@ import pandas as pd
 # https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
 
+interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
+interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
+
 lineage_map = {
     "^B\\.1\\.160(.*)": "B.1.160 - 20A/EU2",
     "^B\\.1\\.177(.*)": "B.1.177 - 20E/EU1",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
+    "^P\\.6(.*)": "P.6 (UY-GTI VOI)",
     "^OTHER$": "Other"
 }
 
@@ -213,8 +217,10 @@ def get_lineage_map():
 
 
 def get_sort_order(interest, interest_type, label):
-    interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "": 9000}
-    interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
+    if interest not in interest_map:
+        interest = ""
+    if interest_type not in interest_type_map:
+        interest_type = ""
     return str(interest_map[interest] + interest_type_map[interest_type]) + label
 
 
