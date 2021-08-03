@@ -19,6 +19,7 @@ lineage_map = {
     "^B\\.1\\.160(.*)": "B.1.160 - 20A/EU2",
     "^B\\.1\\.177(.*)": "B.1.177 - 20E/EU1",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
+    "^B\\.1\\.616(.*)": "B.1.616",
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
     "^OTHER$": "Other"
 }
@@ -234,7 +235,7 @@ def export_variants(main_lineage_map):
 
         label = lineage.split("(")[0].strip()
         pango_list = ", ".join([k.replace("\\", "").replace("(.*)", ".*").replace("^", "").replace("$", "") for k, v in
-                               main_lineage_map.items() if v == lineage])
+                                main_lineage_map.items() if v == lineage])
 
         interest = lineage.split("(")[1].replace(")", "").split()[0] if \
             lineage.find("(") > -1 else "" if ["VUM", "VOI", "VOC", "AFM"] else ""
