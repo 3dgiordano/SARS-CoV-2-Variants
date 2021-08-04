@@ -11,6 +11,7 @@ import pandas as pd
 # https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
 # https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
+# https://www.gov.uk/government/collections/new-sars-cov-2-variant
 
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
@@ -177,10 +178,32 @@ def get_ecdc_variants():
     return ecdc_voc, ecdc_voi, ecdc_vum
 
 
+def phe_filter_values(table, v_type):
+    return list(set([x.split("PANGO: ")[1].split("nextstrain: ")[0].split(",")[0].strip() for x in
+                     table.loc[table["Label"].str.startswith(v_type, na=False)]['Lineages'].tolist() if
+                     "Multiple" not in x]))
+
+
+def get_phe_variants():
+    from urllib.request import Request, urlopen
+
+    phe_variants_tracking_url = "https://github.com/phe-genomics/variant_definitions/blob/main/README.md"
+
+    phe_body = urlopen(Request(phe_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+
+    phe_tables = pd.read_html(phe_body, match=r'Lineages')
+
+    phe_voc = phe_filter_values(phe_tables[0], 'VOC')
+    phe_vui = phe_filter_values(phe_tables[0], 'VUI')
+
+    return phe_voc, phe_vui
+
+
 def get_lineage_map():
     (who_voc, who_voi, who_afm) = get_who_variants()
     (cdc_voi, cdc_voc) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
+    (phe_voc, phe_vui) = get_phe_variants()
 
     who_voc = who_expand(who_voc)
     who_voi = who_expand(who_voi)
@@ -210,6 +233,12 @@ def get_lineage_map():
     lineage_dict_map.update(ecdc_voc_dict)
     lineage_dict_map.update(ecdc_vum_dict)
 
+    phe_voc_dict = filter_to_dict(lineage_dict_map, phe_voc, "(PHE VOC)")
+    phe_vui_dict = filter_to_dict(lineage_dict_map, phe_vui, "(PHE VUI)")
+
+    lineage_dict_map.update(phe_voc_dict)
+    lineage_dict_map.update(phe_vui_dict)
+
     lineage_dict_map.update(lineage_map)
 
     data = {
@@ -218,6 +247,7 @@ def get_lineage_map():
             "who": {"voc": who_voc, "voi": who_voc, "afm": who_afm},
             "cdc": {"voi": cdc_voi, "voc": cdc_voc},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
+            "phe": {"voc": phe_voc, "vui": phe_vui},
         }
     }
     return data
