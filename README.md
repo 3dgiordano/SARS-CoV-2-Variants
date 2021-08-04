@@ -9,10 +9,11 @@ Website: https://3dgiordano.github.io/SARS-CoV-2-Variants/
 The naming system used is a mix between the names denominated by WHO, the Pango Lineage system and some Nextstrain Clade names.
 
 The project use the denomination of:
-- WHO/CDC/ECDC Variants of Concern (VOC)
+- WHO/CDC/ECDC/PHE Variants of Concern (VOC)
 - WHO/CDC/ECDC Variants of Interest (VOI)
 - WHO Alerts for Further Monitoring (AFM)
-- ECDC Variants Under Monitoring (VUM).
+- ECDC Variants Under Monitoring (VUM)
+- PHE Variants Under Investigation (VUI)
 
 If a major variant is detected, the WHO name is used.
 If it is some other variant to consider not yet considered by WHO, its Pango lineage is used.
@@ -23,7 +24,7 @@ For more information about lineages names and classifications
 - WHO - Tracking SARS-CoV-2 variants https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
 - CDC - SARS-CoV-2 Variant Classifications and Definitions https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
 - ECDC - SARS-CoV-2 variants of concern https://www.ecdc.europa.eu/en/covid-19/variants-concern
-
+- PHE - COVID-19 (SARS-CoV-2) variants https://www.gov.uk/government/collections/new-sars-cov-2-variant
 
 #### About:
 
