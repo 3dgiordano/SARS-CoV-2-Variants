@@ -107,7 +107,13 @@ def get_who_variants():
 
 
 def cdc_filter_variants(table):
-    return [row.find_all(role="cell")[0].find_all('strong')[0].text.strip() for row in table.find_all(role='row')]
+    pango_list = []
+    for row in table.find_all(role='row'):
+        for el in row.find_all(role="cell")[0].find_all('p'):
+            text = el.text
+            if text.startswith("Pango"):
+                pango_list += [v.strip() for v in text.split(":")[1].split("(")[0].strip().split(",")]
+    return pango_list
 
 
 def get_cdc_variants():
