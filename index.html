@@ -513,7 +513,10 @@ dfjs.DataFrame.fromCSV(data_url).then(df => {
         },
 	tooltip: {
 		onDatasetHover: { highlightDataSeries: true },
-			
+		
+		shared: false,
+		followCursor: false,
+	  
 		style: {
 			fontSize: '9px',
 			fontFamily: "Verdana"
