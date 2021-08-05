@@ -179,9 +179,11 @@ def get_ecdc_variants():
 
 
 def phe_filter_values(table, v_type):
-    return list(set([x.split("PANGO: ")[1].split("nextstrain: ")[0].split(",")[0].strip() for x in
-                     table.loc[table["Label"].str.startswith(v_type, na=False)]['Lineages'].tolist() if
-                     "Multiple" not in x]))
+    # WA wrong pango from B.1.324.1 to B.1.623
+    return list(set(
+        [x.split("PANGO: ")[1].split("nextstrain: ")[0].replace("B.1.324.1", "B.1.623").split(",")[0].strip() for x in
+         table.loc[table["Label"].str.startswith(v_type, na=False)]['Lineages'].tolist() if
+         "Multiple" not in x]))
 
 
 def get_phe_variants():
