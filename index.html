@@ -1,662 +1,685 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SARS-CoV-2-Variants by @3dgiordano</title>
-<meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="SARS-CoV-2-Variants" />
-<meta name="author" content="David Giordano" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="SARS-CoV-2-Variants by @3dgiordano" />
-<meta property="og:description" content="SARS-CoV-2-Variants by @3dgiordano" />
-<link rel="canonical" href="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
-<meta property="og:url" content="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
-<meta property="og:site_name" content="SARS-CoV-2-Variants by @3dgiordano" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="SARS-CoV-2-Variants by @3dgiordano" />
-<script type="application/ld+json">
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SARS-CoV-2-Variants by @3dgiordano</title>
+  <meta name="generator" content="Jekyll v3.9.0" />
+  <meta property="og:title" content="SARS-CoV-2-Variants" />
+  <meta name="author" content="David Giordano" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <link rel="canonical" href="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:url" content="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:site_name" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="twitter:title" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <script type="application/ld+json">
 {"headline":"SARS-CoV-2-Variants by @3dgiordano","description":"SARS-CoV-2 Variants by @3dgiordano","url":"https://3dgiordano.github.io/SARS-CoV-2-Variants/","@type":"WebSite","name":"SARS-CoV-2-Variants by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
 </script>
-<style>
-body {
-    font-family: Roboto,sans-serif;
-    font-style: normal;
-    margin: 0;
-	padding: 0px;
-}
-h1 {
-	padding: 5px;
-	margin: 10px;
-}
-p {
-	padding: 15px;
-	margin: 5px;
-}
+  <style>
+    body {
+      font-family: Roboto, sans-serif;
+      font-style: normal;
+      margin: 0;
+      padding: 0px;
+    }
 
-@media screen and (max-width: 1024px) {
-       table {
-           width:100%;
-       }
-       tbody td {
-           display: block;
-		   width:100% !important;
-       }
-       tbody td:before {
-           content: attr(data-th);
-           display: block;
-		   width:100% !important;
-           
-       }
-}
+    h1 {
+      padding: 5px;
+      margin: 10px;
+    }
 
-</style>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
-<script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
+    p {
+      padding: 15px;
+      margin: 5px;
+    }
 
-<script id="rendered-js" crossorigin="anonymous" >
+    @media screen and (max-width: 1024px) {
+      table {
+        width: 100%;
+      }
 
-function get_color_columns(columns, variants) {
-	
-	var colors = [	
-	 
-			"#3360a9",
-            "#2a939b",
-            "#e6332e",
-            "#ca2628",
-            "#ffd53e",
-            "#9ecc8a",
-            "#34983f",
-			
-            "#ff7f0e",
-            "#1f77b4",
-            "#ffbb78",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5",
-            "#8c564b",
-            
-			"#c49c94",
-            "#e377c2",
-            "#f7b6d2",
-            "#7f7f7f",
-            "#c7c7c7",
-            "#bcbd22",
-            "#dbdb8d",
-            "#17becf",
-            "#9edae5",
-            "#1f77b4",
-			
-			"#3C4E66",
-            "#B13507",
-            "#00847E",
-            "#6D3E91",
-            "#CF0A66",
-            "#883039",
-            "#00823F",
-            "#4C6A9C",
-            "#C05917",
-            "#D73C50",
-            "#287669",
-            "#CD2285",
-            "#0F739C",
-            "#9A5129",
-            "#C45267",
-            "#008860",
-            "#8C4569",
-            "#B36216",
-            "#366388",
-            "#A2559C",
-            "#578145",
-            "#D7263F",
-            "#18470F",
-            "#BC8E5A",
-            "#585C64",
-			 "#000004",
-            "#010005",
-            "#010106",
-            "#010108",
-            "#020109",
-            "#02020b",
-            "#02020d",
-            "#03030f",
-            "#030312",
-            "#040414",
-            "#050416",
-            "#060518",
-            "#06051a",
-            "#07061c",
-            "#08071e",
-            "#090720",
-            "#0a0822",
-            "#0b0924",
-            "#0c0926",
-            "#0d0a29",
-            "#0e0b2b",
-            "#100b2d",
-            "#110c2f",
-            "#120d31",
-            "#130d34",
-            "#140e36",
-            "#150e38",
-            "#160f3b",
-            "#180f3d",
-            "#19103f",
-            "#1a1042",
-            "#1c1044",
-            "#1d1147",
-            "#1e1149",
-            "#20114b",
-            "#21114e",
-            "#221150",
-            "#241253",
-            "#251255",
-            "#271258",
-            "#29115a",
-            "#2a115c",
-            "#2c115f",
-            "#2d1161",
-            "#2f1163",
-            "#311165",
-            "#331067",
-            "#341069",
-            "#36106b",
-            "#38106c",
-            "#390f6e",
-            "#3b0f70",
-            "#3d0f71",
-            "#3f0f72",
-            "#400f74",
-            "#420f75",
-            "#440f76",
-            "#451077",
-            "#471078",
-            "#491078",
-            "#4a1079",
-            "#4c117a",
-            "#4e117b",
-            "#4f127b",
-            "#51127c",
-            "#52137c",
-            "#54137d",
-            "#56147d",
-            "#57157e",
-            "#59157e",
-            "#5a167e",
-            "#5c167f",
-            "#5d177f",
-            "#5f187f",
-            "#601880",
-            "#621980",
-            "#641a80",
-            "#651a80",
-            "#671b80",
-            "#681c81",
-            "#6a1c81",
-            "#6b1d81",
-            "#6d1d81",
-            "#6e1e81",
-            "#701f81",
-            "#721f81",
-            "#732081",
-            "#752181",
-            "#762181",
-            "#782281",
-            "#792282",
-            "#7b2382",
-            "#7c2382",
-            "#7e2482",
-            "#802582",
-            "#812581",
-            "#832681",
-            "#842681",
-            "#862781",
-            "#882781",
-            "#892881",
-            "#8b2981",
-            "#8c2981",
-            "#8e2a81",
-            "#902a81",
-            "#912b81",
-            "#932b80",
-            "#942c80",
-            "#962c80",
-            "#982d80",
-            "#992d80",
-            "#9b2e7f",
-            "#9c2e7f",
-            "#9e2f7f",
-            "#a02f7f",
-            "#a1307e",
-            "#a3307e",
-            "#a5317e",
-            "#a6317d",
-            "#a8327d",
-            "#aa337d",
-            "#ab337c",
-            "#ad347c",
-            "#ae347b",
-            "#b0357b",
-            "#b2357b",
-            "#b3367a",
-            "#b5367a",
-            "#b73779",
-            "#b83779",
-            "#ba3878",
-            "#bc3978",
-            "#bd3977",
-            "#bf3a77",
-            "#c03a76",
-            "#c23b75",
-            "#c43c75",
-            "#c53c74",
-            "#c73d73",
-            "#c83e73",
-            "#ca3e72",
-            "#cc3f71",
-            "#cd4071",
-            "#cf4070",
-            "#d0416f",
-            "#d2426f",
-            "#d3436e",
-            "#d5446d",
-            "#d6456c",
-            "#d8456c",
-            "#d9466b",
-            "#db476a",
-            "#dc4869",
-            "#de4968",
-            "#df4a68",
-            "#e04c67",
-            "#e24d66",
-            "#e34e65",
-            "#e44f64",
-            "#e55064",
-            "#e75263",
-            "#e85362",
-            "#e95462",
-            "#ea5661",
-            "#eb5760",
-            "#ec5860",
-            "#ed5a5f",
-            "#ee5b5e",
-            "#ef5d5e",
-            "#f05f5e",
-            "#f1605d",
-            "#f2625d",
-            "#f2645c",
-            "#f3655c",
-            "#f4675c",
-            "#f4695c",
-            "#f56b5c",
-            "#f66c5c",
-            "#f66e5c",
-            "#f7705c",
-            "#f7725c",
-            "#f8745c",
-            "#f8765c",
-            "#f9785d",
-            "#f9795d",
-            "#f97b5d",
-            "#fa7d5e",
-            "#fa7f5e",
-            "#fa815f",
-            "#fb835f",
-            "#fb8560",
-            "#fb8761",
-            "#fc8961",
-            "#fc8a62",
-            "#fc8c63",
-            "#fc8e64",
-            "#fc9065",
-            "#fd9266",
-            "#fd9467",
-            "#fd9668",
-            "#fd9869",
-            "#fd9a6a",
-            "#fd9b6b",
-            "#fe9d6c",
-            "#fe9f6d",
-            "#fea16e",
-            "#fea36f",
-            "#fea571",
-            "#fea772",
-            "#fea973",
-            "#feaa74",
-            "#feac76",
-            "#feae77",
-            "#feb078",
-            "#feb27a",
-            "#feb47b",
-            "#feb67c",
-            "#feb77e",
-            "#feb97f",
-            "#febb81",
-            "#febd82",
-            "#febf84",
-            "#fec185",
-            "#fec287",
-            "#fec488",
-            "#fec68a",
-            "#fec88c",
-            "#feca8d",
-            "#fecc8f",
-            "#fecd90",
-            "#fecf92",
-            "#fed194",
-            "#fed395",
-            "#fed597",
-            "#fed799",
-            "#fed89a",
-            "#fdda9c",
-            "#fddc9e",
-            "#fddea0",
-            "#fde0a1",
-            "#fde2a3",
-            "#fde3a5",
-            "#fde5a7",
-            "#fde7a9",
-            "#fde9aa",
-            "#fdebac",
-            "#fcecae",
-            "#fceeb0",
-            "#fcf0b2",
-            "#fcf2b4",
-            "#fcf4b6",
-            "#fcf6b8",
-            "#fcf7b9",
-            "#fcf9bb",
-            "#fcfbbd",
-            "#fcfdbf",
-	];
-	
-	color_linages = [
-	
-	"#eb5164",
-	"#ffd970",
-	"#d85078",
-	"#ff5151",
-	
-	"#ffce7d",
-	"#68ff90",
-	"#c4508b",
-	"#ffc38a",
-	"#79f08d",
-	"#b14f9e",
-	"#ffb796",
-	"#8ae18b",
-	"#9d4fb2",
-	"#ffaca3",
-	"#9ad288",
-	"#8a4ec5",
-	"#ffa1b0",
-	"#abc385",
-	"#764ed8",
-	"#ff96bd",
-	"#bcb483",
-	"#634dec",
-	"#ff8ac9",
-	"#cda580",
-	"#4f4dff",
-	"#ff7fd6",
-	"#dd967d",
-	"#ff74e3",
-	"#ee877b",
-	"#ff7878",
+      tbody td {
+        display: block;
+        width: 100% !important;
+      }
 
-	];
-		
-	if (typeof variants === 'undefined') {
-		// console.log("Uppss variants disapears...");
-		return colors;
-	}
-	
-	var palettte = []
-	// console.log(variants);
-	columns.forEach( variant => {
-		
-		variant = variant.split("(")[0].trim();
-		// console.log(variant);
-		if (variant == "Other") {
-			palettte.push("#8B8B8B");
-		} else {
-			var found = variants.indexOf(variant);
-			// console.log(found);
-			if (found > -1) {
-				var col_index = found %  (colors.length -1);
-				// console.log("Idx:" + col_index);
-				var calt = colors[found %  (colors.length - 1)];
-				// console.log("P:" + calt);
-				palettte.push(calt);
-				
-			} else {
-				// Generate color based on the letters
-				if (variant.length == 2) {
-					var calt1 = color_linages[variant[0].charCodeAt(0) - 65];
-					var pp = (color_linages.length - 1) - (variant[1].charCodeAt(0) - 65);
-					// console.log(pp);
-					var calt2 = color_linages[pp];
-					// console.log("Y:" + calt2);
-					var calt = calt1.substring(0,4) + calt2.substring(4,7);
-					// console.log(variant + ":ALT:" + calt);
-					palettte.push(calt);
-				} else {
-					var calt = color_linages[variant[0].charCodeAt(0) - 65];
-					// console.log(variant + ":ALT2:" + calt);
-					palettte.push(calt);
-				}
-			}
-		}
-	});
-	// console.log(palettte);
-	return palettte;
-}
+      tbody td:before {
+        content: attr(data-th);
+        display: block;
+        width: 100% !important;
 
-function renderChart(data_title, data_url, element_selector, variants) {
+      }
+    }
+  </style>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
+  <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
 
-dfjs.DataFrame.fromCSV(data_url).then(df => {
-	var series = [];
-	var columns = []
-	df.listColumns().forEach(column => {
-		if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function(pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
-			columns.push(column);
-			series.push(
-				{name:column, data:df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.'))})}
-			);
-		};
-	}
-	);
-	
-	var dates = df.toArray("date");
+  <script id="rendered-js" crossorigin="anonymous">
 
-	var colors_columns = get_color_columns(columns, variants);
+    function start() {
+      new Promise(() => {
 
-	var options = {
-		title: {
-			text: data_title,
-			align: 'center',
-			margi: 0,
-			offsetY: 20,
-			style: {
-				fontSize: '16px',
-				fontFamily: "Verdana"
-			},
-		},
-		grid: {
-			show: false,
-		},
-	 colors: colors_columns,
-	  chart: {
-		type: 'area',
-		height: '400px' ,
-		width: '640px' ,
-		redrawOnParentResize: false,
-		stacked: true,
-		animations: {enabled: false},
-		offsetY: 0,
-		toolbar: {
-			show: false,},
-		 zoom: {
-		 enabled: false,},
-		},
-	noData: {
-  text: "No Data",
-	},
+        dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
+          var variants = df.toArray("label");
+          load_charts(variants);
+        });
+      });
+    }
 
-	legend: {
-      show: false},
-	dataLabels: {
-          enabled: false,
-        },
-	tooltip: {
-		onDatasetHover: { highlightDataSeries: true },
-		
-		shared: false,
-		followCursor: false,
-	  
-		style: {
-			fontSize: '9px',
-			fontFamily: "Verdana"
-		},
-		
-		y: {
-		
-			formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
-			  return Number(value).toFixed(0) + "%";
-			}
-		}
-	},
-	fill: {
-		type: 'solid'
-	},
-	  stroke: {
-			  curve: 'smooth',
-			  width: 0,
-			},
-	  series: series,
-	  
-	  xaxis: {
-		tooltip: {
-          enabled: false},
-        type: 'datetime',
-		categories: dates },
-		yaxis: {
-			max: 100,
-			show: false,
-		}
-	};
+    function get_color_columns(columns, variants) {
 
-	var chart = new ApexCharts(document.querySelector(element_selector), options);
+      var colors = [
 
-	chart.render();
-	
-	
-	});
+        "#3360a9",
+        "#2a939b",
+        "#e6332e",
+        "#ca2628",
+        "#ffd53e",
+        "#9ecc8a",
+        "#34983f",
 
-}
+        "#ff7f0e",
+        "#1f77b4",
+        "#ffbb78",
+        "#2ca02c",
+        "#98df8a",
+        "#d62728",
+        "#ff9896",
+        "#9467bd",
+        "#c5b0d5",
+        "#8c564b",
 
-function load_charts(variants) {
-	
-dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df => {
-	
-	df_sequence = df.groupBy('location').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
-	df_variant = df.groupBy('location', 'variant').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
-	
-	// df_sequence.show();
-	// df_variant.show();
-	
-	locations = [...new Set(df.toArray("location"))];
-	
-	var content_table = document.querySelector("#content");
-	var i = 0; 
-	var row;
-	locations.forEach(location => {
-		// console.log(location);
-		tot_sequences = df_sequence.filter(row => row.get('location') == location).toArray("tot_sequences");
-		tot_variants = df_variant.filter(row => row.get('location') == location).toArray("variant").length;
-		
-		if (tot_sequences > 50 && tot_variants >= 2) {
-				
-			if (i % 2 == 0) {
-				row = content_table.insertRow();
-			}
-			var cell = row.insertCell();
-			cell.style="width: 50%;";
-			cell.id = "location_" + i;
-			// cell.innerHTML = location;
-			new Promise( () => {
-			setTimeout( renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + ".csv", "#" + cell.id, variants) , 0 );
-			});
-			
-			i +=1;
-		}
-	});
-	
-});
-}
+        "#c49c94",
+        "#e377c2",
+        "#f7b6d2",
+        "#7f7f7f",
+        "#c7c7c7",
+        "#bcbd22",
+        "#dbdb8d",
+        "#17becf",
+        "#9edae5",
+        "#1f77b4",
 
-</script>
-	
-<div style="margin: 20px;">
-<h1>SARS-CoV-2 Variants</h1>
+        "#3C4E66",
+        "#B13507",
+        "#00847E",
+        "#6D3E91",
+        "#CF0A66",
+        "#883039",
+        "#00823F",
+        "#4C6A9C",
+        "#C05917",
+        "#D73C50",
+        "#287669",
+        "#CD2285",
+        "#0F739C",
+        "#9A5129",
+        "#C45267",
+        "#008860",
+        "#8C4569",
+        "#B36216",
+        "#366388",
+        "#A2559C",
+        "#578145",
+        "#D7263F",
+        "#18470F",
+        "#BC8E5A",
+        "#585C64",
+        "#000004",
+        "#010005",
+        "#010106",
+        "#010108",
+        "#020109",
+        "#02020b",
+        "#02020d",
+        "#03030f",
+        "#030312",
+        "#040414",
+        "#050416",
+        "#060518",
+        "#06051a",
+        "#07061c",
+        "#08071e",
+        "#090720",
+        "#0a0822",
+        "#0b0924",
+        "#0c0926",
+        "#0d0a29",
+        "#0e0b2b",
+        "#100b2d",
+        "#110c2f",
+        "#120d31",
+        "#130d34",
+        "#140e36",
+        "#150e38",
+        "#160f3b",
+        "#180f3d",
+        "#19103f",
+        "#1a1042",
+        "#1c1044",
+        "#1d1147",
+        "#1e1149",
+        "#20114b",
+        "#21114e",
+        "#221150",
+        "#241253",
+        "#251255",
+        "#271258",
+        "#29115a",
+        "#2a115c",
+        "#2c115f",
+        "#2d1161",
+        "#2f1163",
+        "#311165",
+        "#331067",
+        "#341069",
+        "#36106b",
+        "#38106c",
+        "#390f6e",
+        "#3b0f70",
+        "#3d0f71",
+        "#3f0f72",
+        "#400f74",
+        "#420f75",
+        "#440f76",
+        "#451077",
+        "#471078",
+        "#491078",
+        "#4a1079",
+        "#4c117a",
+        "#4e117b",
+        "#4f127b",
+        "#51127c",
+        "#52137c",
+        "#54137d",
+        "#56147d",
+        "#57157e",
+        "#59157e",
+        "#5a167e",
+        "#5c167f",
+        "#5d177f",
+        "#5f187f",
+        "#601880",
+        "#621980",
+        "#641a80",
+        "#651a80",
+        "#671b80",
+        "#681c81",
+        "#6a1c81",
+        "#6b1d81",
+        "#6d1d81",
+        "#6e1e81",
+        "#701f81",
+        "#721f81",
+        "#732081",
+        "#752181",
+        "#762181",
+        "#782281",
+        "#792282",
+        "#7b2382",
+        "#7c2382",
+        "#7e2482",
+        "#802582",
+        "#812581",
+        "#832681",
+        "#842681",
+        "#862781",
+        "#882781",
+        "#892881",
+        "#8b2981",
+        "#8c2981",
+        "#8e2a81",
+        "#902a81",
+        "#912b81",
+        "#932b80",
+        "#942c80",
+        "#962c80",
+        "#982d80",
+        "#992d80",
+        "#9b2e7f",
+        "#9c2e7f",
+        "#9e2f7f",
+        "#a02f7f",
+        "#a1307e",
+        "#a3307e",
+        "#a5317e",
+        "#a6317d",
+        "#a8327d",
+        "#aa337d",
+        "#ab337c",
+        "#ad347c",
+        "#ae347b",
+        "#b0357b",
+        "#b2357b",
+        "#b3367a",
+        "#b5367a",
+        "#b73779",
+        "#b83779",
+        "#ba3878",
+        "#bc3978",
+        "#bd3977",
+        "#bf3a77",
+        "#c03a76",
+        "#c23b75",
+        "#c43c75",
+        "#c53c74",
+        "#c73d73",
+        "#c83e73",
+        "#ca3e72",
+        "#cc3f71",
+        "#cd4071",
+        "#cf4070",
+        "#d0416f",
+        "#d2426f",
+        "#d3436e",
+        "#d5446d",
+        "#d6456c",
+        "#d8456c",
+        "#d9466b",
+        "#db476a",
+        "#dc4869",
+        "#de4968",
+        "#df4a68",
+        "#e04c67",
+        "#e24d66",
+        "#e34e65",
+        "#e44f64",
+        "#e55064",
+        "#e75263",
+        "#e85362",
+        "#e95462",
+        "#ea5661",
+        "#eb5760",
+        "#ec5860",
+        "#ed5a5f",
+        "#ee5b5e",
+        "#ef5d5e",
+        "#f05f5e",
+        "#f1605d",
+        "#f2625d",
+        "#f2645c",
+        "#f3655c",
+        "#f4675c",
+        "#f4695c",
+        "#f56b5c",
+        "#f66c5c",
+        "#f66e5c",
+        "#f7705c",
+        "#f7725c",
+        "#f8745c",
+        "#f8765c",
+        "#f9785d",
+        "#f9795d",
+        "#f97b5d",
+        "#fa7d5e",
+        "#fa7f5e",
+        "#fa815f",
+        "#fb835f",
+        "#fb8560",
+        "#fb8761",
+        "#fc8961",
+        "#fc8a62",
+        "#fc8c63",
+        "#fc8e64",
+        "#fc9065",
+        "#fd9266",
+        "#fd9467",
+        "#fd9668",
+        "#fd9869",
+        "#fd9a6a",
+        "#fd9b6b",
+        "#fe9d6c",
+        "#fe9f6d",
+        "#fea16e",
+        "#fea36f",
+        "#fea571",
+        "#fea772",
+        "#fea973",
+        "#feaa74",
+        "#feac76",
+        "#feae77",
+        "#feb078",
+        "#feb27a",
+        "#feb47b",
+        "#feb67c",
+        "#feb77e",
+        "#feb97f",
+        "#febb81",
+        "#febd82",
+        "#febf84",
+        "#fec185",
+        "#fec287",
+        "#fec488",
+        "#fec68a",
+        "#fec88c",
+        "#feca8d",
+        "#fecc8f",
+        "#fecd90",
+        "#fecf92",
+        "#fed194",
+        "#fed395",
+        "#fed597",
+        "#fed799",
+        "#fed89a",
+        "#fdda9c",
+        "#fddc9e",
+        "#fddea0",
+        "#fde0a1",
+        "#fde2a3",
+        "#fde3a5",
+        "#fde5a7",
+        "#fde7a9",
+        "#fde9aa",
+        "#fdebac",
+        "#fcecae",
+        "#fceeb0",
+        "#fcf0b2",
+        "#fcf2b4",
+        "#fcf4b6",
+        "#fcf6b8",
+        "#fcf7b9",
+        "#fcf9bb",
+        "#fcfbbd",
+        "#fcfdbf",
+      ];
 
-<div style="margin: 20px;">
+      color_linages = [
 
-This site tries to give a glimpse of the different variants of SAR-CoV-2 in the world.<br/>
-<br/>
-<b>Naming:</b><br/>
-<br/>
-The naming system used is a mix between the names denominated by WHO, the Pango Lineage system and some Nextstrain Clade names.<br/>
-<br/>
-The project use the denomination of:<br/>
-<ul>
-<li>WHO/CDC/ECDC/PHE Variants of Concern (VOC)</li>
-<li>WHO/CDC/ECDC Variants of Interest (VOI)</li>
-<li>WHO Alerts for Further Monitoring (AFM)</li>
-<li>ECDC Variants Under Monitoring (VUM)</li>
-<li>PHE Variants Under Investigation (VUI)</li>
-</ul>
-<br/>
-If a major variant is detected, the WHO name is used.<br/>
-If it is some other variant to consider not yet considered by WHO, its Pango lineage is used.<br/>
-Otherwise, the first letters of the Pango lineage are used.<br/>
-If the variant is in WHO/CDC/ECDC/PHE VOI, VUI, VOC, AFM or VUM, the label is included.<br/>
-<br/>
-For more information about lineages names and classifications<br/>
-<ul>
-<li>WHO <a href="https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/" target="_blank">Tracking SARS-CoV-2 variants</a></li>
-<li>CDC <a href="https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html" target="_blank">SARS-CoV-2 Variant Classifications and Definitions</a></li>
-<li>ECDC <a href="https://www.ecdc.europa.eu/en/covid-19/variants-concern" target="_blank">SARS-CoV-2 variants of concern</a></li>
-<li>PHE <a href="https://www.gov.uk/government/collections/new-sars-cov-2-variant" target="_blank">COVID-19 (SARS-CoV-2) variants</a></li>
-</ul>
-<br/>
-<b>About:</b><br/>
-<br/>
-The project, site, published data, and graphics are free and open source.<br/>
-A work in progress project created by <a href="https://github.com/3dgiordano" target="_blank">@3dgiordano</a>.<br/>
-They can access the source code and data in their GitHub project <a href="https://github.com/3dgiordano/SARS-CoV-2-Variants" target="_blank">https://github.com/3dgiordano/SARS-CoV-2-Variants</a>.</br>
-<br/>
-<b>Important:</b>
-Sequencing data is not a random sample selection and does not represent actual prevalence, it is an estimate.<br/>
-<br/>
-</div>
-</div>
+        "#eb5164",
+        "#ffd970",
+        "#d85078",
+        "#ff5151",
 
-<table id="content" style="width: 100%;border-spacing:40px;" >
-</table>
+        "#ffce7d",
+        "#68ff90",
+        "#c4508b",
+        "#ffc38a",
+        "#79f08d",
+        "#b14f9e",
+        "#ffb796",
+        "#8ae18b",
+        "#9d4fb2",
+        "#ffaca3",
+        "#9ad288",
+        "#8a4ec5",
+        "#ffa1b0",
+        "#abc385",
+        "#764ed8",
+        "#ff96bd",
+        "#bcb483",
+        "#634dec",
+        "#ff8ac9",
+        "#cda580",
+        "#4f4dff",
+        "#ff7fd6",
+        "#dd967d",
+        "#ff74e3",
+        "#ee877b",
+        "#ff7878",
 
-<script>new Promise( () => {
+      ];
 
-	dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
-		var variants = df.toArray("label");
-		load_charts(variants);
-	});
-	
-	
-	});
-</script>
-</body>
+      if (typeof variants === 'undefined') {
+        // console.log("Uppss variants disapears...");
+        return colors;
+      }
+
+      var palettte = []
+      // console.log(variants);
+      columns.forEach(variant => {
+
+        variant = variant.split("(")[0].trim();
+        // console.log(variant);
+        if (variant == "Other") {
+          palettte.push("#8B8B8B");
+        } else {
+          var found = variants.indexOf(variant);
+          // console.log(found);
+          if (found > -1) {
+            var col_index = found % (colors.length - 1);
+            // console.log("Idx:" + col_index);
+            var calt = colors[found % (colors.length - 1)];
+            // console.log("P:" + calt);
+            palettte.push(calt);
+
+          } else {
+            // Generate color based on the letters
+            if (variant.length == 2) {
+              var calt1 = color_linages[variant[0].charCodeAt(0) - 65];
+              var pp = (color_linages.length - 1) - (variant[1].charCodeAt(0) - 65);
+              // console.log(pp);
+              var calt2 = color_linages[pp];
+              // console.log("Y:" + calt2);
+              var calt = calt1.substring(0, 4) + calt2.substring(4, 7);
+              // console.log(variant + ":ALT:" + calt);
+              palettte.push(calt);
+            } else {
+              var calt = color_linages[variant[0].charCodeAt(0) - 65];
+              // console.log(variant + ":ALT2:" + calt);
+              palettte.push(calt);
+            }
+          }
+        }
+      });
+      // console.log(palettte);
+      return palettte;
+    }
+
+    function renderChart(data_title, data_url, element_selector, variants) {
+
+      dfjs.DataFrame.fromCSV(data_url).then(df => {
+        var series = [];
+        var columns = []
+        df.listColumns().forEach(column => {
+          if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+            columns.push(column);
+            series.push(
+              { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
+            );
+          };
+        }
+        );
+
+        var dates = df.toArray("date");
+
+        var colors_columns = get_color_columns(columns, variants);
+
+        var options = {
+          title: {
+            text: data_title,
+            align: 'center',
+            margi: 0,
+            offsetY: 20,
+            style: {
+              fontSize: '16px',
+              fontFamily: "Verdana"
+            },
+          },
+          grid: {
+            show: false,
+          },
+          colors: colors_columns,
+          chart: {
+            type: 'area',
+            height: '400px',
+            width: '640px',
+            redrawOnParentResize: false,
+            stacked: true,
+            animations: { enabled: false },
+            offsetY: 0,
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false,
+            },
+          },
+          noData: {
+            text: "No Data",
+          },
+
+          legend: {
+            show: false
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          tooltip: {
+            onDatasetHover: { highlightDataSeries: true },
+
+            shared: false,
+            followCursor: false,
+
+            style: {
+              fontSize: '9px',
+              fontFamily: "Verdana"
+            },
+
+            y: {
+
+              formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                return Number(value).toFixed(0) + "%";
+              }
+            }
+          },
+          fill: {
+            type: 'solid'
+          },
+          stroke: {
+            curve: 'smooth',
+            width: 0,
+          },
+          series: series,
+
+          xaxis: {
+            tooltip: {
+              enabled: false
+            },
+            type: 'datetime',
+            categories: dates
+          },
+          yaxis: {
+            max: 100,
+            show: false,
+          }
+        };
+
+        var chart = new ApexCharts(document.querySelector(element_selector), options);
+
+        chart.render();
+
+
+      });
+
+    }
+
+    function load_charts(variants) {
+
+      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df => {
+
+        df_sequence = df.groupBy('location').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
+        df_variant = df.groupBy('location', 'variant').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
+
+        // df_sequence.show();
+        // df_variant.show();
+
+        locations = [...new Set(df.toArray("location"))];
+
+        var content_table = document.querySelector("#content");
+        var i = 0;
+        var row;
+        locations.forEach(location => {
+          // console.log(location);
+          tot_sequences = df_sequence.filter(row => row.get('location') == location).toArray("tot_sequences");
+          tot_variants = df_variant.filter(row => row.get('location') == location).toArray("variant").length;
+
+          if (tot_sequences > 50 && tot_variants >= 2) {
+
+            if (i % 2 == 0) {
+              row = content_table.insertRow();
+            }
+            var cell = row.insertCell();
+            cell.style = "width: 50%;";
+            cell.id = "location_" + i;
+            // cell.innerHTML = location;
+            new Promise(() => {
+              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + ".csv", "#" + cell.id, variants), 0);
+            });
+
+            i += 1;
+          }
+        });
+
+      });
+    }
+
+  </script>
+
+  <div style="margin: 20px;">
+    <h1>SARS-CoV-2 Variants</h1>
+
+    <div style="margin: 20px;">
+
+      This site tries to give a glimpse of the different variants of SAR-CoV-2 in the world.<br />
+      <br />
+      <b>Naming:</b><br />
+      <br />
+      The naming system used is a mix between the names denominated by WHO, the Pango Lineage system and some Nextstrain
+      Clade names.<br />
+      <br />
+      The project use the denomination of:<br />
+      <ul>
+        <li>WHO/CDC/ECDC/PHE Variants of Concern (VOC)</li>
+        <li>WHO/CDC/ECDC Variants of Interest (VOI)</li>
+        <li>WHO Alerts for Further Monitoring (AFM)</li>
+        <li>ECDC Variants Under Monitoring (VUM)</li>
+        <li>PHE Variants Under Investigation (VUI)</li>
+      </ul>
+      <br />
+      If a major variant is detected, the WHO name is used.<br />
+      If it is some other variant to consider not yet considered by WHO, its Pango lineage is used.<br />
+      Otherwise, the first letters of the Pango lineage are used.<br />
+      If the variant is in WHO/CDC/ECDC/PHE VOI, VUI, VOC, AFM or VUM, the label is included.<br />
+      <br />
+      For more information about lineages names and classifications<br />
+      <ul>
+        <li>WHO <a href="https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/" target="_blank">Tracking
+            SARS-CoV-2 variants</a></li>
+        <li>CDC <a href="https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html"
+            target="_blank">SARS-CoV-2 Variant Classifications and Definitions</a></li>
+        <li>ECDC <a href="https://www.ecdc.europa.eu/en/covid-19/variants-concern" target="_blank">SARS-CoV-2 variants
+            of concern</a></li>
+        <li>PHE <a href="https://www.gov.uk/government/collections/new-sars-cov-2-variant" target="_blank">COVID-19
+            (SARS-CoV-2) variants</a></li>
+      </ul>
+      <br />
+      <b>About:</b><br />
+      <br />
+      The project, site, published data, and graphics are free and open source.<br />
+      A work in progress project created by <a href="https://github.com/3dgiordano"
+        target="_blank">@3dgiordano</a>.<br />
+      They can access the source code and data in their GitHub project <a
+        href="https://github.com/3dgiordano/SARS-CoV-2-Variants"
+        target="_blank">https://github.com/3dgiordano/SARS-CoV-2-Variants</a>.</br>
+      <br />
+      <b>Important:</b>
+      Sequencing data is not a random sample selection and does not represent actual prevalence, it is an
+      estimate.<br />
+      <br />
+    </div>
+  </div>
+
+  <table id="content" style="width: 100%;border-spacing:40px;">
+  </table>
+
+  <script>
+    start();
+  </script>
+  </body>
+
 </html>
