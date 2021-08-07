@@ -60,8 +60,32 @@
   <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
 
   <script id="rendered-js" crossorigin="anonymous">
+    var doc_width = 1024;
+    var chart_width = 640;
+    var chart_list = [];
+
+    function windowSizeUpdate() {
+      doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      chart_width = parseInt((doc_width / 2) - 70);
+      if (doc_width <= 1024) {
+        chart_width = parseInt(doc_width - 100);
+      }
+
+      chart_list.forEach(chart => {
+        ApexCharts.exec(chart, 'updateOptions', {
+          chart: {
+            width: chart_width + "px"
+          }
+        });
+      });
+    }
+
+    window.addEventListener('resize', windowSizeUpdate);
+    windowSizeUpdate();
+
 
     function start() {
+
       new Promise(() => {
 
         dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
@@ -505,9 +529,10 @@
           },
           colors: colors_columns,
           chart: {
+            id: element_selector,
             type: 'area',
             height: '400px',
-            width: '640px',
+            width: chart_width + "px",
             redrawOnParentResize: false,
             stacked: true,
             animations: { enabled: false },
@@ -572,7 +597,7 @@
         var chart = new ApexCharts(document.querySelector(element_selector), options);
 
         chart.render();
-
+        chart_list.push(element_selector);
 
       });
 
