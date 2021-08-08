@@ -364,5 +364,11 @@ def main():
                                                                               index=False,
                                                                               quoting=csv.QUOTE_ALL, decimal=",")
 
+    df_world_pivoted = df.groupby(['date', 'variant']).agg(
+        {'perc_sequences': 'mean'}).reset_index().pivot(index=["date"], columns=["variant"],
+                                                        values="perc_sequences").reset_index()
+
+    df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
 
 main()
