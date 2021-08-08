@@ -368,6 +368,9 @@ def main():
         {'perc_sequences': 'mean'}).reset_index().pivot(index=["date"], columns=["variant"],
                                                         values="perc_sequences").reset_index()
 
+    df_world_pivoted["location"] = "World"
+    df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
+
     df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
 
