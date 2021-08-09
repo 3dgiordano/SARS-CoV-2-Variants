@@ -496,6 +496,12 @@
 
     function renderChart(data_title, data_url, element_selector, variants) {
 
+      var chart_width_px = chart_width + "px";
+      var chart_height_px = "400px";
+      if (element_selector == "#world") {
+        chart_width_px = (chart_width * 2) + "px";
+        chart_height_px = "500px";
+      }
       dfjs.DataFrame.fromCSV(data_url).then(df => {
         var series = [];
         var columns = []
@@ -531,8 +537,8 @@
           chart: {
             id: element_selector,
             type: 'area',
-            height: '400px',
-            width: chart_width + "px",
+            height: chart_height_px,
+            width: chart_width_px,
             redrawOnParentResize: false,
             stacked: true,
             animations: { enabled: false },
@@ -604,6 +610,10 @@
     }
 
     function load_charts(variants) {
+
+      new Promise(() => {
+        setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World.csv', "#world", variants), 0);
+      });
 
       dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df => {
 
@@ -699,7 +709,13 @@
     </div>
   </div>
 
+  
   <table id="content" style="width: 100%;border-spacing:30px 10px;">
+    <tr>
+      <td colspan=2 align="center">
+        <div id="world"></div>
+      </td>
+    </tr>
   </table>
 
   <script>
