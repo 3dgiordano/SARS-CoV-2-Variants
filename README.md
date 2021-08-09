@@ -31,3 +31,15 @@ For more information about lineages names and classifications
 The project, site, published data, and graphics are free and open source.
 A work in progress project created by @3dgiordano.
 They can access the source code and data in their GitHub project https://github.com/3dgiordano/SARS-CoV-2-Variants.
+
+#### Genomic data sources:
+
+##### outbreak.info
+
+Julia L. Mullen, Ginger Tsueng, Alaa Abdel Latif, Manar Alkuzweny, Marco Cano, Emily Haag, Jerry Zhou, Mark Zeller, Emory Hufbauer, Nate Matteson, Kristian G. Andersen, Chunlei Wu, Andrew I. Su, Karthik Gangavarapu, Laura D. Hughes, and the Center for Viral Systems Biology outbreak.info. Available online: https://outbreak.info/ (2020)
+
+##### GISAID Initiative
+
+Elbe, S., and Buckland-Merrett, G. (2017) Data, disease and diplomacy: GISAID’s innovative contribution to global health. Global Challenges, 1:33-46. DOI: 10.1002/gch2.1018 PMCID: 31565258; Shu, Y., McCauley, J. (2017) GISAID: Global initiative on sharing all influenza data – from vision to reality. EuroSurveillance, 22(13) DOI: 10.2807/1560-7917.ES.2017.22.13.30494 PMCID: PMC5388101
+data license: https://www.gisaid.org/registration/terms-of-use/
+
