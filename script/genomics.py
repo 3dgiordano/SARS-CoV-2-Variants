@@ -1,6 +1,7 @@
 import csv
 import json
 import re
+from datetime import datetime
 from urllib.request import urlopen
 
 import pandas as pd
@@ -372,7 +373,13 @@ def main():
     df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
     df_world_pivoted = df_world_pivoted.fillna(0)
 
-    df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    df_world_pivoted[:-1].to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    update_dict = {
+        "last_update_utc": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+    }
+    with open('../data/update.json', 'w') as upd_file:
+        json.dump(update_dict, upd_file, indent=4)
 
 
 main()
