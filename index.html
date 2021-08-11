@@ -101,6 +101,13 @@
 
     function start() {
 
+      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+          var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
+          var date_str = new Date(update_date_str).toString();
+          document.getElementById("last_update").innerText = date_str;
+        });
+
+
       new Promise(() => {
 
         dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
@@ -739,6 +746,7 @@
       Sequencing data is not a random sample selection and does not represent actual prevalence, it is an
       estimate.<br />
       <br />
+      <b>Last update: </b><span id="last_update"></span><br>
     </div>
   </div>
 
