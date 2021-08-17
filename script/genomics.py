@@ -25,6 +25,15 @@ lineage_map = {
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
     "^P\\.7(.*)": "P.7",
     "^R\\.2(.*)": "R.2",
+    "^AY\\.4(.*)": "Delta - AY.4",
+    "^AY\\.5(.*)": "Delta - AY.5",
+    "^AY\\.6(.*)": "Delta - AY.6",
+    "^AY\\.7(.*)": "Delta - AY.7",
+    "^AY\\.8(.*)": "Delta - AY.8",
+    "^AY\\.9(.*)": "Delta - AY.9",
+    "^AY\\.10(.*)": "Delta - AY.10",
+    "^AY\\.11(.*)": "Delta - AY.11",
+    "^AY\\.15(.*)": "Delta - AY.15",
     "^OTHER$": "Other"
 }
 
@@ -37,7 +46,6 @@ who_pango_map = {
     "^B\\.1\\.429(.*)": "Epsilon",
     "^P\\.2(.*)": "Zeta - P.2",
     "^P\\.3(.*)": "Theta - P.3",
-    "^AY\\.4(.*)": "Delta - AY.4",
 }
 
 
