@@ -23,6 +23,8 @@ lineage_map = {
     "^B\\.1\\.1\\.28$": "B.1.1.28",
     "^B\\.1\\.616(.*)": "B.1.616",
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
+    "^P\\.7(.*)": "P.7",
+    "^R\\.2(.*)": "R.2",
     "^OTHER$": "Other"
 }
 
@@ -34,7 +36,8 @@ who_pango_map = {
     "^B\\.1\\.427(.*)": "Epsilon",
     "^B\\.1\\.429(.*)": "Epsilon",
     "^P\\.2(.*)": "Zeta - P.2",
-    "^P\\.3(.*)": "Theta - P.3"
+    "^P\\.3(.*)": "Theta - P.3",
+    "^AY\\.4(.*)": "Delta - AY.4",
 }
 
 
@@ -154,7 +157,7 @@ def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
             if match:
                 variant_regex = variant_regex.replace("(.*)", "$")
             if k_normal != variant_regex:
-                variants[variant_regex] = f"{cdc_variant} {cdc_type}"
+                variants[variant_regex] = f"{who_pango_rename(cdc_variant)} {cdc_type}"
 
     return variants
 
