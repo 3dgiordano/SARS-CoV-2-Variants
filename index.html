@@ -585,8 +585,39 @@
           tooltip: {
             onDatasetHover: { highlightDataSeries: true },
 
-            shared: false,
+            shared: true,
             followCursor: false,
+
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+              var str_html = '<div style="">';
+
+              var sortIndex = [];
+              w.globals.seriesNames.forEach(function (sn_value, sn_i) {
+                
+                sortIndex.push((series[sn_i][dataPointIndex] + 100) + ":" + sn_i);
+                
+              });
+
+              sortIndex = sortIndex.sort().reverse();
+              sortIndex.forEach(function (value, i) {
+                var val = parseFloat(value.split(":")[0]) - 100;
+                if (val >= 1) {
+                  var d_index = parseInt(value.split(":")[1]);
+                  var val_frmt = w.globals.ttVal.formatter(val, {series, seriesIndex, dataPointIndex, w});
+                  var s_name =  w.globals.seriesNames[d_index];
+
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                  '<span class="apexcharts-tooltip-marker" style="width:15px;height:10px;background-color:' + w.globals.colors[d_index] + '">' + '</span>' + 
+                  '<span class="apexcharts-tooltip-text" style="width:100%">' + s_name + '</span>' +
+                  '<span style="width:50px;text-align:right;display:block;">' + val_frmt + '</span>' +
+                  '</div>';
+                }
+
+              });
+              str_html += '</div>';
+
+    return str_html;
+  },
 
             style: {
               fontSize: '9px',
