@@ -312,6 +312,7 @@ def main():
     locations = get_locations().to_dict('records')
 
     for location in locations:
+
         print(f"Location: {location['country']}")
         df = get_location_data(location["country_id"], location["country"])
         df.rename(
@@ -372,9 +373,11 @@ def main():
     # Exclude the last register because is noisy
     for location in locations:
         print(f"Save Location: {location['country']}")
-        df_pivoted[df_pivoted["location"] == location['country']][:-1].to_csv(f"../data/{location['country']}.csv",
-                                                                              index=False,
-                                                                              quoting=csv.QUOTE_ALL, decimal=",")
+        df_location = df_pivoted[df_pivoted["location"] == location['country']]
+        df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
+
+        df_location[:-1].to_csv(
+            f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     df_world_pivoted = df.groupby(['date', 'variant']).agg(
         {'perc_sequences': 'mean'}).reset_index().pivot(index=["date"], columns=["variant"],
