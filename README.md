@@ -32,6 +32,19 @@ The project, site, published data, and graphics are free and open source.
 A work in progress project created by @3dgiordano.
 They can access the source code and data in their GitHub project https://github.com/3dgiordano/SARS-CoV-2-Variants.
 
+#### Inspiration ideas
+If it inspires, it is worth not to miss the opportunity to cite the people and their work.
+
+_Charts_
+
+The visualization idea is inspired by the work of Emma B. Hodcroft [@hodcroftlab](https://github.com/emmahodcroft)
+
+`Emma B. Hodcroft. 2021. "CoVariants: SARS-CoV-2 Mutations and Variants of Interest." https://covariants.org/`
+
+_Color scheme_
+
+The color palette was mainly based on the color palette used by the project [Our World in Data Grapher](https://github.com/owid/owid-grapher)
+
 #### Genomic data sources:
 
 ##### outbreak.info
