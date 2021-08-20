@@ -1,7 +1,7 @@
 import csv
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.request import urlopen
 
 import pandas as pd
@@ -378,12 +378,16 @@ def main():
 
     # Save a file for each location generating pivot table
     # Exclude the last register because is noisy
+    to_date = datetime.now() - timedelta(days=14)
     for location in locations:
         print(f"Save Location: {location['country']}")
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
-
-        df_location[:-1].to_csv(
+        if df_location.size > 0:
+            if df_location.tail(1).iloc[0]['date'] > to_date:
+                # Remove the last register because probably is noise
+                df_location = df_location[:-1]
+        df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     df_world_pivoted = df.groupby(['date', 'variant']).agg(
