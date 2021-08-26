@@ -33,6 +33,16 @@ lineage_map = {
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
     "^P\\.7(.*)": "P.7",
     "^R\\.2(.*)": "R.2",
+
+    "^Q\\.1(.*)": "Alpha - Q.1",
+    "^Q\\.2(.*)": "Alpha - Q.2",
+    "^Q\\.3(.*)": "Alpha - Q.3",
+    "^Q\\.4(.*)": "Alpha - Q.4",
+
+    "^AY\\.1(.*)": "Delta - AY.1",
+    "^AY\\.2(.*)": "Delta - AY.2",
+    "^AY\\.3$": "Delta - AY.3",
+    "^AY\\.3\\.1$": "Delta - AY.3.1",
     "^AY\\.4(.*)": "Delta - AY.4",
     "^AY\\.5(.*)": "Delta - AY.5",
     "^AY\\.6(.*)": "Delta - AY.6",
@@ -42,6 +52,13 @@ lineage_map = {
     "^AY\\.10(.*)": "Delta - AY.10",
     "^AY\\.11(.*)": "Delta - AY.11",
     "^AY\\.15(.*)": "Delta - AY.15",
+    "^AY\\.16(.*)": "Delta - AY.16",
+    "^AY\\.17(.*)": "Delta - AY.17",
+    "^AY\\.18(.*)": "Delta - AY.18",
+    "^AY\\.19(.*)": "Delta - AY.19",
+    "^AY\\.20(.*)": "Delta - AY.20",
+    "^AY\\.21(.*)": "Delta - AY.21",
+    "^AY\\.22(.*)": "Delta - AY.22",
     "^OTHER$": "Other"
 }
 
@@ -111,7 +128,7 @@ def who_to_dict(data, who_type):
 
 
 def who_expand(data):
-    return data.assign(pango=data['Pango lineages'].str.split()).explode('pango')
+    return data.assign(pango=data['Pango lineage*'].str.split()).explode('pango')
 
 
 def get_who_variants():
@@ -124,6 +141,12 @@ def get_who_variants():
     # WA: generate spaces to solve new lines and unexpected new lines with div/p inside column values
     who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;").replace("</p>",
                                                                                                     "</p>&nbsp;")
+    # Workaround
+    who_body = who_body.replace("#", "")
+    who_body = who_body.replace('<sup>&sect;</sup>', "")
+    # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
+    # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
+
     return pd.read_html(who_body, match=r'GISAID\sclade')
 
 
