@@ -18,26 +18,33 @@ interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
 
 lineage_map = {
+    "^A\\.23\\.1(.*)": "A.23.1",
+    "^A\\.27(.*)": "A.27",
+    "^A\\.28(.*)": "A.28",
     "^B\\.1\\.160(.*)": "B.1.160 - 20A/EU2",
     "^B\\.1\\.177(.*)": "B.1.177 - 20E/EU1",
     "^B\\.1\\.221(.*)": "B.1.221 - 20A/S:98F",
     "^B\\.1\\.258(.*)": "B.1.258 - 20A/S:439K",
     "^B\\.1\\.367(.*)": "B.1.367 - 20C/S:80Y",
     "^B\\.1\\.620(.*)": "B.1.620 - 20A/S:126A",
-    "^B\\.1\\.621(.*)": "B.1.621 - 21H",
     "^B\\.1\\.616(.*)": "B.1.616",
+    "^B\\.1\\.671\\.2$": "B.1.671.2",
     "^B\\.1\\.1\\.28$": "B.1.1.28",
     "^B\\.1\\.1\\.277(.*)": "B.1.1.277 - 20B/S:626S",
     "^B\\.1\\.1\\.302(.*)": "B.1.1.302 - 20B/S:1122L",
     "^B\\.1\\.1\\.519(.*)": "B.1.1.519 - 20B/S:732A",
+    "^C\\.16(.*)": "C.16",
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
     "^P\\.7(.*)": "P.7",
     "^R\\.2(.*)": "R.2",
-
     "^Q\\.1(.*)": "Alpha - Q.1 (WHO VOC)",
     "^Q\\.2(.*)": "Alpha - Q.2 (WHO VOC)",
     "^Q\\.3(.*)": "Alpha - Q.3 (WHO VOC)",
     "^Q\\.4(.*)": "Alpha - Q.4 (WHO VOC)",
+    "^Q\\.5(.*)": "Alpha - Q.5 (WHO VOC)",
+    "^Q\\.6(.*)": "Alpha - Q.6 (WHO VOC)",
+    "^Q\\.7(.*)": "Alpha - Q.7 (WHO VOC)",
+    "^Q\\.8(.*)": "Alpha - Q.8 (WHO VOC)",
 
     "^AY\\.1(.*)": "Delta - AY.1 (WHO VOC)",
     "^AY\\.2(.*)": "Delta - AY.2 (WHO VOC)",
@@ -51,6 +58,9 @@ lineage_map = {
     "^AY\\.9(.*)": "Delta - AY.9 (WHO VOC)",
     "^AY\\.10(.*)": "Delta - AY.10 (WHO VOC)",
     "^AY\\.11(.*)": "Delta - AY.11 (WHO VOC)",
+    "^AY\\.12(.*)": "Delta - AY.12 (WHO VOC)",
+    "^AY\\.13(.*)": "Delta - AY.13 (WHO VOC)",
+    "^AY\\.14(.*)": "Delta - AY.14 (WHO VOC)",
     "^AY\\.15(.*)": "Delta - AY.15 (WHO VOC)",
     "^AY\\.16(.*)": "Delta - AY.16 (WHO VOC)",
     "^AY\\.17(.*)": "Delta - AY.17 (WHO VOC)",
@@ -59,11 +69,22 @@ lineage_map = {
     "^AY\\.20(.*)": "Delta - AY.20 (WHO VOC)",
     "^AY\\.21(.*)": "Delta - AY.21 (WHO VOC)",
     "^AY\\.22(.*)": "Delta - AY.22 (WHO VOC)",
+    "^AY\\.23(.*)": "Delta - AY.23 (WHO VOC)",
+    "^AY\\.24(.*)": "Delta - AY.24 (WHO VOC)",
+    "^AY\\.25(.*)": "Delta - AY.25 (WHO VOC)",
+    "^AY\\.26(.*)": "Delta - AY.26 (WHO VOC)",
+    "^AY\\.27(.*)": "Delta - AY.27 (WHO VOC)",
+    "^AY\\.28(.*)": "Delta - AY.28 (WHO VOC)",
+    "^AY\\.29(.*)": "Delta - AY.29 (WHO VOC)",
+    "^AY\\.30(.*)": "Delta - AY.30 (WHO VOC)",
+    "^AY\\.31(.*)": "Delta - AY.31 (WHO VOC)",
+    "^AY\\.32(.*)": "Delta - AY.32 (WHO VOC)",
     "^OTHER$": "Other"
 }
 
 who_detail_map = {
     "Gamma": "Gamma - P.1",
+    "Mu": "Mu - 21H",
 }
 
 who_pango_map = {
@@ -74,8 +95,24 @@ who_pango_map = {
 }
 
 
+def get_url(url):
+    from urllib.error import URLError
+    tries = 3
+    timeout = 60000
+    for _ in range(tries):
+        try:
+            response = urlopen(url, timeout=timeout)
+            break
+        except URLError as err:
+            if not isinstance(err.reason, socket.timeout):
+                raise
+    else:
+        raise err
+    return response
+
+
 def get_locations():
-    response = urlopen("https://api.outbreak.info/genomics/location?name=**")
+    response = get_url("https://api.outbreak.info/genomics/location?name=**")
     json_data = response.read().decode('utf-8', 'replace')
     loc_json = json.loads(json_data)
 
@@ -88,7 +125,7 @@ def get_locations():
 
 
 def get_location_data(location_id, location):
-    json_data = urlopen(
+    json_data = get_url(
         f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
         f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=1024").read().decode('utf-8', 'replace')
     loc_df = pd.json_normalize(json.loads(json_data)["results"])
@@ -156,7 +193,8 @@ def cdc_filter_variants(table):
         for el in row.find_all(role="cell")[0].find_all('p'):
             text = el.text
             if text.startswith("Pango"):
-                pango_list += [v.strip() for v in text.split(":")[1].split("(")[0].strip().split(",")]
+                pango_list += [v.strip() for v in
+                               text.split(":")[1].split("(")[0].strip().split(" and ")[0].split(",")]
     return pango_list
 
 
@@ -343,6 +381,10 @@ def main():
     locations = get_locations().to_dict('records')
 
     for location in locations:
+
+        # if location["country"] != "Uruguay":
+        #     continue
+
         print(f"Location: {location['country']}")
         df = get_location_data(location["country_id"], location["country"])
         df.rename(
