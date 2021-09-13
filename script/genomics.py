@@ -455,10 +455,21 @@ def main():
         df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    df_world_pivoted = df.groupby(['date', 'variant']).agg(
-        {'perc_sequences': 'mean'}).reset_index().pivot(index=["date"], columns=["variant"],
-                                                        values="perc_sequences").reset_index()
+    df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
 
+    dfb_world = df_world.groupby(['date']).agg(
+        {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
+
+    df_world = pd.merge(df_world, dfb_world, on=['date'])
+
+    df_world["perc_sequences"] = (df_world["num_sequences"] / df_world["num_sequences_total"]) * 100
+
+    df_world = df_world.drop(df_world[df_world.perc_sequences.isnull()].index)
+
+    df_world = df_world.sort_values(['date', 'variant'])
+
+    df_world_pivoted = df_world.pivot(index=["date"], columns=["variant"],
+                                      values="perc_sequences").reset_index()
     df_world_pivoted["location"] = "World"
     df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
     df_world_pivoted = df_world_pivoted.fillna(0)
