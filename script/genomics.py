@@ -16,6 +16,7 @@ import pandas as pd
 
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
+lineages = None
 
 lineage_map = {
     "^A\\.23\\.1(.*)": "A.23.1",
@@ -37,48 +38,6 @@ lineage_map = {
     "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
     "^P\\.7(.*)": "P.7",
     "^R\\.2(.*)": "R.2",
-    "^Q\\.1(.*)": "Alpha - Q.1 (WHO VOC)",
-    "^Q\\.2(.*)": "Alpha - Q.2 (WHO VOC)",
-    "^Q\\.3(.*)": "Alpha - Q.3 (WHO VOC)",
-    "^Q\\.4(.*)": "Alpha - Q.4 (WHO VOC)",
-    "^Q\\.5(.*)": "Alpha - Q.5 (WHO VOC)",
-    "^Q\\.6(.*)": "Alpha - Q.6 (WHO VOC)",
-    "^Q\\.7(.*)": "Alpha - Q.7 (WHO VOC)",
-    "^Q\\.8(.*)": "Alpha - Q.8 (WHO VOC)",
-
-    "^AY\\.1(.*)": "Delta - AY.1 (WHO VOC)",
-    "^AY\\.2(.*)": "Delta - AY.2 (WHO VOC)",
-    "^AY\\.3$": "Delta - AY.3 (WHO VOC)",
-    "^AY\\.3\\.1$": "Delta - AY.3.1 (WHO VOC)",
-    "^AY\\.4(.*)": "Delta - AY.4 (WHO VOC)",
-    "^AY\\.5(.*)": "Delta - AY.5 (WHO VOC)",
-    "^AY\\.6(.*)": "Delta - AY.6 (WHO VOC)",
-    "^AY\\.7(.*)": "Delta - AY.7 (WHO VOC)",
-    "^AY\\.8(.*)": "Delta - AY.8 (WHO VOC)",
-    "^AY\\.9(.*)": "Delta - AY.9 (WHO VOC)",
-    "^AY\\.10(.*)": "Delta - AY.10 (WHO VOC)",
-    "^AY\\.11(.*)": "Delta - AY.11 (WHO VOC)",
-    "^AY\\.12(.*)": "Delta - AY.12 (WHO VOC)",
-    "^AY\\.13(.*)": "Delta - AY.13 (WHO VOC)",
-    "^AY\\.14(.*)": "Delta - AY.14 (WHO VOC)",
-    "^AY\\.15(.*)": "Delta - AY.15 (WHO VOC)",
-    "^AY\\.16(.*)": "Delta - AY.16 (WHO VOC)",
-    "^AY\\.17(.*)": "Delta - AY.17 (WHO VOC)",
-    "^AY\\.18(.*)": "Delta - AY.18 (WHO VOC)",
-    "^AY\\.19(.*)": "Delta - AY.19 (WHO VOC)",
-    "^AY\\.20(.*)": "Delta - AY.20 (WHO VOC)",
-    "^AY\\.21(.*)": "Delta - AY.21 (WHO VOC)",
-    "^AY\\.22(.*)": "Delta - AY.22 (WHO VOC)",
-    "^AY\\.23(.*)": "Delta - AY.23 (WHO VOC)",
-    "^AY\\.24(.*)": "Delta - AY.24 (WHO VOC)",
-    "^AY\\.25(.*)": "Delta - AY.25 (WHO VOC)",
-    "^AY\\.26(.*)": "Delta - AY.26 (WHO VOC)",
-    "^AY\\.27(.*)": "Delta - AY.27 (WHO VOC)",
-    "^AY\\.28(.*)": "Delta - AY.28 (WHO VOC)",
-    "^AY\\.29(.*)": "Delta - AY.29 (WHO VOC)",
-    "^AY\\.30(.*)": "Delta - AY.30 (WHO VOC)",
-    "^AY\\.31(.*)": "Delta - AY.31 (WHO VOC)",
-    "^AY\\.32(.*)": "Delta - AY.32 (WHO VOC)",
     "^OTHER$": "Other"
 }
 
@@ -109,6 +68,26 @@ def get_url(url):
     else:
         raise err
     return response
+
+
+def get_alias_map_sub_lineage(lineage_to_match):
+    global lineages
+    alias_map_sub_lineage = []
+    if not lineages:
+        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
+        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    for lineage in lineages:
+        alias = lineage.split("\t")[0]
+        if "\t" in lineage:
+            is_alias_of = lineage.split("\t")[1].split("Alias of ")
+        else:
+            is_alias_of = lineage.split(", ")[1].split("Alias of ")
+        if len(is_alias_of) > 1:
+            alias_of = is_alias_of[1].split(",")[0]
+            alias_of = ".".join(alias_of.split(".")[:-1])
+            if alias_of == lineage_to_match:
+                alias_map_sub_lineage.append(alias)
+    return alias_map_sub_lineage
 
 
 def get_locations():
@@ -154,9 +133,20 @@ def pango_regex(pango):
 def who_to_dict(data, who_type):
     who_label = 'WHO\xa0label'
     if who_label in data.columns:
-        return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
-                ind, row in
-                data.iterrows()}
+        who_dict = {}
+        for ind, row in data.iterrows():
+            pango = row['pango']
+            label = who_detail(row[who_label])
+            who_dict[pango_regex(pango)] = f"{label} {who_type}"
+            pango_alias_lineages = get_alias_map_sub_lineage(pango)
+            if pango_alias_lineages:
+                for p_alias_l in pango_alias_lineages:
+                    who_dict[pango_regex(p_alias_l)] = f"{label} - {p_alias_l} {who_type}"
+
+        return who_dict
+        # return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
+        #        ind, row in
+        #        data.iterrows()}
     else:
         return {
             pango_regex(row['pango']):
@@ -381,7 +371,6 @@ def main():
     locations = get_locations().to_dict('records')
 
     for location in locations:
-
         # if location["country"] != "Uruguay":
         #     continue
 
