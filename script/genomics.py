@@ -51,6 +51,9 @@ who_pango_map = {
     "^B\\.1\\.429(.*)": "Epsilon",
     "^P\\.2(.*)": "Zeta - P.2",
     "^P\\.3(.*)": "Theta - P.3",
+    "^B\\.1\\.525(.*)": "Eta",
+    "^B\\.1\\.526(.*)": "Iota",
+    "^B\\.1\\.617\\.1$": "Kappa",
 }
 
 
@@ -188,6 +191,37 @@ def cdc_filter_variants(table):
     return pango_list
 
 
+def cdc_to_dict(data, who_type):
+    who_label = 'WHO\xa0Label'
+    if who_label in data.columns:
+        who_dict = {}
+        for ind, row in data.iterrows():
+            pango = row['pango']
+            label = who_detail(row[who_label])
+            who_dict[pango_regex(pango)] = f"{label} {who_type}"
+            pango_alias_lineages = get_alias_map_sub_lineage(pango)
+            if pango_alias_lineages:
+                for p_alias_l in pango_alias_lineages:
+                    who_dict[pango_regex(p_alias_l)] = f"{label} - {p_alias_l} {who_type}"
+
+        return who_dict
+        # return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
+        #        ind, row in
+        #        data.iterrows()}
+    else:
+        return {
+            pango_regex(row['pango']):
+                f"{who_pango_rename(row['pango'].replace('*', ''))} {who_type}" for ind, row in
+            data.iterrows()}
+
+
+def cdc_expand(data):
+    df = data.assign(pangoy=data['Pango Lineage'].str.split(",")).explode('pangoy')
+    df["pangoy"] = df["pangoy"].str.strip()
+    df = df.assign(pango=df["pangoy"].str.split()).explode("pango")
+    return df
+
+
 def get_cdc_variants():
     from urllib.request import Request, urlopen
     from bs4 import BeautifulSoup
@@ -200,7 +234,10 @@ def get_cdc_variants():
     variants_tables = soup.find_all(
         'div', role="table")
 
-    return cdc_filter_variants(variants_tables[0]), cdc_filter_variants(variants_tables[1])
+    cdc_data = pd.read_html(cdc_body, match=r'Pango\sLineage')
+
+    cdc_voi = []  # TODO:For now, CDC not have VOI variants
+    return cdc_voi, cdc_filter_variants(variants_tables[0]), cdc_expand(cdc_data[0])["pango"].tolist()
 
 
 def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
@@ -274,7 +311,7 @@ def get_phe_variants():
 
 def get_lineage_map():
     (who_voc, who_voi, who_afm) = get_who_variants()
-    (cdc_voi, cdc_voc) = get_cdc_variants()
+    (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
     (phe_voc, phe_vui) = get_phe_variants()
 
@@ -294,9 +331,11 @@ def get_lineage_map():
 
     cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
     cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    cdc_vbm_dict = filter_to_dict(lineage_dict_map, cdc_vbm, "(CDC VBM)")
 
     lineage_dict_map.update(cdc_voi_dict)
     lineage_dict_map.update(cdc_voc_dict)
+    lineage_dict_map.update(cdc_vbm_dict)
 
     ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
     ecdc_voi_dict = filter_to_dict(lineage_dict_map, ecdc_voi, "(ECDC VOI)")
@@ -318,7 +357,7 @@ def get_lineage_map():
         "map": lineage_dict_map,
         "data": {
             "who": {"voc": who_voc, "voi": who_voc, "afm": who_afm},
-            "cdc": {"voi": cdc_voi, "voc": cdc_voc},
+            "cdc": {"voi": cdc_voi, "voc": cdc_voc, "vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
         }
@@ -473,3 +512,4 @@ def main():
 
 
 main()
+
