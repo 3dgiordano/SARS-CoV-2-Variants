@@ -12,6 +12,7 @@ The project use the denomination of:
 - WHO/CDC/ECDC/PHE Variants of Concern (VOC)
 - WHO/CDC/ECDC Variants of Interest (VOI)
 - WHO Alerts for Further Monitoring (AFM)
+- CDC Variants Being Monitored (VBM)
 - ECDC Variants Under Monitoring (VUM)
 - PHE Variants Under Investigation (VUI)
 
