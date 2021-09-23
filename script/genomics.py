@@ -59,6 +59,7 @@ who_pango_map = {
 
 def get_url(url):
     from urllib.error import URLError
+    import socket
     tries = 3
     timeout = 60000
     for _ in range(tries):
