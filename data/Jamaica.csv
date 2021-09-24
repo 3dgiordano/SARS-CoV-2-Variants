@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","Alpha - Q.1 (WHO VOC)","B (Lineage)","Delta - AY.1 (WHO VOC)","Delta - AY.2 (WHO VOC)","Delta - AY.7 (WHO VOC)","Delta - AY.9 (WHO VOC)","Iota (WHO AFM)","Other"
+"location","date","Alpha (WHO VOC)","Alpha - Q.1 (WHO VOC)","B (Lineage)","Delta (WHO VOC)","Delta - AY.2 (WHO VOC)","Delta - AY.4 (WHO VOC)","Delta - AY.9 (WHO VOC)","Iota (WHO AFM)","Other"
 "Jamaica","2020-03-22","0,0","0,0","100,0","0,0","0,0","0,0","0,0","0,0","0,0"
 "Jamaica","2020-12-27","40,0","0,0","20,0","0,0","0,0","0,0","0,0","0,0","40,0"
 "Jamaica","2021-01-24","85,71428571428571","0,0","14,285714285714285","0,0","0,0","0,0","0,0","0,0","0,0"
