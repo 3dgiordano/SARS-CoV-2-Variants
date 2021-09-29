@@ -42,13 +42,14 @@ lineage_map = {
 }
 
 who_detail_map = {
-    "Gamma": "Gamma - P.1",
+    # "Gamma": "Gamma - P.1",
     "Mu": "Mu - 21H",
 }
 
 who_pango_map = {
     "^B\\.1\\.427(.*)": "Epsilon",
     "^B\\.1\\.429(.*)": "Epsilon",
+    "^P\\.1(.*)": "Gamma - P.1",
     "^P\\.2(.*)": "Zeta - P.2",
     "^P\\.3(.*)": "Theta - P.3",
     "^B\\.1\\.525(.*)": "Eta",
@@ -141,8 +142,12 @@ def who_to_dict(data, who_type):
         for ind, row in data.iterrows():
             pango = row['pango']
             label = who_detail(row[who_label])
-            who_dict[pango_regex(pango)] = f"{label} {who_type}"
-            pango_alias_lineages = get_alias_map_sub_lineage(pango)
+            if pango == "P.1":
+                who_dict["^P.1$"] = f"{label} {who_type}"
+                pango_alias_lineages = get_alias_map_sub_lineage("B.1.1.28.1")
+            else:
+                who_dict[pango_regex(pango)] = f"{label} {who_type}"
+                pango_alias_lineages = get_alias_map_sub_lineage(pango)
             if pango_alias_lineages:
                 for p_alias_l in pango_alias_lineages:
                     who_dict[pango_regex(p_alias_l)] = f"{label} - {p_alias_l} {who_type}"
@@ -172,6 +177,7 @@ def get_who_variants():
     # WA: generate spaces to solve new lines and unexpected new lines with div/p inside column values
     who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;").replace("</p>",
                                                                                                     "</p>&nbsp;")
+
     # Workaround
     who_body = who_body.replace("#", "")
     who_body = who_body.replace('<sup>&sect;</sup>', "")
@@ -513,4 +519,3 @@ def main():
 
 
 main()
-
