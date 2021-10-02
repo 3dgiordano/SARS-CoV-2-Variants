@@ -35,7 +35,8 @@ lineage_map = {
     "^B\\.1\\.1\\.302(.*)": "B.1.1.302 - 20B/S:1122L",
     "^B\\.1\\.1\\.519(.*)": "B.1.1.519 - 20B/S:732A",
     "^C\\.16(.*)": "C.16",
-    "^P\\.6(.*)": "P.6 (UY-GTI VOC)",
+    "^N\\.7(.*)": "N.7 (UY-GTI)",
+    "^P\\.6(.*)": "P.6 (UY-GTI)",
     "^P\\.7(.*)": "P.7",
     "^R\\.2(.*)": "R.2",
     "^OTHER$": "Other"
@@ -396,7 +397,7 @@ def export_variants(main_lineage_map):
             lineage.find("(") > -1 else "" if ["VUM", "VOI", "VOC", "AFM"] else ""
 
         interest_type = ""
-        if "(" in lineage and len(lineage.split("(")[1].replace(")", "").split()) > 0:
+        if "(" in lineage and len(lineage.split("(")[1].replace(")", "").split()) > 1:
             interest_type = lineage.split("(")[1].replace(")", "").split()[1]
 
         variant_records.append({
