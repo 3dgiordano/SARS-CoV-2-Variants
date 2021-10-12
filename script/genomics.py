@@ -3,6 +3,7 @@ import json
 import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
+import os
 
 import pandas as pd
 
@@ -111,11 +112,21 @@ def get_locations():
 
 
 def get_location_data(location_id, location):
-    json_data = get_url(
-        f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
-        f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=1024").read().decode('utf-8', 'replace')
-    loc_df = pd.json_normalize(json.loads(json_data)["results"])
-    loc_df["location"] = location
+    location_file = f"../temp/{location}_data.csv"
+    last_time = None
+    if os.path.isfile(location_file):
+        last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(location_file))).total_seconds()
+    # keep the stored data temporarily for one hour
+    if not last_time or last_time > 3600:
+        json_data = get_url(
+            f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
+            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=1024").read().decode('utf-8', 'replace')
+        loc_df = pd.json_normalize(json.loads(json_data)["results"])
+        loc_df["location"] = location
+        loc_df.to_csv(location_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    else:
+        loc_df = pd.read_csv(location_file, quoting=csv.QUOTE_ALL, decimal=",")
+        # loc_df.convert_objects(convert_numeric=True)
     return loc_df
 
 
@@ -436,6 +447,7 @@ def main():
 
         locations_list.append(df)
 
+    print("Create location list...")
     df = pd.concat(locations_list)
 
     # Clear zeroes
@@ -443,6 +455,7 @@ def main():
 
     df['variant'] = df['variant'].str.upper()
 
+    print("Map lineage...")
     data = get_lineage_map()
     main_lineage_map = data["map"]
 
@@ -451,14 +464,17 @@ def main():
     main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
     other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
 
+    print("Save lineage map...")
     export_variants(main_lineage_map)
 
+    print("Transform not monitored lineage to parent...")
     # Transform no specific lineage to parent lineage
     lineage_to_parent = {}
     for o in other_lineage:
         lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
     df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
 
+    print("Group and calculate percentage of sequences...")
     df['date'] = pd.to_datetime(df['date'])
 
     df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).agg(
@@ -475,11 +491,14 @@ def main():
 
     df = df.sort_values(['location', 'date', 'variant'])
 
+    print("Save genomics.csv...")
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    print("Pivot data...")
     df_pivoted = df.pivot(index=["location", "date"], columns=["variant"], values="perc_sequences").reset_index()
     df_pivoted = df_pivoted.fillna(0)
 
+    print("Save locations...")
     # Save a file for each location generating pivot table
     # Exclude the last register because is noisy
     to_date = datetime.now() - timedelta(days=14)
@@ -494,6 +513,7 @@ def main():
         df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    print("Generate World data...")
     df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
 
     dfb_world = df_world.groupby(['date']).agg(
@@ -513,13 +533,16 @@ def main():
     df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
     df_world_pivoted = df_world_pivoted.fillna(0)
 
+    print("Save World.csv...")
     df_world_pivoted[:-1].to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    print("Generate update file...")
     update_dict = {
         "last_update_utc": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     }
     with open('../data/update.json', 'w') as upd_file:
         json.dump(update_dict, upd_file, indent=4)
 
+    print("End.")
 
 main()
