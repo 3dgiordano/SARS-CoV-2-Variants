@@ -1,9 +1,9 @@
 import csv
 import json
+import os
 import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
-import os
 
 import pandas as pd
 
@@ -18,29 +18,29 @@ import pandas as pd
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
 lineages = None
-
+t = "($|\\..*$)"  # Tail Regex
 lineage_map = {
-    "^A\\.23\\.1(.*)": "A.23.1",
-    "^A\\.27(.*)": "A.27",
-    "^A\\.28(.*)": "A.28",
-    "^AT\\.1(.*)": "AT.1",
-    "^B\\.1\\.160(.*)": "B.1.160 - 20A/EU2",
-    "^B\\.1\\.177(.*)": "B.1.177 - 20E/EU1",
-    "^B\\.1\\.221(.*)": "B.1.221 - 20A/S:98F",
-    "^B\\.1\\.258(.*)": "B.1.258 - 20A/S:439K",
-    "^B\\.1\\.367(.*)": "B.1.367 - 20C/S:80Y",
-    "^B\\.1\\.620(.*)": "B.1.620 - 20A/S:126A",
-    "^B\\.1\\.616(.*)": "B.1.616",
-    "^B\\.1\\.671\\.2$": "B.1.671.2",
-    "^B\\.1\\.1\\.28$": "B.1.1.28",
-    "^B\\.1\\.1\\.277(.*)": "B.1.1.277 - 20B/S:626S",
-    "^B\\.1\\.1\\.302(.*)": "B.1.1.302 - 20B/S:1122L",
-    "^B\\.1\\.1\\.519(.*)": "B.1.1.519 - 20B/S:732A",
-    "^C\\.16(.*)": "C.16",
-    "^N\\.7(.*)": "N.7 (UY-GTI)",
-    "^P\\.6(.*)": "P.6 (UY-GTI)",
-    "^P\\.7(.*)": "P.7",
-    "^R\\.2(.*)": "R.2",
+    f"^A\\.23\\.1{t}": "A.23.1",
+    f"^A\\.27{t}": "A.27",
+    f"^A\\.28{t}": "A.28",
+    f"^AT\\.1{t}": "AT.1",
+    f"^B\\.1\\.160{t}": "B.1.160 - 20A/EU2",
+    f"^B\\.1\\.177{t}": "B.1.177 - 20E/EU1",
+    f"^B\\.1\\.221{t}": "B.1.221 - 20A/S:98F",
+    f"^B\\.1\\.258{t}": "B.1.258 - 20A/S:439K",
+    f"^B\\.1\\.367{t}": "B.1.367 - 20C/S:80Y",
+    f"^B\\.1\\.620{t}": "B.1.620 - 20A/S:126A",
+    f"^B\\.1\\.616{t}": "B.1.616",
+    f"^B\\.1\\.671\\.2$": "B.1.671.2",
+    f"^B\\.1\\.1\\.28$": "B.1.1.28",
+    f"^B\\.1\\.1\\.277{t}": "B.1.1.277 - 20B/S:626S",
+    f"^B\\.1\\.1\\.302{t}": "B.1.1.302 - 20B/S:1122L",
+    f"^B\\.1\\.1\\.519{t}": "B.1.1.519 - 20B/S:732A",
+    f"^C\\.16{t}": "C.16",
+    f"^N\\.7{t}": "N.7 (UY-GTI)",
+    f"^P\\.6{t}": "P.6 (UY-GTI)",
+    f"^P\\.7{t}": "P.7",
+    f"^R\\.2{t}": "R.2",
     "^OTHER$": "Other"
 }
 
@@ -50,14 +50,14 @@ who_detail_map = {
 }
 
 who_pango_map = {
-    "^B\\.1\\.427(.*)": "Epsilon",
-    "^B\\.1\\.429(.*)": "Epsilon",
-    "^P\\.1(.*)": "Gamma - P.1",
-    "^P\\.2(.*)": "Zeta - P.2",
-    "^P\\.3(.*)": "Theta - P.3",
-    "^B\\.1\\.525(.*)": "Eta",
-    "^B\\.1\\.526(.*)": "Iota",
-    "^B\\.1\\.617\\.1$": "Kappa",
+    f"^B\\.1\\.427{t}": "Epsilon",
+    f"^B\\.1\\.429{t}": "Epsilon",
+    f"^P\\.1{t}": "Gamma - P.1",
+    f"^P\\.2{t}": "Zeta - P.2",
+    f"^P\\.3{t}": "Theta - P.3",
+    f"^B\\.1\\.525{t}": "Eta",
+    f"^B\\.1\\.526{t}": "Iota",
+    f"^B\\.1\\.617\\.1$": "Kappa",
 }
 
 
@@ -139,13 +139,14 @@ def who_detail(who_name):
 def who_pango_rename(pango):
     for k, v in who_pango_map.items():
         pango = re.sub(k, v, pango)
+
     return pango
 
 
 def pango_regex(pango):
     sub_depth = pango.count(".")
     pango = pango.replace("*", "").replace(".", "\\.")
-    return f"^{pango}$" if sub_depth == 3 else f"^{pango}(.*)"
+    return f"^{pango}$" if sub_depth == 3 else f"^{pango}{t}"
 
 
 def who_to_dict(data, who_type):
@@ -276,12 +277,12 @@ def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
             match = False
             k_normal = ""
             for k, v in who_dict_map.items():
-                k_normal = k.replace("\\", "").replace("^", "").replace("$", "").replace("(.*)", "")
+                k_normal = k.replace("\\", "").replace("^", "").replace("$", "").replace(f"{t}", "")
                 if re.match(variant_regex, k_normal):
                     match = True
                     break
             if match:
-                variant_regex = variant_regex.replace("(.*)", "$")
+                variant_regex = variant_regex.replace(f"{t}", "$")
             if k_normal != variant_regex:
                 variants[variant_regex] = f"{who_pango_rename(cdc_variant)} {cdc_type}"
 
@@ -404,7 +405,7 @@ def export_variants(main_lineage_map):
             continue
 
         label = lineage.split("(")[0].strip()
-        pango_list = ", ".join([k.replace("\\", "").replace("(.*)", ".*").replace("^", "").replace("$", "") for k, v in
+        pango_list = ", ".join([k.replace(f"{t}", ".*").replace("\\", "").replace("^", "").replace("$", "") for k, v in
                                 main_lineage_map.items() if v == lineage])
 
         interest = lineage.split("(")[1].replace(")", "").split()[0] if \
@@ -544,5 +545,6 @@ def main():
         json.dump(update_dict, upd_file, indent=4)
 
     print("End.")
+
 
 main()
