@@ -446,7 +446,7 @@ def main():
 
     df_cases_data["cases"] = pd.to_numeric(df_cases_data["cases"], downcast='integer')
 
-    df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    # df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     for location in locations:
         # if location["country"] != "Uruguay":
