@@ -446,8 +446,6 @@ def main():
 
     df_cases_data["cases"] = pd.to_numeric(df_cases_data["cases"], downcast='integer')
 
-    # df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
-
     for location in locations:
         # if location["country"] != "Uruguay":
         #     continue
@@ -531,7 +529,6 @@ def main():
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
         if location["country"] in df_cases_data["location"].values:
-            print(location["country"] + " OK")
 
             df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
                                                                                            on=['location', 'date'],
