@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
 
+import numpy as np
 import pandas as pd
 
 # Data Sources
@@ -76,6 +77,10 @@ def get_url(url):
     else:
         raise err
     return response
+
+
+def get_cases_data():
+    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
 
 
 def get_alias_map_sub_lineage(lineage_to_match):
@@ -432,6 +437,17 @@ def main():
 
     locations = get_locations().to_dict('records')
 
+    df_cases_data = get_cases_data()
+
+    df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
+
+    df_cases_data = df_cases_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
+        {'new_cases': 'sum'}).rename(columns={"new_cases": "cases"}).reset_index()
+
+    df_cases_data["cases"] = pd.to_numeric(df_cases_data["cases"], downcast='integer')
+
+    df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
     for location in locations:
         # if location["country"] != "Uruguay":
         #     continue
@@ -513,6 +529,36 @@ def main():
                 df_location = df_location[:-1]
         df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+        if location["country"] in df_cases_data["location"].values:
+            print(location["country"] + " OK")
+
+            df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
+                                                                                           on=['location', 'date'],
+                                                                                           how='outer')
+
+            # Fit
+            columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
+            for v in columns:
+                df_fit[v] = df_fit["cases"] * (df_fit[v] / 100)
+                df_fit[v] = df_fit[v].fillna(0.0)
+                df_fit[v] = df_fit[v].apply(np.ceil).astype(int)
+
+            df_fit['Unknown'] = df_fit.loc[:, columns].sum(axis=1)
+            df_fit['Unknown'] = df_fit["cases"] - df_fit['Unknown']
+            df_fit['Unknown'] = df_fit['Unknown'].fillna(0.0)
+            df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
+            df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
+
+            df_fit.drop(['cases'], axis=1)
+
+            if df_fit.size > 0:
+                if df_fit.tail(1).iloc[0]['date'] > to_date:
+                    # Remove the last register because probably is noise
+                    df_fit = df_fit[:-1]
+
+            df_fit.to_csv(
+                f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate World data...")
     df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
