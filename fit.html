@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SARS-CoV-2-Variants by @3dgiordano</title>
+  <meta name="generator" content="Jekyll v3.9.0" />
+  <meta property="og:title" content="SARS-CoV-2-Variants" />
+  <meta name="author" content="David Giordano" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <link rel="canonical" href="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:url" content="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:site_name" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="twitter:title" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:image" content="/web/favicon.png">
+  <link rel="shortcut icon" type="image/x-icon" href="./web/favicon.ico">
+  <link rel="shortcut icon" type="image/png" href="./web/favicon.png">
+  <link rel="apple-touch-icon" sizes="170x170" href="./web/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./web/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./web/favicon-16x16.png">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBJJX8MJH3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QBJJX8MJH3');
+  </script>
+  <script type="application/ld+json">
+{"headline":"SARS-CoV-2-Variants by @3dgiordano","description":"SARS-CoV-2 Variants by @3dgiordano","url":"https://3dgiordano.github.io/SARS-CoV-2-Variants/","@type":"WebSite","name":"SARS-CoV-2-Variants by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
+</script>
+  <style>
+    body {
+      font-family: Roboto, sans-serif;
+      font-style: normal;
+      margin: 0;
+      padding: 0px;
+    }
+
+    h1 {
+      padding: 5px;
+      margin: 10px;
+    }
+
+    p {
+      padding: 15px;
+      margin: 5px;
+    }
+
+    @media screen and (max-width: 1024px) {
+      table {
+        width: 100%;
+      }
+
+      tbody td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tbody td:before {
+        content: attr(data-th);
+        display: block;
+        width: 100% !important;
+
+      }
+    }
+  </style>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
+  <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
+
+  <script id="rendered-js" crossorigin="anonymous">
+    var doc_width = 1024;
+    var chart_width = 640;
+    var chart_list = [];
+
+    function windowSizeUpdate() {
+      doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      chart_width = parseInt((doc_width / 2) - 70);
+      if (doc_width <= 1024) {
+        chart_width = parseInt(doc_width - 100);
+      }
+
+      chart_list.forEach(chart => {
+        ApexCharts.exec(chart, 'updateOptions', {
+          chart: {
+            width: chart_width + "px"
+          }
+        });
+      });
+    }
+
+    window.addEventListener('resize', windowSizeUpdate);
+    windowSizeUpdate();
+
+
+    function start() {
+
+      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+        var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
+        var date_str = new Date(update_date_str).toString();
+        document.getElementById("last_update").innerText = date_str;
+      });
+
+
+      new Promise(() => {
+
+        dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
+          var variants = df.toArray("label");
+          load_charts(variants);
+        });
+      });
+    }
+
+    function get_color_columns(columns, variants) {
+
+      var colors = [
+
+        "#3360a9",
+        "#2a939b",
+        "#e6332e",
+        "#ca2628",
+        "#ffd53e",
+        "#9ecc8a",
+        "#34983f",
+
+        "#ff7f0e",
+        "#1f77b4",
+        "#ffbb78",
+        "#2ca02c",
+        "#98df8a",
+        "#d62728",
+        "#ff9896",
+        "#9467bd",
+        "#c5b0d5",
+        "#8c564b",
+
+        "#c49c94",
+        "#e377c2",
+        "#f7b6d2",
+        "#7f7f7f",
+        "#c7c7c7",
+        "#bcbd22",
+        "#dbdb8d",
+        "#17becf",
+        "#9edae5",
+        "#1f77b4",
+
+        "#3C4E66",
+        "#B13507",
+        "#00847E",
+        "#6D3E91",
+        "#CF0A66",
+        "#883039",
+        "#00823F",
+        "#4C6A9C",
+        "#C05917",
+        "#D73C50",
+        "#287669",
+        "#CD2285",
+        "#0F739C",
+        "#9A5129",
+        "#C45267",
+        "#008860",
+        "#8C4569",
+        "#B36216",
+        "#366388",
+        "#A2559C",
+        "#578145",
+        "#D7263F",
+        "#18470F",
+        "#BC8E5A",
+        "#585C64",
+
+        "#F66F9E",
+        "#B87BE1",
+        "#4AB5E1",
+        "#4BC59F",
+        "#4A73BD",
+
+      ];
+
+      color_linages = [
+
+        "#eb5164",
+        "#ffd970",
+        "#d85078",
+        "#ff5151",
+
+        "#ffce7d",
+        "#68ff90",
+        "#c4508b",
+        "#ffc38a",
+        "#79f08d",
+        "#b14f9e",
+        "#ffb796",
+        "#8ae18b",
+        "#9d4fb2",
+        "#ffaca3",
+        "#9ad288",
+        "#8a4ec5",
+        "#ffa1b0",
+        "#abc385",
+        "#764ed8",
+        "#ff96bd",
+        "#bcb483",
+        "#634dec",
+        "#ff8ac9",
+        "#cda580",
+        "#4f4dff",
+        "#ff7fd6",
+        "#dd967d",
+        "#ff74e3",
+        "#ee877b",
+        "#ff7878",
+
+      ];
+
+      if (typeof variants === 'undefined') {
+        // console.log("Uppss variants disapears...");
+        return colors;
+      }
+
+      var palettte = []
+      // console.log(variants);
+      columns.forEach(variant => {
+
+        variant = variant.split("(")[0].trim();
+        // console.log(variant);
+        if (variant == "Other") {
+          palettte.push("#8B8B8B");
+		} else if (variant == "Unknown") {
+          palettte.push("#DBDBDB9B");		
+        } else {
+          var found = variants.indexOf(variant);
+          // console.log(found);
+          if (found > -1) {
+            var col_index = found % (colors.length - 1);
+            // console.log("Idx:" + col_index);
+            var calt = colors[found % (colors.length - 1)];
+            // console.log("P:" + calt);
+            palettte.push(calt);
+
+          } else {
+            // Generate color based on the letters
+            if (variant.length == 2) {
+              var calt1 = color_linages[variant[0].charCodeAt(0) - 65];
+              var pp = (color_linages.length - 1) - (variant[1].charCodeAt(0) - 65);
+              // console.log(pp);
+              var calt2 = color_linages[pp];
+              // console.log("Y:" + calt2);
+              var calt = calt1.substring(0, 4) + calt2.substring(4, 7);
+              // console.log(variant + ":ALT:" + calt);
+              palettte.push(calt);
+            } else {
+              var calt = color_linages[variant[0].charCodeAt(0) - 65];
+              // console.log(variant + ":ALT2:" + calt);
+              palettte.push(calt);
+            }
+          }
+        }
+      });
+      // console.log(palettte);
+      return palettte;
+    }
+
+    function renderChart(data_title, data_url, element_selector, variants) {
+
+      var chart_width_px = chart_width + "px";
+      var chart_height_px = "400px";
+      if (element_selector == "#world" && chart_width > 400) {
+        chart_width_px = (chart_width * 2) + "px";
+        chart_height_px = "500px";
+      }
+      dfjs.DataFrame.fromCSV(data_url).then(df => {
+        var series = [];
+        var columns = []
+        df.listColumns().forEach(column => {
+          if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+            columns.push(column);
+            series.push(
+              { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
+            );
+          };
+        }
+        );
+
+        var dates = df.toArray("date");
+
+        var colors_columns = get_color_columns(columns, variants);
+
+        /*
+        columns.forEach(function (column, col_ind) {
+          console.log(column + ":" + colors_columns[col_ind]);
+        });
+        */
+       
+        var options = {
+          title: {
+            text: data_title,
+            align: 'center',
+            margi: 0,
+            offsetY: 20,
+            style: {
+              fontSize: '16px',
+              fontFamily: "Verdana"
+            },
+          },
+          grid: {
+            show: true,
+          },
+          colors: colors_columns,
+          chart: {
+            id: element_selector,
+            type: 'area',
+            height: chart_height_px,
+            width: chart_width_px,
+            redrawOnParentResize: false,
+            stacked: true,
+            animations: { enabled: false },
+            offsetY: 0,
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false,
+            },
+          },
+          noData: {
+            text: "No Data",
+          },
+
+          legend: {
+            show: false
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          tooltip: {
+            onDatasetHover: { highlightDataSeries: true },
+
+            shared: true,
+            followCursor: false,
+
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+              var str_html = '<div style="">';
+
+              str_html += '<div class="arrow_box apexcharts-tooltip-title" style="display:flex">' +
+                '<span style="width:100%;text-align:center;display:block;">' + w.config.xaxis.categories[dataPointIndex -1] + " to " + w.config.xaxis.categories[dataPointIndex] + '</span>' +
+                '</div>';
+
+              var sortIndex = [];
+              w.globals.seriesNames.forEach(function (sn_value, sn_i) {
+
+                sortIndex.push((series[sn_i][dataPointIndex] + 10000000) + ":" + sn_i);
+
+              });
+
+              sortIndex = sortIndex.sort().reverse();
+              sortIndex.forEach(function (value, i) {
+                var val = parseFloat(value.split(":")[0]) - 10000000;
+                if (val >= 1) {
+                  var d_index = parseInt(value.split(":")[1]);
+                  var val_frmt = w.globals.ttVal.formatter(val, { series, seriesIndex, d_index, w });
+                  var s_name = w.globals.seriesNames[d_index];
+
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                    '<span class="apexcharts-tooltip-marker" style="width:15px;height:10px;background-color:' + w.globals.colors[d_index] + '">' + '</span>' +
+                    '<span class="apexcharts-tooltip-text" style="width:100%">' + s_name + '</span>' +
+                    '<span style="width:50px;text-align:right;display:block;">' + val_frmt + '</span>' +
+                    '</div>';
+                }
+
+              });
+              str_html += '</div>';
+
+              return str_html;
+            },
+
+            style: {
+              fontSize: '9px',
+              fontFamily: "Verdana"
+            },
+
+            y: {
+
+              formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                return (Number(value)/ 1000).toFixed(2) + "k";
+              }
+            }
+          },
+          fill: {
+            type: 'solid'
+          },
+          stroke: {
+            curve: 'smooth',
+            width: 0,
+          },
+          series: series,
+
+          xaxis: {
+            tooltip: {
+              enabled: false
+            },
+            type: 'datetime',
+            categories: dates
+          },
+          yaxis: {
+            show: true,
+			labels: {
+              formatter: function (value) {
+                return (Number(value)/ 1000).toFixed(0) + "k";
+              }
+			}
+          }
+        };
+
+        var chart = new ApexCharts(document.querySelector(element_selector), options);
+
+        chart.render();
+        chart_list.push(element_selector);
+
+      });
+
+    }
+
+    function load_charts(variants) {
+	  /*
+      new Promise(() => {
+        setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World.csv', "#world", variants), 0);
+      });
+	  */
+      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases.csv').then(df => {
+
+        df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+        
+        // df_cases.show();
+        
+        locations = [...new Set(df.toArray("location"))];
+
+        var content_table = document.querySelector("#content");
+        var i = 0;
+        var row;
+        locations.forEach(location => {
+          // console.log(location);
+          tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
+          
+          if (tot_cases > 50) {
+
+            if (i % 2 == 0) {
+              row = content_table.insertRow();
+            }
+            var cell = row.insertCell();
+            cell.style = "width: 50%;";
+            cell.id = "location_" + i;
+            // cell.innerHTML = location;
+            new Promise(() => {
+              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + cell.id, variants), 0);
+            });
+
+            i += 1;
+          }
+        });
+
+      });
+    }
+
+  </script>
+
+  <div style="margin: 20px;">
+    <h1>SARS-CoV-2 Variants</h1>
+
+    <div style="margin: 20px;">
+
+      This site tries to give a glimpse of the different variants of SAR-CoV-2 in the world.<br />
+      <br />
+      <b>Naming:</b><br />
+      <br />
+      The naming system used is a mix between the names denominated by WHO, the Pango Lineage system and some Nextstrain
+      Clade names.<br />
+      <br />
+      The project use the denomination of:<br />
+      <ul>
+        <li>WHO/CDC/ECDC/PHE Variants of Concern (VOC)</li>
+        <li>WHO/CDC/ECDC Variants of Interest (VOI)</li>
+        <li>WHO Alerts for Further Monitoring (AFM)</li>
+        <li>CDC Variants Being Monitored (VBM)</li>
+        <li>ECDC Variants Under Monitoring (VUM)</li>
+        <li>PHE Variants Under Investigation (VUI)</li>
+      </ul>
+      <br />
+      If a major variant is detected, the WHO name is used.<br />
+      If it is some other variant to consider not yet considered by WHO, its Pango lineage is used.<br />
+      Otherwise, the first letters of the Pango lineage are used.<br />
+      If the variant is in WHO/CDC/ECDC/PHE VOI, VUI, VOC, AFM or VUM, the label is included.<br />
+      <br />
+      For more information about lineages names and classifications<br />
+      <ul>
+        <li>WHO <a href="https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/" target="_blank">Tracking
+            SARS-CoV-2 variants</a></li>
+        <li>CDC <a href="https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html"
+            target="_blank">SARS-CoV-2 Variant Classifications and Definitions</a></li>
+        <li>ECDC <a href="https://www.ecdc.europa.eu/en/covid-19/variants-concern" target="_blank">SARS-CoV-2 variants
+            of concern</a></li>
+        <li>PHE <a href="https://www.gov.uk/government/collections/new-sars-cov-2-variant" target="_blank">COVID-19
+            (SARS-CoV-2) variants</a></li>
+      </ul>
+      <br />
+      <b>About:</b><br />
+      <br />
+      The project, site, published data, and graphics are free and open source.<br />
+      A work in progress project created by <a href="https://github.com/3dgiordano"
+        target="_blank">@3dgiordano</a>.<br />
+      They can access the source code and data in their GitHub project <a
+        href="https://github.com/3dgiordano/SARS-CoV-2-Variants"
+        target="_blank">https://github.com/3dgiordano/SARS-CoV-2-Variants</a>.</br>
+      <br />
+      <b>Genomic data sources:</b><br />
+      <br />
+      <b>outbreak.info</b><br />
+      <br />
+      Julia L. Mullen, Ginger Tsueng, Alaa Abdel Latif, Manar Alkuzweny, Marco Cano, Emily Haag, Jerry Zhou, Mark
+      Zeller, Emory Hufbauer, Nate Matteson, Kristian G. Andersen, Chunlei Wu, Andrew I. Su, Karthik Gangavarapu, Laura
+      D. Hughes, and the Center for Viral Systems Biology outbreak.info. Available online: <a
+        href="https://outbreak.info/" target="_blank">https://outbreak.info/</a> (2020)<br />
+      <br />
+      <b>GISAID Initiative</b><br />
+      <br />
+      Elbe, S., and Buckland-Merrett, G. (2017) Data, disease and diplomacy: GISAID’s innovative contribution to global
+      health. Global Challenges, 1:33-46. DOI: 10.1002/gch2.1018 PMCID: 31565258; Shu, Y., McCauley, J. (2017) GISAID:
+      Global initiative on sharing all influenza data – from vision to reality. EuroSurveillance, 22(13) DOI:
+      10.2807/1560-7917.ES.2017.22.13.30494 PMCID: PMC5388101 data license: <a
+        href="https://www.gisaid.org/registration/terms-of-use/"
+        target="_blank">https://www.gisaid.org/registration/terms-of-use/</a><br />
+      <br />
+      <b>Important:</b>
+      Sequencing data is not a random sample selection and does not represent actual prevalence, it is an
+      estimate.<br />
+      <br />
+      <b>Last update: </b><span id="last_update"></span><br>
+    </div>
+  </div>
+
+
+  <table id="content" style="width: 100%;border-spacing:30px 10px;">
+    <tr>
+      <td colspan=2 align="center">
+        <div id="world"></div>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    start();
+  </script>
+  </body>
+
+</html>
