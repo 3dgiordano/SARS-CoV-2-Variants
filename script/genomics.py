@@ -455,7 +455,7 @@ def main():
         df.rename(
             columns={'lineage': 'variant', 'prevalence_rolling': 'perc_sequences', 'total_count': 'num_sequences_total',
                      'lineage_count': 'num_sequences'}, inplace=True)
-        df.drop(['prevalence'], axis=1)
+        df.drop(['prevalence'], axis=1, inplace=True)
 
         df = df.reindex(
             columns=['location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
@@ -547,7 +547,7 @@ def main():
             df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
             df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
 
-            df_fit.drop(['cases'], axis=1)
+            df_fit.drop(columns=['cases'], inplace=True)
 
             if df_fit.size > 0:
                 if df_fit.tail(1).iloc[0]['date'] > to_date:
