@@ -470,6 +470,13 @@ def main():
 
     df['variant'] = df['variant'].str.upper()
 
+    # Drop from cases countries not in list
+    locations_to_clean = list(set(df_cases_data["location"].values) - set(df["location"].values))
+    df_cases_data = df_cases_data.loc[~df_cases_data.location.isin(locations_to_clean)]
+
+    print("Save cases.csv...")
+    df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
     print("Map lineage...")
     data = get_lineage_map()
     main_lineage_map = data["map"]
