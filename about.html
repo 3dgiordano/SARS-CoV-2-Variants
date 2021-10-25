@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SARS-CoV-2-Variants by @3dgiordano</title>
+  <meta name="generator" content="Jekyll v3.9.0" />
+  <meta property="og:title" content="SARS-CoV-2-Variants" />
+  <meta name="author" content="David Giordano" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <link rel="canonical" href="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:url" content="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:site_name" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="twitter:title" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:image" content="/web/favicon.png">
+  <link rel="shortcut icon" type="image/x-icon" href="./web/favicon.ico">
+  <link rel="shortcut icon" type="image/png" href="./web/favicon.png">
+  <link rel="apple-touch-icon" sizes="170x170" href="./web/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./web/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./web/favicon-16x16.png">
+  <link rel='stylesheet' href='web/general.css'>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBJJX8MJH3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QBJJX8MJH3');
+  </script>
+  <script type="application/ld+json">
+{"headline":"SARS-CoV-2-Variants by @3dgiordano","description":"SARS-CoV-2 Variants by @3dgiordano","url":"https://3dgiordano.github.io/SARS-CoV-2-Variants/","@type":"WebSite","name":"SARS-CoV-2-Variants by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
+</script>
+  <style>
+    @media screen and (max-width: 1024px) {
+      table {
+        width: 100%;
+      }
+
+      tbody td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tbody td:before {
+        content: attr(data-th);
+        display: block;
+        width: 100% !important;
+
+      }
+    }
+  </style>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
+  <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
+
+  <script>
+        function start() {
+          dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+            var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
+            var date_str = new Date(update_date_str).toString();
+            document.getElementById("last_update").innerText = date_str;
+          });
+      }
+  </script>
+
+  <div style="margin: 20px;">
+    <h1>SARS-CoV-2 Variants</h1>
+    <div style="margin: 20px;">
+      This site tries to give a glimpse of the different variants of SAR-CoV-2 in the world.<br />
+      <br />
+      <b>Last update: </b><span id="last_update"></span><br>
+      <br /><br />
+      <a class="button" href="index.html">Sequences</a>&nbsp;<a class="button" href="fit.html">Fitting cases to sequences</a>&nbsp;<a class="button_active" href="about.html">About</a><br>
+      <br />
+      <b>About:</b><br />
+      <br />
+      The project, site, published data, and graphics are free and open source.<br />
+      A work in progress project created by <a href="https://github.com/3dgiordano"
+        target="_blank">@3dgiordano</a>.<br />
+      They can access the source code and data in their GitHub project <a
+        href="https://github.com/3dgiordano/SARS-CoV-2-Variants"
+        target="_blank">https://github.com/3dgiordano/SARS-CoV-2-Variants</a>.</br>
+      <br />
+      <b>Genomic data sources:</b><br />
+      <br />
+      <b>outbreak.info</b><br />
+      <br />
+      Julia L. Mullen, Ginger Tsueng, Alaa Abdel Latif, Manar Alkuzweny, Marco Cano, Emily Haag, Jerry Zhou, Mark
+      Zeller, Emory Hufbauer, Nate Matteson, Kristian G. Andersen, Chunlei Wu, Andrew I. Su, Karthik Gangavarapu, Laura
+      D. Hughes, and the Center for Viral Systems Biology outbreak.info. Available online: <a
+        href="https://outbreak.info/" target="_blank">https://outbreak.info/</a> (2020)<br />
+      <br />
+      <b>GISAID Initiative</b><br />
+      <br />
+      Elbe, S., and Buckland-Merrett, G. (2017) Data, disease and diplomacy: GISAID’s innovative contribution to global
+      health. Global Challenges, 1:33-46. DOI: 10.1002/gch2.1018 PMCID: 31565258; Shu, Y., McCauley, J. (2017) GISAID:
+      Global initiative on sharing all influenza data – from vision to reality. EuroSurveillance, 22(13) DOI:
+      10.2807/1560-7917.ES.2017.22.13.30494 PMCID: PMC5388101 data license: <a
+        href="https://www.gisaid.org/registration/terms-of-use/"
+        target="_blank">https://www.gisaid.org/registration/terms-of-use/</a><br />
+      <br />
+      <b>Important:</b>
+      Sequencing data is not a random sample selection and does not represent actual prevalence, it is an
+      estimate.<br />
+      <br />
+      <b>Naming:</b><br />
+      <br />
+      The naming system used is a mix between the names denominated by WHO, the Pango Lineage system and some Nextstrain
+      Clade names.<br />
+      <br />
+      The project use the denomination of:<br />
+      <ul>
+        <li>WHO/CDC/ECDC/PHE Variants of Concern (VOC)</li>
+        <li>WHO/CDC/ECDC Variants of Interest (VOI)</li>
+        <li>WHO Alerts for Further Monitoring (AFM)</li>
+        <li>CDC Variants Being Monitored (VBM)</li>
+        <li>ECDC Variants Under Monitoring (VUM)</li>
+        <li>PHE Variants Under Investigation (VUI)</li>
+      </ul>
+      <br />
+      If a major variant is detected, the WHO name is used.<br />
+      If it is some other variant to consider not yet considered by WHO, its Pango lineage is used.<br />
+      Otherwise, the first letters of the Pango lineage are used.<br />
+      If the variant is in WHO/CDC/ECDC/PHE VOI, VUI, VOC, AFM or VUM, the label is included.<br />
+      <br />
+      For more information about lineages names and classifications<br />
+      <ul>
+        <li>WHO <a href="https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/" target="_blank">Tracking
+            SARS-CoV-2 variants</a></li>
+        <li>CDC <a href="https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html"
+            target="_blank">SARS-CoV-2 Variant Classifications and Definitions</a></li>
+        <li>ECDC <a href="https://www.ecdc.europa.eu/en/covid-19/variants-concern" target="_blank">SARS-CoV-2 variants
+            of concern</a></li>
+        <li>PHE <a href="https://www.gov.uk/government/collections/new-sars-cov-2-variant" target="_blank">COVID-19
+            (SARS-CoV-2) variants</a></li>
+      </ul>
+      <br />
+    </div>
+  </div>
+  <script>
+    start();
+  </script>
+  </body>
+
+</html>
