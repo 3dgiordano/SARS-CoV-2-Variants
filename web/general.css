@@ -36,6 +36,7 @@ p {
     font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
     text-decoration: none;
     vertical-align: middle;
+    display: inline-block;
     }
  .button:hover {
     border-top-color: #288f48;
@@ -64,6 +65,7 @@ p {
     font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
     text-decoration: none;
     vertical-align: middle;
+    display: inline-block;
     }
 
 .button_active:hover {
