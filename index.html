@@ -260,22 +260,11 @@
         chart_width_px = (chart_width * 2) + "px";
         chart_height_px = "500px";
       }
-      dfjs.DataFrame.fromCSV(data_url).then(df => {
-        var series = [];
-        var columns = []
-        df.listColumns().forEach(column => {
-          if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
-            columns.push(column);
-            series.push(
-              { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
-            );
-          };
-        }
-        );
 
-        var dates = df.toArray("date");
-
-        var colors_columns = get_color_columns(columns, variants);
+      var series = [];
+      var columns = [];
+      var dates = [];
+      var colors_columns = [];
 
         /*
         columns.forEach(function (column, col_ind) {
@@ -315,7 +304,7 @@
             },
           },
           noData: {
-            text: "No Data",
+            text: "Loading...",
           },
 
           legend: {
@@ -404,7 +393,40 @@
         chart.render();
         chart_list.push(element_selector);
 
-      });
+        dfjs.DataFrame.fromCSV(data_url).then(df => {
+          df.listColumns().forEach(column => {
+            if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+              columns.push(column);
+              series.push(
+                { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
+              );
+            };
+          }
+          );
+
+          dates = df.toArray("date");
+
+          colors_columns = get_color_columns(columns, variants);
+
+          chart.updateOptions (
+            {
+              series: series,
+              colors: colors_columns,
+              noData: {
+                text: "No Data",
+              },
+              xaxis: {
+                tooltip: {
+                  enabled: false
+                },
+                type: 'datetime',
+                categories: dates
+              },
+            }, 
+            true, false, true
+
+          );
+        });
 
     }
 
@@ -439,10 +461,12 @@
             }
             var cell = row.insertCell();
             cell.style = "width: 50%;";
-            cell.id = "location_" + i;
-            // cell.innerHTML = location;
+            var container = document.createElement("div");
+            container.id = "location_" + i;
+            cell.appendChild(container);
+
             new Promise(() => {
-              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + ".csv", "#" + cell.id, variants), 0);
+              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + ".csv", "#" + container.id, variants), 0);
             });
 
             i += 1;

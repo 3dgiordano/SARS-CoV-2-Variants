@@ -70,7 +70,7 @@
       if (doc_width <= 1024) {
         chart_width = parseInt(doc_width - 100);
       }
-
+      
       chart_list.forEach(chart => {
         ApexCharts.exec(chart, 'updateOptions', {
           chart: {
@@ -78,6 +78,7 @@
           }
         });
       });
+    
     }
 
     window.addEventListener('resize', windowSizeUpdate);
@@ -262,155 +263,144 @@
         chart_width_px = (chart_width * 2) + "px";
         chart_height_px = "500px";
       }
-      dfjs.DataFrame.fromCSV(data_url).then(df => {
-        var series = [];
-        var columns = []
-        df.listColumns().forEach(column => {
-          if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
-            columns.push(column);
-            series.push(
-              { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
-            );
-          };
-        }
-        );
 
-        var dates = df.toArray("date");
+      var series = [];
+      var columns = [];
+      var dates = [];
+      var colors_columns = [];
 
-        var colors_columns = get_color_columns(columns, variants);
-
-        /*
-        columns.forEach(function (column, col_ind) {
-          console.log(column + ":" + colors_columns[col_ind]);
-        });
-        */
-       
-        var options = {
-          title: {
-            text: data_title,
-            align: 'center',
-            margi: 0,
-            offsetY: 20,
-            style: {
-              fontSize: '16px',
-              fontFamily: "Verdana"
-            },
+      /*
+      columns.forEach(function (column, col_ind) {
+        console.log(column + ":" + colors_columns[col_ind]);
+      });
+      */
+      
+      var options = {
+        title: {
+          text: data_title,
+          align: 'center',
+          margi: 0,
+          offsetY: 20,
+          style: {
+            fontSize: '16px',
+            fontFamily: "Verdana"
           },
-          grid: {
-            show: true,
+        },
+        grid: {
+          show: true,
+        },
+        colors: colors_columns,
+        chart: {
+          id: element_selector,
+          type: 'area',
+          height: chart_height_px,
+          width: chart_width_px,
+          redrawOnParentResize: false,
+          stacked: true,
+          animations: { enabled: false },
+          offsetY: 0,
+          toolbar: {
+            show: false,
           },
-          colors: colors_columns,
-          chart: {
-            id: element_selector,
-            type: 'area',
-            height: chart_height_px,
-            width: chart_width_px,
-            redrawOnParentResize: false,
-            stacked: true,
-            animations: { enabled: false },
-            offsetY: 0,
-            toolbar: {
-              show: false,
-            },
-            zoom: {
-              enabled: false,
-            },
-          },
-          noData: {
-            text: "No Data",
-          },
-
-          legend: {
-            show: false
-          },
-          dataLabels: {
+          zoom: {
             enabled: false,
           },
-          tooltip: {
-            onDatasetHover: { highlightDataSeries: true },
+        },
+        noData: {
+          text: "Loading...",
+        },
 
-            shared: true,
-            followCursor: false,
+        legend: {
+          show: false
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        tooltip: {
+          onDatasetHover: { highlightDataSeries: true },
 
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-              var str_html = '<div style="">';
+          shared: true,
+          followCursor: false,
 
-              str_html += '<div class="arrow_box apexcharts-tooltip-title" style="display:flex">' +
-                '<span style="width:100%;text-align:center;display:block;">' + w.config.xaxis.categories[dataPointIndex -1] + " to " + w.config.xaxis.categories[dataPointIndex] + '</span>' +
-                '</div>';
+          custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+            var str_html = '<div style="">';
 
-              var sortIndex = [];
-              w.globals.seriesNames.forEach(function (sn_value, sn_i) {
+            str_html += '<div class="arrow_box apexcharts-tooltip-title" style="display:flex">' +
+              '<span style="width:100%;text-align:center;display:block;">' + w.config.xaxis.categories[dataPointIndex -1] + " to " + w.config.xaxis.categories[dataPointIndex] + '</span>' +
+              '</div>';
 
-                sortIndex.push((series[sn_i][dataPointIndex] + 10000000) + ":" + sn_i);
+            var sortIndex = [];
+            w.globals.seriesNames.forEach(function (sn_value, sn_i) {
 
-              });
-              var numTooltips = 0;
-              sortIndex = sortIndex.sort().reverse();
-              sortIndex.forEach(function (value, i) {
-                if (numTooltips < 20) {
-                  var val = parseFloat(value.split(":")[0]) - 10000000;
-                  if (val >= 1) {
-                    numTooltips += 1;
-                    var d_index = parseInt(value.split(":")[1]);
-                    var val_frmt = w.globals.ttVal.formatter(val, { series, seriesIndex, d_index, w });
-                    var s_name = w.globals.seriesNames[d_index];
+              sortIndex.push((series[sn_i][dataPointIndex] + 10000000) + ":" + sn_i);
 
-                    str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
-                      '<span class="apexcharts-tooltip-marker" style="width:15px;height:10px;background-color:' + w.globals.colors[d_index] + '">' + '</span>' +
-                      '<span class="apexcharts-tooltip-text" style="width:100%">' + s_name + '</span>' +
-                      '<span style="width:50px;text-align:right;display:block;">' + val_frmt + '</span>' +
-                      '</div>'; 
-                  }
-                } else if (numTooltips == 20) {
-                    numTooltips += 1;
-                    str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
-                      '<span class="apexcharts-tooltip-text" style="width:100%">* Limited to top 20</span>' +
-                      '</div>';
+            });
+            var numTooltips = 0;
+            sortIndex = sortIndex.sort().reverse();
+            sortIndex.forEach(function (value, i) {
+              if (numTooltips < 20) {
+                var val = parseFloat(value.split(":")[0]) - 10000000;
+                if (val >= 1) {
+                  numTooltips += 1;
+                  var d_index = parseInt(value.split(":")[1]);
+                  var val_frmt = w.globals.ttVal.formatter(val, { series, seriesIndex, d_index, w });
+                  var s_name = w.globals.seriesNames[d_index];
+
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                    '<span class="apexcharts-tooltip-marker" style="width:15px;height:10px;background-color:' + w.globals.colors[d_index] + '">' + '</span>' +
+                    '<span class="apexcharts-tooltip-text" style="width:100%">' + s_name + '</span>' +
+                    '<span style="width:50px;text-align:right;display:block;">' + val_frmt + '</span>' +
+                    '</div>'; 
                 }
-                
-              });
-              str_html += '</div>';
-
-              return str_html;
-            },
-
-            style: {
-              fontSize: '9px',
-              fontFamily: "Verdana"
-            },
-
-            y: {
-
-              formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                return (Number(value)/ 1000).toFixed(2) + "k";
+              } else if (numTooltips == 20) {
+                  numTooltips += 1;
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                    '<span class="apexcharts-tooltip-text" style="width:100%">* Limited to top 20</span>' +
+                    '</div>';
               }
+              
+            });
+            str_html += '</div>';
+
+            return str_html;
+          },
+
+          style: {
+            fontSize: '9px',
+            fontFamily: "Verdana"
+          },
+
+          y: {
+
+            formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+              return (Number(value)/ 1000).toFixed(2) + "k";
             }
-          },
-          fill: {
-            type: 'solid'
-          },
-          stroke: {
-            curve: 'smooth',
-            width: 0,
-          },
-          series: series,
-
-          xaxis: {
-            tooltip: {
-              enabled: false
-            },
-            type: 'datetime',
-            categories: dates
-          },
-          yaxis: {
-            show: true,
-			labels: {
-              formatter: function (value) {
-                return (Number(value)/ 1000).toFixed(0) + "k";
-              }
-			}
           }
+        },
+        fill: {
+          type: 'solid'
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 0,
+        },
+        series: series,
+
+        xaxis: {
+          tooltip: {
+            enabled: false
+          },
+          type: 'datetime',
+          categories: dates
+        },
+        yaxis: {
+          show: true,
+          labels: {
+            formatter: function (value) {
+              return (Number(value)/ 1000).toFixed(0) + "k";
+            }
+          }
+        }
         };
 
         var chart = new ApexCharts(document.querySelector(element_selector), options);
@@ -418,7 +408,41 @@
         chart.render();
         chart_list.push(element_selector);
 
-      });
+        dfjs.DataFrame.fromCSV(data_url).then(df => {
+          df.listColumns().forEach(column => {
+            if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+              columns.push(column);
+              series.push(
+                { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
+              );
+            };
+          }
+          );
+
+          dates = df.toArray("date");
+
+          colors_columns = get_color_columns(columns, variants);
+
+          chart.updateOptions (
+            {
+              series: series,
+              colors: colors_columns,
+              noData: {
+                text: "No Data",
+              },
+              xaxis: {
+                tooltip: {
+                  enabled: false
+                },
+                type: 'datetime',
+                categories: dates
+              },
+            }, 
+            true, false, true
+
+          );
+
+        });
 
     }
 
@@ -450,10 +474,12 @@
             }
             var cell = row.insertCell();
             cell.style = "width: 50%;";
-            cell.id = "location_" + i;
-            // cell.innerHTML = location;
+            var container = document.createElement("div");
+            container.id = "location_" + i;
+            cell.appendChild(container);
+
             new Promise(() => {
-              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + cell.id, variants), 0);
+              setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
             });
 
             i += 1;
