@@ -83,6 +83,10 @@ def get_cases_data():
     return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
 
 
+def get_cases_r_data():
+    return pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
+
+
 def get_alias_map_sub_lineage(lineage_to_match):
     global lineages
     alias_map_sub_lineage = []
@@ -477,6 +481,22 @@ def main():
     print("Save cases.csv...")
     df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    # R
+    df_cases_r_data = get_cases_r_data()
+
+    df_cases_r_data.rename(columns={"Country/Region": "location", "Date": "date", "R": "r"}, inplace=True)
+
+    df_cases_r_data['date'] = pd.to_datetime(df_cases_r_data['date'])
+
+    df_cases_r_data = df_cases_r_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
+        {'r': 'mean'}).reset_index()
+
+    df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'])
+
+    df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    # return
+
     print("Map lineage...")
     data = get_lineage_map()
     main_lineage_map = data["map"]
@@ -540,6 +560,8 @@ def main():
             df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
                                                                                            on=['location', 'date'],
                                                                                            how='outer')
+
+            df_fit = df_fit.sort_values(['location', 'date', 'cases'])
 
             # Fit
             columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
