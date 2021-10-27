@@ -373,7 +373,11 @@
           y: {
 
             formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-              return (Number(value)/ 1000).toFixed(2) + "k";
+              if (Number(value)> 1000000) {
+                return (Number(value)/ 1000000).toFixed(2) + "M";
+              } else {
+                return (Number(value)/ 1000).toFixed(2) + "k";
+              }
             }
           }
         },
@@ -397,7 +401,11 @@
           show: true,
           labels: {
             formatter: function (value) {
-              return (Number(value)/ 1000).toFixed(0) + "k";
+              if (Number(value)> 1000000) {
+                return (Number(value)/ 1000000).toFixed(0) + "M";
+              } else {
+                return (Number(value)/ 1000).toFixed(0) + "k";
+              }
             }
           }
         }
@@ -447,11 +455,11 @@
     }
 
     function load_charts(variants) {
-	  /*
+	  
       new Promise(() => {
-        setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World.csv', "#world", variants), 0);
+        setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World_fit.csv', "#world", variants), 0);
       });
-	  */
+	  
       dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases.csv').then(df => {
 
         df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');

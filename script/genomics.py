@@ -546,6 +546,7 @@ def main():
     # Save a file for each location generating pivot table
     # Exclude the last register because is noisy
     to_date = datetime.now() - timedelta(days=14)
+    df_fit_list = []
     for location in locations:
         print(f"Save Location: {location['country']}")
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
@@ -588,7 +589,9 @@ def main():
             df_fit.to_csv(
                 f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    print("Generate World data...")
+            df_fit_list.append(df_fit)
+
+    print("Generate Variants World data...")
     df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
 
     dfb_world = df_world.groupby(['date']).agg(
@@ -610,6 +613,28 @@ def main():
 
     print("Save World.csv...")
     df_world_pivoted[:-1].to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    # Generate World Fit
+    print("Create location list...")
+    df_world_fit = pd.concat(df_fit_list)
+
+    # Get columns to melt
+    df_world_fit = df_world_fit.melt(id_vars=["location", "date"], var_name="variant", value_name="cases")
+
+    # Clear zeroes
+    df_world_fit = df_world_fit[df_world_fit.cases != 0]
+    df_world_fit = df_world_fit.drop(df_world_fit[df_world_fit.cases.isnull()].index)
+
+    df_world_fit = df_world_fit.groupby(['date', 'variant']).agg({'cases': 'sum'}).reset_index()
+
+    df_world_fit = df_world_fit.sort_values(['date', 'variant'])
+
+    df_world_fit_pivoted = df_world_fit.pivot(index=["date"], columns=["variant"], values="cases").reset_index()
+    df_world_fit_pivoted["location"] = "World"
+    df_world_fit_pivoted.insert(0, "location", df_world_fit_pivoted.pop("location"))
+    df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
+
+    df_world_fit_pivoted[:-1].to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate update file...")
     update_dict = {
