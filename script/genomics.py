@@ -104,7 +104,7 @@ def get_alias_map_sub_lineage(lineage_to_match):
         if len(is_alias_of) > 1 and not alias.startswith("*"):
             alias_of = is_alias_of[1].split(",")[0]
             alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
-            if alias_of_x == lineage_to_match:
+            if lineage_to_match == alias_of_x:
                 alias_map_sub_lineage.append(alias)
     return alias_map_sub_lineage
 
@@ -162,30 +162,30 @@ def pango_regex(pango, no_sub=False):
 
 def who_to_dict(data, who_type):
     who_label = 'WHO\xa0label'
+    with_who_label = False
     if who_label in data.columns:
-        who_dict = {}
-        for ind, row in data.iterrows():
-            pango = row['pango']
-            label = who_detail(row[who_label])
-            if pango == "P.1":
-                who_dict["^P.1$"] = f"{label} {who_type}"
-                pango_alias_lineages = get_alias_map_sub_lineage("B.1.1.28.1")
-            else:
-                who_dict[pango_regex(pango)] = f"{label} {who_type}"
-                pango_alias_lineages = get_alias_map_sub_lineage(pango)
-            if pango_alias_lineages:
-                for p_alias_l in pango_alias_lineages:
-                    who_dict[pango_regex(p_alias_l, no_sub=True)] = f"{label} - {p_alias_l} {who_type}"
+        with_who_label = True
 
-        return who_dict
-        # return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
-        #        ind, row in
-        #        data.iterrows()}
-    else:
-        return {
-            pango_regex(row['pango']):
-                f"{who_pango_rename(row['pango'].replace('*', ''))} {who_type}" for ind, row in
-            data.iterrows()}
+    who_dict = {}
+    for ind, row in data.iterrows():
+        pango = row['pango']
+
+        if with_who_label:
+            label = who_detail(row[who_label])
+        else:
+            label = f"{who_pango_rename(row['pango'].replace('*', ''))}"
+
+        if pango == "P.1":
+            who_dict["^P.1$"] = f"{label} {who_type}"
+            pango_alias_lineages = get_alias_map_sub_lineage("B.1.1.28.1")
+        else:
+            who_dict[pango_regex(pango)] = f"{label} {who_type}"
+            pango_alias_lineages = get_alias_map_sub_lineage(pango)
+        if pango_alias_lineages:
+            for p_alias_l in pango_alias_lineages:
+                who_dict[pango_regex(p_alias_l, no_sub=True)] = f"{label} - {p_alias_l} {who_type}"
+
+    return who_dict
 
 
 def who_expand(data):
@@ -226,25 +226,23 @@ def cdc_filter_variants(table):
 def cdc_to_dict(data, who_type):
     who_label = 'WHO\xa0Label'
     if who_label in data.columns:
-        who_dict = {}
-        for ind, row in data.iterrows():
-            pango = row['pango']
-            label = who_detail(row[who_label])
-            who_dict[pango_regex(pango)] = f"{label} {who_type}"
-            pango_alias_lineages = get_alias_map_sub_lineage(pango)
-            if pango_alias_lineages:
-                for p_alias_l in pango_alias_lineages:
-                    who_dict[pango_regex(p_alias_l, no_sub=True)] = f"{label} - {p_alias_l} {who_type}"
-
-        return who_dict
-        # return {pango_regex(row['pango']): f"{who_detail(row[who_label])} {who_type}" for
-        #        ind, row in
-        #        data.iterrows()}
+        with_who_label = True
     else:
-        return {
-            pango_regex(row['pango']):
-                f"{who_pango_rename(row['pango'].replace('*', ''))} {who_type}" for ind, row in
-            data.iterrows()}
+        with_who_label = False
+    who_dict = {}
+    for ind, row in data.iterrows():
+        pango = row['pango']
+        if with_who_label:
+            label = who_detail(row[who_label])
+        else:
+            label = f"{who_pango_rename(row['pango'].replace('*', ''))}"
+        who_dict[pango_regex(pango)] = f"{label} {who_type}"
+        pango_alias_lineages = get_alias_map_sub_lineage(pango)
+        if pango_alias_lineages:
+            for p_alias_l in pango_alias_lineages:
+                who_dict[pango_regex(p_alias_l, no_sub=True)] = f"{label} - {p_alias_l} {who_type}"
+
+    return who_dict
 
 
 def cdc_expand(data):
