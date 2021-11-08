@@ -218,7 +218,7 @@
 
         variant = variant.split("(")[0].trim();
         // console.log(variant);
-        if (variant == "Other") {
+        if (variant == "Other" || variant == "") {
           palettte.push("#8B8B8B");
 		} else if (variant == "Unknown") {
           palettte.push("#DBDBDB");		
