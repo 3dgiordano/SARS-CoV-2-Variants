@@ -342,7 +342,7 @@ def get_phe_variants():
 
 
 def get_lineage_map():
-    (who_voc, who_voi, who_afm) = get_who_variants()
+    (who_voc, who_voi, who_afm, who_fmv) = get_who_variants()
     (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
     (phe_voc, phe_vui) = get_phe_variants()
@@ -350,15 +350,18 @@ def get_lineage_map():
     who_voc = who_expand(who_voc)
     who_voi = who_expand(who_voi)
     who_afm = who_expand(who_afm)
+    who_fmv = who_expand(who_fmv)
 
     who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
     who_voi_dict = who_to_dict(who_voi, "(WHO VOI)")
     who_afm_dict = who_to_dict(who_afm, "(WHO AFM)")
+    who_fmv_dict = who_to_dict(who_fmv, "(WHO FMV)")
 
     lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voi_dict.items()) +
-        list(who_afm_dict.items())
+        list(who_afm_dict.items()) +
+        list(who_fmv_dict.items())
     )
 
     cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
@@ -388,7 +391,7 @@ def get_lineage_map():
     data = {
         "map": lineage_dict_map,
         "data": {
-            "who": {"voc": who_voc, "voi": who_voc, "afm": who_afm},
+            "who": {"voc": who_voc, "voi": who_voc, "afm": who_afm, "fmv": who_fmv},
             "cdc": {"voi": cdc_voi, "voc": cdc_voc, "vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
@@ -504,7 +507,7 @@ def main():
     df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
     main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
-    other_lineage = list(dict.fromkeys([l for l in df["variant"].unique() if l not in main_lineage]))
+    other_lineage = list(dict.fromkeys([str(l) for l in df["variant"].unique() if l not in main_lineage]))
 
     print("Save lineage map...")
     export_variants(main_lineage_map)
