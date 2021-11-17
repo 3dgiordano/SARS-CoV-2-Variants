@@ -85,6 +85,10 @@ def get_cases_data():
     return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
 
 
+def get_locations_data():
+    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/locations.csv")
+
+
 def get_cases_r_data():
     return pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
 
@@ -485,6 +489,13 @@ def main():
     df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # R
+
+    df_cases_location_data = get_locations_data()
+
+    # Clean to only needed data
+    df_cases_location_data = df_cases_location_data[
+        df_cases_location_data.columns.intersection(["location", "population"])]
+
     df_cases_r_data = get_cases_r_data()
 
     df_cases_r_data.rename(columns={"Country/Region": "location", "Date": "date", "R": "r"}, inplace=True)
@@ -496,6 +507,14 @@ def main():
 
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'])
 
+    df_cases_r_data = pd.merge(df_cases_r_data, df_cases_location_data, on=['location'])
+    df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
+
+    df_cases_r_data["cases_100k"] = round((df_cases_r_data["cases"] / df_cases_r_data["population"]) * 100000, 2)
+
+    df_cases_r_data["risk"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["r"] + 1)) / 250, 2)
+
+    print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # return
