@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
 
+import math
 import numpy as np
 import pandas as pd
 
@@ -90,7 +91,17 @@ def get_locations_data():
 
 
 def get_cases_r_data():
-    return pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
+    r_file = f"../temp/r_data.csv"
+    last_time = None
+    if os.path.isfile(r_file):
+        last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(r_file))).total_seconds()
+    # keep the stored data temporarily for one hour
+    if not last_time or last_time > 3600:
+        r_df = pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
+        r_df.to_csv(r_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    else:
+        r_df = pd.read_csv(r_file, quoting=csv.QUOTE_ALL, decimal=",")
+    return r_df
 
 
 def get_alias_map_sub_lineage(lineage_to_match):
@@ -457,6 +468,8 @@ def main():
 
     df_cases_data["cases"] = pd.to_numeric(df_cases_data["cases"], downcast='integer')
 
+    df_cases_data.cases = df_cases_data.cases.mask(df_cases_data.cases.lt(0), 0)  # Remove negative values
+
     for location in locations:
         # if location["country"] != "Uruguay":
         #     continue
@@ -490,14 +503,17 @@ def main():
 
     # R
 
+    print("get looations")
     df_cases_location_data = get_locations_data()
 
     # Clean to only needed data
     df_cases_location_data = df_cases_location_data[
         df_cases_location_data.columns.intersection(["location", "population"])]
 
+    print("get cases r")
     df_cases_r_data = get_cases_r_data()
 
+    print("Rename countries")
     df_cases_r_data.rename(columns={"Country/Region": "location", "Date": "date", "R": "r"}, inplace=True)
 
     df_cases_r_data['date'] = pd.to_datetime(df_cases_r_data['date'])
@@ -505,8 +521,10 @@ def main():
     df_cases_r_data = df_cases_r_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
         {'r': 'mean'}).reset_index()
 
+    print("Merge cases")
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'])
 
+    print("Merge location")
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_location_data, on=['location'])
     df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
 
@@ -514,10 +532,54 @@ def main():
 
     df_cases_r_data["risk"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["r"] + 1)) / 250, 2)
 
+    df_cases_r_data["x"] = 0  # init
+
+    def row_x(x):
+        prev_x = 0
+        prev_r = 0
+        if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
+            prev_x = df_cases_r_data.iloc[x.name - 1]["x"]
+            prev_r = df_cases_r_data.iloc[x.name - 1]["r"]
+
+        if x["r"] >= 0.8:
+            if prev_r == 0:
+                val_x = 0
+            else:
+                if x["r"] >= 1:
+                    if x["r"] >= prev_r:
+                        val_x = prev_x / 3
+                    else:
+                        val_x = 0.5
+                else:
+                    val_x = 0.25
+            val = val_x + prev_x
+            if val < 0:
+                val = 0
+            df_cases_r_data.loc[[x.name], "x"] = val
+        else:
+            if prev_r < 0.8:
+                val_x = prev_x
+            else:
+                val_x = prev_x / 2
+            val = prev_x - val_x
+            if val < 0:
+                val = 0
+            df_cases_r_data.loc[[x.name], "x"] = val
+
+        days = (time.now() - x["date"]).days
+        print(f" {x['date']} {days}")
+
+    df_cases_r_data.apply(row_x, axis=1)
+
+    df_cases_r_data["risk2"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["x"])) / 50, 2)
+    df_cases_r_data["risk3"] = np.sqrt(np.sqrt(df_cases_r_data["risk2"]))
+
+    df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.lt(0.5), 0)  # Clean lowers values
+
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    # return
+    return
 
     print("Map lineage...")
     data = get_lineage_map()
