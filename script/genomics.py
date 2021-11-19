@@ -566,8 +566,10 @@ def main():
                 val = 0
             df_cases_r_data.loc[[x.name], "x"] = val
 
-        days = (time.now() - x["date"]).days
-        print(f" {x['date']} {days}")
+        days = (datetime.now() - x["date"]).days
+        if days < 14:
+            if prev_r >= 0.8 and x["r"] >= 1:
+                df_cases_r_data.loc[[x.name], "x"] = (df_cases_r_data.loc[[x.name], "x"] / days) * 7
 
     df_cases_r_data.apply(row_x, axis=1)
 
@@ -579,7 +581,7 @@ def main():
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    return
+    # return
 
     print("Map lineage...")
     data = get_lineage_map()
