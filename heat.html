@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SARS-CoV-2-Variants by @3dgiordano</title>
+  <meta name="generator" content="Jekyll v3.9.0" />
+  <meta property="og:title" content="SARS-CoV-2-Variants" />
+  <meta name="author" content="David Giordano" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:description" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <link rel="canonical" href="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:url" content="https://3dgiordano.github.io/SARS-CoV-2-Variants/" />
+  <meta property="og:site_name" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="twitter:title" content="SARS-CoV-2-Variants by @3dgiordano" />
+  <meta property="og:image" content="/web/favicon.png">
+  <link rel="shortcut icon" type="image/x-icon" href="./web/favicon.ico">
+  <link rel="shortcut icon" type="image/png" href="./web/favicon.png">
+  <link rel="apple-touch-icon" sizes="170x170" href="./web/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./web/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./web/favicon-16x16.png">
+  <link rel='stylesheet' href='web/general.css'>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBJJX8MJH3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QBJJX8MJH3');
+  </script>
+  <script type="application/ld+json">
+{"headline":"SARS-CoV-2-Variants by @3dgiordano","description":"SARS-CoV-2 Variants by @3dgiordano","url":"https://3dgiordano.github.io/SARS-CoV-2-Variants/","@type":"WebSite","name":"SARS-CoV-2-Variants by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
+</script>
+  <style>
+
+    @media screen and (max-width: 1024px) {
+      table {
+        width: 100%;
+      }
+
+      tbody td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tbody td:before {
+        content: attr(data-th);
+        display: block;
+        width: 100% !important;
+
+      }
+    }
+  </style>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
+  <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
+
+  <script id="rendered-js" crossorigin="anonymous">
+    var doc_width = 1024;
+    var chart_width = 640;
+    var chart_list = [];
+
+    function windowSizeUpdate() {
+      doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      chart_width = parseInt((doc_width / 2) - 70);
+      if (doc_width <= 1024) {
+        chart_width = parseInt(doc_width - 100);
+      }
+      
+      chart_list.forEach(chart => {
+        ApexCharts.exec(chart, 'updateOptions', {
+          chart: {
+            width: chart_width + "px"
+          }
+        });
+      });
+    
+    }
+
+    //window.addEventListener('resize', windowSizeUpdate);
+    //windowSizeUpdate();
+
+
+    function start() {
+
+      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+        var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
+        var date_str = new Date(update_date_str).toString();
+        document.getElementById("last_update").innerText = date_str;
+      });
+
+      load_charts();
+
+    }
+
+    function renderChart(data_title, data_url, element_selector, variants) {
+
+      var chart_width_px = chart_width + "px";
+      var chart_height_px = "400px";
+      if (element_selector == "#world" && chart_width > 400) {
+        chart_width_px = (chart_width * 2) + "px";
+        chart_height_px = "500px";
+      }
+
+      var series = [];
+      var columns = [];
+      var dates = [];
+      var colors_columns = [];
+
+      /*
+      columns.forEach(function (column, col_ind) {
+        console.log(column + ":" + colors_columns[col_ind]);
+      });
+      */
+      
+      var options = {
+        title: {
+          text: data_title,
+          align: 'center',
+          margi: 0,
+          offsetY: 20,
+          style: {
+            fontSize: '16px',
+            fontFamily: "Verdana"
+          },
+        },
+        grid: {
+          show: true,
+        },
+        colors: colors_columns,
+        chart: {
+          id: element_selector,
+          type: 'area',
+          height: chart_height_px,
+          width: chart_width_px,
+          redrawOnParentResize: false,
+          redrawOnWindowResize: false,
+          stacked: true,
+          animations: { enabled: false },
+          offsetY: 0,
+          toolbar: {
+            show: false,
+          },
+          zoom: {
+            enabled: false,
+          },
+        },
+        noData: {
+          text: "Loading...",
+        },
+
+        legend: {
+          show: false
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        tooltip: {
+          onDatasetHover: { highlightDataSeries: true },
+
+          shared: true,
+          followCursor: false,
+
+          custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+            var str_html = '<div style="">';
+
+            str_html += '<div class="arrow_box apexcharts-tooltip-title" style="display:flex">' +
+              '<span style="width:100%;text-align:center;display:block;">' + w.config.xaxis.categories[dataPointIndex -1] + " to " + w.config.xaxis.categories[dataPointIndex] + '</span>' +
+              '</div>';
+
+            var sortIndex = [];
+            w.globals.seriesNames.forEach(function (sn_value, sn_i) {
+
+              sortIndex.push((series[sn_i][dataPointIndex] + 10000000) + ":" + sn_i);
+
+            });
+            var numTooltips = 0;
+            sortIndex = sortIndex.sort().reverse();
+            sortIndex.forEach(function (value, i) {
+              if (numTooltips < 20) {
+                var val = parseFloat(value.split(":")[0]) - 10000000;
+                if (val >= 1) {
+                  numTooltips += 1;
+                  var d_index = parseInt(value.split(":")[1]);
+                  var val_frmt = w.globals.ttVal.formatter(val, { series, seriesIndex, d_index, w });
+                  var s_name = w.globals.seriesNames[d_index];
+
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                    '<span class="apexcharts-tooltip-marker" style="width:15px;height:10px;background-color:' + w.globals.colors[d_index] + '">' + '</span>' +
+                    '<span class="apexcharts-tooltip-text" style="width:100%">' + s_name + '</span>' +
+                    '<span style="width:50px;text-align:right;display:block;">' + val_frmt + '</span>' +
+                    '</div>'; 
+                }
+              } else if (numTooltips == 20) {
+                  numTooltips += 1;
+                  str_html += '<div class="arrow_box apexcharts-tooltip-series-group" style="display:flex">' +
+                    '<span class="apexcharts-tooltip-text" style="width:100%">* Limited to top 20</span>' +
+                    '</div>';
+              }
+              
+            });
+            str_html += '</div>';
+
+            return str_html;
+          },
+
+          style: {
+            fontSize: '9px',
+            fontFamily: "Verdana"
+          },
+
+          y: {
+
+            formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+              if (Number(value)> 1000000) {
+                return (Number(value)/ 1000000).toFixed(2) + "M";
+              } else {
+                return (Number(value)/ 1000).toFixed(2) + "k";
+              }
+            }
+          }
+        },
+        fill: {
+          type: 'solid'
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 0,
+        },
+        series: series,
+
+        xaxis: {
+          tooltip: {
+            enabled: false
+          },
+          type: 'datetime',
+          categories: dates
+        },
+        yaxis: {
+          show: true,
+          labels: {
+            formatter: function (value) {
+              if (Number(value)> 1000000) {
+                return (Number(value)/ 1000000).toFixed(0) + "M";
+              } else {
+                return (Number(value)/ 1000).toFixed(0) + "k";
+              }
+            }
+          }
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector(element_selector), options);
+
+        chart.render();
+        chart_list.push(element_selector);
+
+        dfjs.DataFrame.fromCSV(data_url).then(df => {
+          df.listColumns().forEach(column => {
+            if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+              columns.push(column);
+              series.push(
+                { name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
+              );
+            };
+          }
+          );
+
+          dates = df.toArray("date");
+
+          colors_columns = get_color_columns(columns, variants);
+
+          chart.updateOptions (
+            {
+              series: series,
+              colors: colors_columns,
+              noData: {
+                text: "No Data",
+              },
+              xaxis: {
+                tooltip: {
+                  enabled: false
+                },
+                type: 'datetime',
+                categories: dates
+              },
+            }, 
+            true, false, true
+
+          );
+
+        });
+
+    }
+
+    function load_charts() {
+	  
+      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases_r.csv').then(df => {
+
+        df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+        df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
+      
+        // console.log(df_dates);
+
+        // df_cases.show();
+        
+        locations = [...new Set(df.toArray("location"))];
+        
+        series = [];
+
+        var content_table = document.querySelector("#content");
+        var i = 0;
+        var row;
+        locations.forEach(location => {
+          // console.log(location);
+          tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
+          
+          if (tot_cases > 50) {
+
+            if (i % 2 == 0) {
+              row = content_table.insertRow();
+            }
+            var cell = row.insertCell();
+            cell.style = "width: 50%;";
+            var container = document.createElement("div");
+            container.id = "location_" + i;
+            cell.appendChild(container);
+
+            df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
+            df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
+            
+            data = []
+            d = 0;
+            df_dates.forEach(df_date => {
+              dci = df_cases_dates.indexOf(df_date);
+              dcv = 0;
+              if (dci > -1) {
+                dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
+              }
+              data.push(
+                { x: df_date, y: dcv}
+              );
+              d +=1
+            });
+
+            series.push(
+                { name: location, data: data }
+              );
+
+            i += 1;
+          }
+        });
+
+        // console.log(series);
+
+        var options = {
+            series: series,
+            chart: {
+            height: 5550,
+            type: 'heatmap',
+            redrawOnParentResize: true,
+            redrawOnWindowResize: true,
+            animations: { enabled: false },
+            stroke: {
+              width: 1
+            },
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false,
+            },
+          },
+          yaxis:{
+            show: true,
+            showAlways: true,
+            opposite: true,
+            reversed: true,
+            floating: false,
+            labels:{
+              show:true,
+              align:"left",
+              offsetY: 0,
+              rotate: 40,
+            },
+            axisBorder: {
+              show: true,
+              color: '#78909C',
+              offsetX: 0,
+              offsetY: 00
+            },
+            axisTicks: {
+              show: true,
+              borderType: 'solid',
+              color: '#78909C',
+              width: 6,
+              offsetX: 0,
+              offsetY: 00
+            },
+              
+          },
+          plotOptions: {
+            heatmap: {
+              shadeIntensity: 0.5,
+              radius: 0,
+              useFillColorAsStroke: true,
+              colorScale: {
+                ranges: [
+                  {
+                    from: 0,
+                    to: 0.1,
+                    name: 'low',
+                    color: '#A0CE9D'
+                  },
+                  {
+                    from: 0.1,
+                    to: 0.99,
+                    name: 'warn',
+                    color: '#F9E7AF'
+                  },
+                  {
+                    from: 1,
+                    to: 1.49,
+                    name: 'danger',
+                    color: '#F9A74F'
+                  },
+                  {
+                    from: 1.5,
+                    to: 1.99,
+                    name: 'medium',
+                    color: '#CAA84B'
+                  },
+                  {
+                    from: 2,
+                    to: 3.99,
+                    name: 'high',
+                    color: '#F5181B'
+                  },
+                  {
+                    from: 4,
+                    to: 5.99,
+                    name: 'very high',
+                    color: '#FC28A0'
+                  },
+                  {
+                    from: 6,
+                    to: 9,
+                    name: 'critical',
+                    color: '#0B090A'
+                  },
+                ]
+              },
+            },
+          },
+          dataLabels: {
+            enabled: false
+          },
+          
+          title: {
+            text: "World Heat Map",
+            align: 'center',
+            margi: 0,
+            offsetY: 20,
+            style: {
+              fontSize: '16px',
+              fontFamily: "Verdana"
+            },
+          },
+        };
+
+        var chart = new ApexCharts(document.querySelector("#world"), options);
+        chart.render();
+
+      });
+    }
+
+  </script>
+
+  <div style="margin: 20px;">
+    <h1>SARS-COV-2 CALAMARDO</h1>
+
+    <div style="margin: 20px;">
+      CALAMARDO = CALculation And MAcroevolution of Risk DOminance<br/>
+      The name and codename is actually a joke, it's just an internal name (from a spongebob fanatic)<br/><br/>
+      This page is an exercise to try to obtain a prediction and a calculation of the risk level for each country.<br />
+      <br/>
+      How does the tool do it?<br/><br/>
+      Take into consideration the behavior of the Re, as well as the cases detected in the last weeks to obtain a classification.<br/>
+      The tool was created primarily as a traffic light, to predict and warn about events that happen on an inadvertent scale.<br/>
+      The algorithm tries to detect when a wave is forming, they are warned as a warning and danger, after the cases are triggered they are classified as medium, high, very high and critical.<br/>
+      In itself, the important thing about the algorithm is that it indicates when an equilibrium stage was actually achieved, although there are still high cases, it detects the appropriate descent behavior.<br/>
+      The concept of critic was simply taken as those cases in which the cases have been the highest in the pandemic for every one hundred thousand inhabitants.<br/>
+      For the last value in the series, try to extrapolate a possible situation, moderately upwards based on the data that you have available at the time.<br/>
+      <br />
+      <b>Last update: </b><span id="last_update"></span><br>
+      <br /><br />
+      <!--
+      <table><tr><td><a class="button" href="./">Sequences</a></td><td><a class="button_active" href="fit">Fitting cases to sequences</a></td><td><a class="button" href="about">About</a></td></tr></table><br>
+      -->
+      <br />
+    </div>
+    
+  </div>
+
+
+  <table id="content" style="width: 100%;border-spacing:30px 10px;">
+    <tr>
+      <td colspan=2 align="center">
+        <div id="world"></div>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    start();
+  </script>
+  </body>
+
+</html>
