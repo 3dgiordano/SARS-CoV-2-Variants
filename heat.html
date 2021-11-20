@@ -483,6 +483,9 @@
           tooltip: {
             x: {
               show: true,
+              formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
+                return value + " + 14days";
+              }
             },
             marker: {
               show: false,
