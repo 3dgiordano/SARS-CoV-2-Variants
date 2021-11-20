@@ -569,7 +569,10 @@ def main():
         days = (datetime.now() - x["date"]).days
         if days < 14:
             if prev_r >= 0.8 and x["r"] >= 1:
-                df_cases_r_data.loc[[x.name], "x"] = (df_cases_r_data.loc[[x.name], "x"] / days) * 7
+                # xp = df_cases_r_data.loc[[x.name - 1] , "x"].item()
+                xpp = (df_cases_r_data.loc[[x.name], "x"].item() / days) * 14
+                if xpp < df_cases_r_data.loc[[x.name], "x"].item():
+                    df_cases_r_data.loc[[x.name], "x"] = (xpp + df_cases_r_data.loc[[x.name], "x"].item()) / 2
 
     df_cases_r_data.apply(row_x, axis=1)
 
