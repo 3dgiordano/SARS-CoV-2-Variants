@@ -375,6 +375,25 @@
               enabled: false,
             },
           },
+          xaxis:{
+            show: true,
+            position: "top",
+            axisTicks: {
+              show: true,
+            },
+            tooltip: {
+              enabled: false
+            },
+            labels:{
+              show:true,
+              offsetY: -1,
+              rotate: 0,
+              trim: false,
+              style: {
+                fontSize: 9,
+              }
+            },
+          },
           yaxis:{
             show: true,
             showAlways: true,
@@ -386,6 +405,8 @@
               align:"left",
               offsetY: 0,
               rotate: 40,
+              trim: true,
+              maxWidth: 100,
             },
             axisBorder: {
               show: true,
@@ -462,6 +483,9 @@
           tooltip: {
             x: {
               show: true,
+            },
+            marker: {
+              show: false,
             },
           },
           title: {
