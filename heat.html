@@ -301,92 +301,59 @@
 	  
       dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases_r.csv').then(df => {
 
-        df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
         df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
-      
-        // console.log(df_dates);
-
-        // df_cases.show();
-        
-        locations = [...new Set(df.toArray("location"))];
         
         series = [];
 
-        var content_table = document.querySelector("#content");
-        var i = 0;
-        var row;
-        locations.forEach(location => {
-          // console.log(location);
-          tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
-          
-          if (tot_cases > 50) {
-
-            if (i % 2 == 0) {
-              row = content_table.insertRow();
-            }
-            var cell = row.insertCell();
-            cell.style = "width: 50%;";
-            var container = document.createElement("div");
-            container.id = "location_" + i;
-            cell.appendChild(container);
-
-            df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
-            df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
-            
-            data = []
-            d = 0;
-            df_dates.forEach(df_date => {
-              dci = df_cases_dates.indexOf(df_date);
-              dcv = 0;
-              if (dci > -1) {
-                dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
-              }
-              data.push(
-                { x: df_date, y: dcv}
-              );
-              d +=1
-            });
-
-            series.push(
-                { name: location, data: data }
-              );
-
-            i += 1;
-          }
-        });
-
-        // console.log(series);
-
         var options = {
             series: series,
+            noData: {
+              text: "Loading...",
+            },
             chart: {
-            height: 5550,
-            type: 'heatmap',
-            redrawOnParentResize: true,
-            redrawOnWindowResize: true,
-            animations: { enabled: false },
-            stroke: {
-              width: 1
+              height: 150,
+              type: 'heatmap',
+              redrawOnParentResize: true,
+              redrawOnWindowResize: true,
+              animations: { enabled: false },
+              stroke: {
+                width: 1
+              },
+              toolbar: {
+                show: false,
+              },
+              zoom: {
+                enabled: false,
+              },
             },
-            toolbar: {
-              show: false,
-            },
-            zoom: {
-              enabled: false,
-            },
-          },
+          legend: {
+              offsetY: -5,
+          }, 
           xaxis:{
             show: true,
+            type: 'datetime',
+            categories: df_dates,
             position: "top",
+            axisBorder: {
+              show: true,
+              color: '#78909C',
+              offsetX: 0,
+              offsetY: 00
+            },
             axisTicks: {
               show: true,
+              borderType: 'solid',
+              color: '#78909C',
+              width: 6,
+              offsetX: 0,
+              offsetY: 00
             },
             tooltip: {
               enabled: false
             },
             labels:{
               show:true,
-              offsetY: -1,
+              offsetY: -5,
               rotate: 0,
               trim: false,
               style: {
@@ -440,7 +407,7 @@
                   {
                     from: 0.1,
                     to: 0.99,
-                    name: 'warn',
+                    name: 'warning',
                     color: '#F9E7AF'
                   },
                   {
@@ -484,7 +451,7 @@
             x: {
               show: true,
               formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
-                return value + " + 14days";
+                return (new Date(value)).toISOString().split("T")[0] + " + 14days";
               }
             },
             marker: {
@@ -495,7 +462,7 @@
             text: "World Heat Map",
             align: 'center',
             margi: 0,
-            offsetY: 20,
+            offsetY: -5,
             style: {
               fontSize: '16px',
               fontFamily: "Verdana"
@@ -505,6 +472,55 @@
 
         var chart = new ApexCharts(document.querySelector("#world"), options);
         chart.render();
+                
+        df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+        locations = [...new Set(df.toArray("location"))];
+
+        var i = 0;
+        var row;
+        locations.forEach(location => {
+          // console.log(location);
+          tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
+          
+          if (tot_cases > 50) {
+
+            df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
+            df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
+            
+            data = []
+            d = 0;
+            df_dates.forEach(df_date => {
+              dci = df_cases_dates.indexOf(df_date);
+              dcv = 0;
+              if (dci > -1) {
+                dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
+              }
+              data.push(
+                { x: df_date, y: dcv}
+              );
+              d +=1
+            });
+
+            series.push(
+                { name: location, data: data }
+              );
+
+            i += 1;
+          }
+        });
+
+        chart.updateOptions (
+            {
+              chart: {
+                height: 5550,
+              },
+              series: series,
+              noData: {
+                text: "No Data",
+              },
+            }, 
+            true, false, true
+          );
 
       });
     }
