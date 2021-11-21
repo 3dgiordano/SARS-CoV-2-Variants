@@ -101,6 +101,51 @@
       df_dates = [];
       series = [];
 
+      ranges = [
+                  {
+                    from: 0,
+                    to: 0.1,
+                    name: 'low [0 to 0.1]',
+                    color: '#A0CE9D'
+                  },
+                  {
+                    from: 0.1,
+                    to: 0.99,
+                    name: 'warning [1 to 0.99]',
+                    color: '#F9E7AF'
+                  },
+                  {
+                    from: 1,
+                    to: 1.49,
+                    name: 'danger [1 to 1.49]',
+                    color: '#F9A74F'
+                  },
+                  {
+                    from: 1.5,
+                    to: 1.99,
+                    name: 'medium [1.5 to 1.99]',
+                    color: '#CAA84B'
+                  },
+                  {
+                    from: 2,
+                    to: 3.99,
+                    name: 'high [2 to 3.99]',
+                    color: '#F5181B'
+                  },
+                  {
+                    from: 4,
+                    to: 5.99,
+                    name: 'very high [4 to 5.99]',
+                    color: '#FC28A0'
+                  },
+                  {
+                    from: 6,
+                    to: 9,
+                    name: 'critical [more than 6]',
+                    color: '#0B090A'
+                  },
+                ];
+
       var options = {
             series: series,
             noData: {
@@ -199,50 +244,7 @@
               radius: 0,
               useFillColorAsStroke: true,
               colorScale: {
-                ranges: [
-                  {
-                    from: 0,
-                    to: 0.1,
-                    name: 'low',
-                    color: '#A0CE9D'
-                  },
-                  {
-                    from: 0.1,
-                    to: 0.99,
-                    name: 'warning',
-                    color: '#F9E7AF'
-                  },
-                  {
-                    from: 1,
-                    to: 1.49,
-                    name: 'danger',
-                    color: '#F9A74F'
-                  },
-                  {
-                    from: 1.5,
-                    to: 1.99,
-                    name: 'medium',
-                    color: '#CAA84B'
-                  },
-                  {
-                    from: 2,
-                    to: 3.99,
-                    name: 'high',
-                    color: '#F5181B'
-                  },
-                  {
-                    from: 4,
-                    to: 5.99,
-                    name: 'very high',
-                    color: '#FC28A0'
-                  },
-                  {
-                    from: 6,
-                    to: 9,
-                    name: 'critical',
-                    color: '#0B090A'
-                  },
-                ]
+                ranges: ranges
               },
             },
           },
@@ -254,11 +256,27 @@
               show: true,
               formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
                 return (new Date(value)).toISOString().split("T")[0] + " + 14days";
-              }
+              },
+              marker: {
+                show: true,
+              },
             },
             marker: {
-              show: false,
+              show: true,
             },
+            y: {
+              formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                item_value = Number(series[seriesIndex][dataPointIndex]);
+                found = "Not found";
+                ranges.map((range, index) => {
+                  if (item_value >= range.from && item_value <= range.to) {
+                    found = item_value + " = " + range.name;
+                  }
+                })
+                return found;
+              }
+            }
+              
           },
           title: {
             text: "World Heat Map",
