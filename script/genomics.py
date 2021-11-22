@@ -96,7 +96,7 @@ def get_cases_r_data():
     if os.path.isfile(r_file):
         last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(r_file))).total_seconds()
     # keep the stored data temporarily for one hour
-    if not last_time or last_time > 3600:
+    if not last_time or last_time > 21600:
         r_df = pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
         r_df.to_csv(r_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
@@ -143,7 +143,7 @@ def get_location_data(location_id, location):
     if os.path.isfile(location_file):
         last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(location_file))).total_seconds()
     # keep the stored data temporarily for one hour
-    if not last_time or last_time > 3600:
+    if not last_time or last_time > 21600:
         json_data = get_url(
             f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
             f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=1024").read().decode('utf-8', 'replace')
@@ -522,11 +522,25 @@ def main():
         {'r': 'mean'}).reset_index()
 
     print("Merge cases")
-    df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'])
+    df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'], how='outer', sort=True)
+    df_cases_r_data["cases"] = df_cases_r_data["cases"].fillna(0)
+    df_cases_r_data["cases"] = pd.to_numeric(df_cases_r_data["cases"], downcast='integer')
+
+    # Fix border cases
+    def fix_row_x(r):
+
+        if pd.isnull(r["r"]):
+            if r["location"] == df_cases_r_data.iloc[r.name - 1]["location"] and not pd.isnull(df_cases_r_data.iloc[r.name - 1]["r"]):
+                df_cases_r_data.loc[[r.name], "r"] = df_cases_r_data.iloc[r.name - 1]["r"]
+            else:
+                df_cases_r_data.loc[[r.name], "r"] = 0.0
+
+    df_cases_r_data.apply(fix_row_x, axis=1)
 
     print("Merge location")
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_location_data, on=['location'])
-    df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
+    df_cases_r_data["population"] = df_cases_r_data["population"].fillna(0)
+    df_cases_r_data["population"] = df_cases_r_data["population"].astype(int)
 
     df_cases_r_data["cases_100k"] = round((df_cases_r_data["cases"] / df_cases_r_data["population"]) * 100000, 2)
 
@@ -537,11 +551,13 @@ def main():
     def row_x(x):
         prev_x = 0
         prev_r = 0
+        prev_cases = 0
         if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
             prev_x = df_cases_r_data.iloc[x.name - 1]["x"]
             prev_r = df_cases_r_data.iloc[x.name - 1]["r"]
+            prev_cases = df_cases_r_data.iloc[x.name - 1]["cases"]
 
-        if x["r"] >= 0.8:
+        if x["r"] >= 0.9:
             if prev_r == 0:
                 val_x = 0
             else:
@@ -557,7 +573,7 @@ def main():
                 val = 0
             df_cases_r_data.loc[[x.name], "x"] = val
         else:
-            if prev_r < 0.8:
+            if prev_r < 0.9:
                 val_x = prev_x
             else:
                 val_x = prev_x / 2
@@ -567,12 +583,21 @@ def main():
             df_cases_r_data.loc[[x.name], "x"] = val
 
         days = (datetime.now() - x["date"]).days
-        if days < 14:
-            if prev_r >= 0.8 and x["r"] >= 1:
-                # xp = df_cases_r_data.loc[[x.name - 1] , "x"].item()
-                xpp = (df_cases_r_data.loc[[x.name], "x"].item() / days) * 14
-                if xpp < df_cases_r_data.loc[[x.name], "x"].item():
-                    df_cases_r_data.loc[[x.name], "x"] = (xpp + df_cases_r_data.loc[[x.name], "x"].item()) / 2
+        if days < 0:
+            tot_days_data = (14 + days) - 1
+            pond = tot_days_data / 14
+            if x["cases"] > 0:
+                #print(tot_days_data)
+                p_cases = (x["cases"] * 14) / tot_days_data
+                #print( x["location"] + " " + str(x["cases"]) + " " + str(p_cases))
+                diff = p_cases / x["cases"]
+                #print(diff)
+                dif_z = p_cases / prev_cases
+                xpp = ((df_cases_r_data.loc[[x.name], "x"] * (1 + pond) ) * diff) * dif_z #.item() * 14 ) / (14 + days)
+                #if prev_r >= 0.8 and x["r"] >= 1 and xpp > df_cases_r_data.loc[[x.name], "x"].item():
+                #    df_cases_r_data.loc[[x.name], "x"] = xpp * x["r"]
+
+                df_cases_r_data.loc[[x.name], "x"] = xpp
 
     df_cases_r_data.apply(row_x, axis=1)
 
@@ -580,6 +605,8 @@ def main():
     df_cases_r_data["risk3"] = np.sqrt(np.sqrt(df_cases_r_data["risk2"]))
 
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.lt(0.5), 0)  # Clean lowers values
+
+    #df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
 
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
