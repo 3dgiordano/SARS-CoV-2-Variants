@@ -557,7 +557,7 @@ def main():
             prev_r = df_cases_r_data.iloc[x.name - 1]["r"]
             prev_cases = df_cases_r_data.iloc[x.name - 1]["cases"]
 
-        if x["r"] >= 0.9:
+        if x["r"] >= 0.85:
             if prev_r == 0:
                 val_x = 0
             else:
@@ -573,7 +573,7 @@ def main():
                 val = 0
             df_cases_r_data.loc[[x.name], "x"] = val
         else:
-            if prev_r < 0.9:
+            if prev_r < 0.85:
                 val_x = prev_x
             else:
                 val_x = prev_x / 2
