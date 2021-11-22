@@ -254,15 +254,11 @@
           tooltip: {
             x: {
               show: true,
-              formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
-                return (new Date(value)).toISOString().split("T")[0] + " + 14days";
+              formatter: function(value) {
+                v_date = new Date(value);
+                f_date = new Date(v_date - (( 3600 * 1000 * 24) * 13 )); 
+                return  f_date.toISOString().split("T")[0] + " to " + v_date.toISOString().split("T")[0];
               },
-              marker: {
-                show: true,
-              },
-            },
-            marker: {
-              show: true,
             },
             y: {
               formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
