@@ -125,14 +125,23 @@ def get_alias_map_sub_lineage(lineage_to_match):
 
 
 def get_locations():
-    response = get_url("https://api.outbreak.info/genomics/location?name=**")
-    json_data = response.read().decode('utf-8', 'replace')
-    loc_json = json.loads(json_data)
+    locations_file = f"../temp/locations_data.csv"
+    last_time = None
+    if os.path.isfile(locations_file):
+        last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(locations_file))).total_seconds()
+    # keep the stored data temporarily for one hour
+    if not last_time or last_time > 21600:
+        response = get_url("https://api.outbreak.info/genomics/location?name=**")
+        json_data = response.read().decode('utf-8', 'replace')
+        loc_json = json.loads(json_data)
 
-    loc_df = pd.json_normalize(loc_json["results"])
-    loc_df = loc_df[["country_id", "country"]].drop_duplicates()
-    loc_df = loc_df[loc_df["country_id"] != "None"]
-    loc_df = loc_df.sort_values(by=['country'])
+        loc_df = pd.json_normalize(loc_json["results"])
+        loc_df = loc_df[["country_id", "country"]].drop_duplicates()
+        loc_df = loc_df[loc_df["country_id"] != "None"]
+        loc_df = loc_df.sort_values(by=['country'])
+        loc_df.to_csv(locations_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    else:
+        loc_df = pd.read_csv(locations_file, quoting=csv.QUOTE_ALL, decimal=",")
 
     return loc_df
 
@@ -562,12 +571,17 @@ def main():
                 val_x = 0
             else:
                 if x["r"] >= 1:
-                    if x["r"] >= prev_r:
+                    if x["r"] >= prev_r and prev_x > 0:
                         val_x = prev_x / 3
                     else:
                         val_x = 0.5
                 else:
-                    val_x = 0.25
+                    if prev_r < 0.85:
+                        val_x = 0.25
+                    elif x["r"] >= 0.95:
+                        val_x = 0.15
+                    else:
+                        val_x = -(prev_x/3)
             val = val_x + prev_x
             if val < 0:
                 val = 0
@@ -576,7 +590,7 @@ def main():
             if prev_r < 0.85:
                 val_x = prev_x
             else:
-                val_x = prev_x / 2
+                val_x = prev_x / 1.5
             val = prev_x - val_x
             if val < 0:
                 val = 0
