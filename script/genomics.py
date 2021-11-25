@@ -157,9 +157,10 @@ def get_location_data(location_id, location):
     if not last_time or last_time > 21600:
         json_data = get_url(
             f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
-            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=1024").read().decode('utf-8', 'replace')
+            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=2048").read().decode('utf-8', 'replace')
         loc_df = pd.json_normalize(json.loads(json_data)["results"])
         loc_df["location"] = location
+        loc_df = loc_df.sort_values(['location', 'date', 'lineage'])
         loc_df.to_csv(location_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
         loc_df = pd.read_csv(location_file, quoting=csv.QUOTE_ALL, decimal=",")
