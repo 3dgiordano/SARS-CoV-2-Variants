@@ -8,6 +8,7 @@ from urllib.request import urlopen
 import math
 import numpy as np
 import pandas as pd
+from numpy import errstate, isneginf, array
 
 # Data Sources
 # https://outbreak.info/situation-reports/methods
@@ -27,6 +28,7 @@ lineage_map = {
     f"^A\\.27{t}": "A.27",
     f"^A\\.28{t}": "A.28",
     f"^AT\\.1{t}": "AT.1",
+    f"^B\\.1\\.1\\.529{t}": "B.1.1.529",
     f"^B\\.1\\.160{t}": "B.1.160 - 20A/EU2",
     f"^B\\.1\\.177{t}": "B.1.177 - 20E/EU1",
     f"^B\\.1\\.221{t}": "B.1.221 - 20A/S:98F",
@@ -539,7 +541,8 @@ def main():
     def fix_row_x(r):
 
         if pd.isnull(r["r"]):
-            if r["location"] == df_cases_r_data.iloc[r.name - 1]["location"] and not pd.isnull(df_cases_r_data.iloc[r.name - 1]["r"]):
+            if r["location"] == df_cases_r_data.iloc[r.name - 1]["location"] and not pd.isnull(
+                    df_cases_r_data.iloc[r.name - 1]["r"]):
                 df_cases_r_data.loc[[r.name], "r"] = df_cases_r_data.iloc[r.name - 1]["r"]
             else:
                 df_cases_r_data.loc[[r.name], "r"] = 0.0
@@ -551,6 +554,16 @@ def main():
     df_cases_r_data["population"] = df_cases_r_data["population"].fillna(0)
     df_cases_r_data["population"] = df_cases_r_data["population"].astype(int)
 
+    def pro_cases(x):
+        if x["cases"] > 0:
+            days = (datetime.now() - x["date"]).days
+            if days < 0:
+                tot_days_data = (14 + days) - 1
+                p_cases = round((x["cases"] * 14) / tot_days_data, 0)
+                df_cases_r_data.loc[[x.name], "cases"] = p_cases
+
+    df_cases_r_data.apply(pro_cases, axis=1)
+
     df_cases_r_data["cases_100k"] = round((df_cases_r_data["cases"] / df_cases_r_data["population"]) * 100000, 2)
 
     df_cases_r_data["risk"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["r"] + 1)) / 250, 2)
@@ -561,10 +574,13 @@ def main():
         prev_x = 0
         prev_r = 0
         prev_cases = 0
+        inc_cases = 1
         if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
             prev_x = df_cases_r_data.iloc[x.name - 1]["x"]
             prev_r = df_cases_r_data.iloc[x.name - 1]["r"]
             prev_cases = df_cases_r_data.iloc[x.name - 1]["cases"]
+            if prev_cases > 0:
+                inc_cases = (x["cases"] / prev_cases)
 
         if x["r"] >= 0.85:
             if prev_r == 0:
@@ -581,7 +597,7 @@ def main():
                     elif x["r"] >= 0.95:
                         val_x = 0.15
                     else:
-                        val_x = -(prev_x/3)
+                        val_x = -(prev_x / 3)
             val = val_x + prev_x
             if val < 0:
                 val = 0
@@ -592,35 +608,48 @@ def main():
             else:
                 val_x = prev_x / 1.5
             val = prev_x - val_x
+
             if val < 0:
                 val = 0
             df_cases_r_data.loc[[x.name], "x"] = val
 
-        days = (datetime.now() - x["date"]).days
-        if days < 0:
-            tot_days_data = (14 + days) - 1
-            pond = tot_days_data / 14
-            if x["cases"] > 0:
-                #print(tot_days_data)
-                p_cases = (x["cases"] * 14) / tot_days_data
-                #print( x["location"] + " " + str(x["cases"]) + " " + str(p_cases))
-                diff = p_cases / x["cases"]
-                #print(diff)
-                dif_z = p_cases / prev_cases
-                xpp = ((df_cases_r_data.loc[[x.name], "x"] * (1 + pond) ) * diff) * dif_z #.item() * 14 ) / (14 + days)
-                #if prev_r >= 0.8 and x["r"] >= 1 and xpp > df_cases_r_data.loc[[x.name], "x"].item():
-                #    df_cases_r_data.loc[[x.name], "x"] = xpp * x["r"]
+        # days = (datetime.now() - x["date"]).days
+        # if days < 0:
+        #    tot_days_data = (14 + days) - 1
+        #    pond = tot_days_data / 14
+        #    if x["cases"] > 0:
 
-                df_cases_r_data.loc[[x.name], "x"] = xpp
+        #        p_cases = (x["cases"] * 14) / tot_days_data
+        #        diff = p_cases / x["cases"]
+        #        dif_z = p_cases / prev_cases
+        #        if dif_z > 1:
+        #            dif_z = dif_z * 2
+        #        else:
+        #            dif_z = dif_z / 2
+        #        xpp = ((df_cases_r_data.loc[[x.name], "x"].item() * (1 + pond)) * diff) * dif_z  # .item() * 14 ) / (14 + days)
+
+        #        print(f"{str(x['location'])} X:{str(df_cases_r_data.loc[[x.name], 'x'].item())} C:{str(x['cases'])} PC:{str(p_cases)} TD:{tot_days_data} PO:{pond} DF:{diff} DZ:{dif_z} XPP:{str(xpp)}")
+
+        #        # if prev_r >= 0.8 and x["r"] >= 1 and xpp > df_cases_r_data.loc[[x.name], "x"].item():
+        #        #     df_cases_r_data.loc[[x.name], "x"] = xpp * x["r"]
+
+        #        df_cases_r_data.loc[[x.name], "x"] = xpp
+
+        #        df_cases_r_data.loc[[x.name], "cases_100k"] = round((p_cases / x["population"]) * 100000, 2)
 
     df_cases_r_data.apply(row_x, axis=1)
 
-    df_cases_r_data["risk2"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["x"])) / 50, 2)
+    with errstate(divide='ignore'):
+        df_cases_r_data["riskX"] = np.exp(df_cases_r_data["cases_100k"] / 1000)
+        df_cases_r_data.riskX = df_cases_r_data.riskX.mask(df_cases_r_data.riskX.lt(0.0), 0)  # Clean negatives values
+
+    df_cases_r_data["risk2"] = round(
+        (((df_cases_r_data["cases_100k"] * df_cases_r_data["riskX"]) * (1 + df_cases_r_data["x"])) / 50), 2)
     df_cases_r_data["risk3"] = np.sqrt(np.sqrt(df_cases_r_data["risk2"]))
 
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.lt(0.5), 0)  # Clean lowers values
 
-    #df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
+    # df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
 
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
