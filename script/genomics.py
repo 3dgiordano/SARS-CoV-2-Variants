@@ -325,7 +325,7 @@ def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
 
 
 def ecdc_filter_values(table):
-    return list(set([x.split("+")[0].strip() for x in table['Lineage + additional mutations'].tolist()]))
+    return list(set([str(x).split("+")[0].split("(")[0].strip() for x in table['Lineage + additional mutations'].tolist()]))
 
 
 def get_ecdc_variants():
@@ -335,6 +335,9 @@ def get_ecdc_variants():
 
     ecdc_body = urlopen(Request(ecdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode(
         'UTF-8')
+
+    # Fix errors in HTML
+    ecdc_body = re.sub(r"<td>\s+<table>\s+<tbody>\s+<tr>|</tr>\s+</tbody>\s+</table>\s+</td>", "", ecdc_body)
 
     ecdc_tables = pd.read_html(ecdc_body, match=r'WHO\slabel')
 
