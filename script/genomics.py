@@ -231,6 +231,7 @@ def get_who_variants():
 
     # Workaround
     who_body = who_body.replace("#", "")
+    who_body = who_body.replace("Omicron*", "Omicron")
     who_body = who_body.replace('<sup>&sect;</sup>', "")
     # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
     # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
