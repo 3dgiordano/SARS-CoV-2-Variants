@@ -522,7 +522,7 @@ def main():
 
     # Clean to only needed data
     df_cases_location_data = df_cases_location_data[
-        df_cases_location_data.columns.intersection(["location", "population"])]
+        df_cases_location_data.columns.intersection(["continent", "location", "population"])]
 
     print("get cases r")
     df_cases_r_data = get_cases_r_data()
