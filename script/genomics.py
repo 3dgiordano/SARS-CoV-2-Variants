@@ -665,7 +665,7 @@ def main():
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    return
+    # return
 
     print("Map lineage...")
     data = get_lineage_map()
