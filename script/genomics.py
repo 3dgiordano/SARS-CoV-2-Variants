@@ -326,7 +326,8 @@ def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
 
 
 def ecdc_filter_values(table):
-    return list(set([str(x).split("+")[0].split("(")[0].strip() for x in table['Lineage + additional mutations'].tolist()]))
+    return list(
+        set([str(x).split("+")[0].split("(")[0].strip() for x in table['Lineage + additional mutations'].tolist()]))
 
 
 def get_ecdc_variants():
@@ -472,7 +473,8 @@ def export_variants(main_lineage_map):
 def main():
     locations_list = []
 
-    locations = get_locations().to_dict('records')
+    df_loc = get_locations()
+    locations = df_loc.to_dict('records')
 
     df_cases_data = get_cases_data()
 
@@ -485,7 +487,11 @@ def main():
 
     df_cases_data.cases = df_cases_data.cases.mask(df_cases_data.cases.lt(0), 0)  # Remove negative values
 
+    iso_list = df_loc[df_loc.columns.intersection(["country_id", "country"])]
+    iso_list = iso_list.rename(columns={'country_id': 'iso', 'country': 'location'})
+
     for location in locations:
+        # print(location)
         # if location["country"] != "Uruguay":
         #     continue
 
@@ -497,7 +503,7 @@ def main():
         df.drop(['prevalence'], axis=1, inplace=True)
 
         df = df.reindex(
-            columns=['location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
+            columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
 
         locations_list.append(df)
 
@@ -538,6 +544,7 @@ def main():
 
     print("Merge cases")
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'], how='outer', sort=True)
+    df_cases_r_data = pd.merge(df_cases_r_data, iso_list, on=['location'], how='outer', sort=False)
     df_cases_r_data["cases"] = df_cases_r_data["cases"].fillna(0)
     df_cases_r_data["cases"] = pd.to_numeric(df_cases_r_data["cases"], downcast='integer')
 
@@ -658,7 +665,7 @@ def main():
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    # return
+    return
 
     print("Map lineage...")
     data = get_lineage_map()
