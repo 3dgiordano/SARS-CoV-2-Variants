@@ -215,7 +215,7 @@ def who_to_dict(data, who_type):
 
 
 def who_expand(data):
-    return data.assign(pango=data['Pango lineage*'].str.split()).explode('pango')
+    return data.assign(pango=data['Pango lineage'].str.split()).explode('pango')
 
 
 def get_who_variants():
@@ -233,6 +233,8 @@ def get_who_variants():
     who_body = who_body.replace("#", "")
     who_body = who_body.replace("Omicron*", "Omicron")
     who_body = who_body.replace('<sup>&sect;</sup>', "")
+    who_body = who_body.replace("&bull;", "")
+    who_body = who_body.replace("lineage*", "lineage")
     # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
     # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
 
