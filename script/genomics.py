@@ -601,16 +601,20 @@ def main():
             else:
                 if x["r"] >= 1:
                     if x["r"] >= prev_r and prev_x > 0:
-                        val_x = prev_x / 3
+                        val_x = prev_x / 4
                     else:
                         val_x = 0.5
                 else:
-                    if prev_r < 0.85:
-                        val_x = 0.25
-                    elif x["r"] >= 0.95:
-                        val_x = 0.15
+                    if x["r"] >= 0.95:
+                        if prev_r < 0.85:
+                            val_x = 0.15
+                        else:
+                            val_x = 0.05
                     else:
-                        val_x = -(prev_x / 3)
+                        if prev_r < 0.85:
+                            val_x = 0.05
+                        else:
+                            val_x = -(prev_x / 1.5)
             val = val_x + prev_x
             if val < 0:
                 val = 0
@@ -667,7 +671,7 @@ def main():
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    # return
+    return
 
     print("Map lineage...")
     data = get_lineage_map()
