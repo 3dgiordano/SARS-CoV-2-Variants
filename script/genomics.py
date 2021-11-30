@@ -673,6 +673,78 @@ def main():
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    data_date_trend = sorted(list(set(df_cases_r_data["date"])))[-2:]
+    df_cases_r_data_trend = df_cases_r_data.loc[df_cases_r_data["date"] >= data_date_trend[0]]
+
+    df_cases_r_data_trend_pivot = df_cases_r_data_trend.pivot(index='location', columns='date',
+                                                              values='risk3').reset_index()
+    df_cases_r_data_trend_pivot.columns.name = None
+
+    df_cases_r_data_trend_pivot = df_cases_r_data_trend_pivot.rename(
+        columns={data_date_trend[0]: 'start', data_date_trend[1]: 'end'})
+
+    df_cases_r_data_trend_pivot = df_cases_r_data_trend_pivot.dropna(0)
+
+    # df_continents = df_cases_location_data[df_cases_location_data.columns.intersection(["continent", "location"])]
+
+    df_cases_r_data_trend_pivot = pd.merge(df_cases_location_data, df_cases_r_data_trend_pivot, on=['location'])
+
+    ranges = [
+        {
+            "from": 0,
+            "to": 0.0999999999,
+            "name": 'low [0 to 0.09]',
+            "color": '#A0CE9D'
+        },
+        {
+            "from": 0.1,
+            "to": 0.9999999999,
+            "name": 'warning [0.1 to 0.99]',
+            "color": '#F9E7AF'
+        },
+        {
+            "from": 1,
+            "to": 1.4999999999,
+            "name": 'caution [1 to 1.49]',
+            "color": '#F9A74F'
+        },
+        {
+            "from": 1.5,
+            "to": 1.9999999999,
+            "name": 'to risky wave [1.5 to 1.99]',
+            "color": '#CAA84B'
+        },
+        {
+            "from": 2,
+            "to": 3.9999999999,
+            "name": 'high wave [2 to 3.99]',
+            "color": '#F5181B'
+        },
+        {
+            "from": 4,
+            "to": 5.9999999999,
+            "name": 'very high wave [4 to 5.99]',
+            "color": '#FC28A0'
+        },
+        {
+            "from": 6,
+            "to": 12,
+            "name": 'critical wave [more than 6]',
+            "color": '#0B090A'
+        },
+    ]
+    df_cases_r_data_trend_pivot["range"] = ""
+
+    def range_apply(x):
+        for r in ranges:
+            if r["from"] <= x["end"] <= r["to"]:
+                df_cases_r_data_trend_pivot.loc[[x.name], "range"] = r["name"]
+
+    df_cases_r_data_trend_pivot.apply(range_apply, axis=1)
+
+    print("Save cases_r_trend.csv...")
+    df_cases_r_data_trend_pivot.to_csv("../data/cases_r_trend.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
     # return
 
     print("Map lineage...")
