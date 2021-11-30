@@ -666,6 +666,8 @@ def main():
 
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.lt(0.5), 0)  # Clean lowers values
 
+    df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.gt(12), 12)  # Force upper values
+
     # df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
 
     print("Save cases_r.csv...")
