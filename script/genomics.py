@@ -1,8 +1,10 @@
 import csv
 import json
+import multiprocessing
 import os
 import re
 from datetime import datetime, timedelta
+from multiprocessing import Pool, freeze_support
 from urllib.request import urlopen
 
 import math
@@ -472,6 +474,19 @@ def export_variants(main_lineage_map):
         quoting=csv.QUOTE_ALL, decimal=",")
 
 
+def get_loc_data(locat):
+    print(f"Location: {locat['country']}")
+    df_loc = get_location_data(locat["country_id"], locat["country"])
+    df_loc.rename(
+        columns={'lineage': 'variant', 'prevalence_rolling': 'perc_sequences', 'total_count': 'num_sequences_total',
+                 'lineage_count': 'num_sequences'}, inplace=True)
+    df_loc.drop(['prevalence'], axis=1, inplace=True)
+
+    df_loc = df_loc.reindex(
+        columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
+    return df_loc
+
+
 def main():
     locations_list = []
 
@@ -492,22 +507,10 @@ def main():
     iso_list = df_loc[df_loc.columns.intersection(["country_id", "country"])]
     iso_list = iso_list.rename(columns={'country_id': 'iso', 'country': 'location'})
 
-    for location in locations:
-        # print(location)
-        # if location["country"] != "Uruguay":
-        #     continue
+    pool = multiprocessing.Pool()
 
-        print(f"Location: {location['country']}")
-        df = get_location_data(location["country_id"], location["country"])
-        df.rename(
-            columns={'lineage': 'variant', 'prevalence_rolling': 'perc_sequences', 'total_count': 'num_sequences_total',
-                     'lineage_count': 'num_sequences'}, inplace=True)
-        df.drop(['prevalence'], axis=1, inplace=True)
-
-        df = df.reindex(
-            columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
-
-        locations_list.append(df)
+    with Pool(5) as p:
+        locations_list += p.map(get_loc_data, locations)
 
     print("Create location list...")
     df = pd.concat(locations_list)
@@ -900,4 +903,6 @@ def main():
     print("End.")
 
 
-main()
+if __name__ == '__main__':
+    freeze_support()
+    main()
