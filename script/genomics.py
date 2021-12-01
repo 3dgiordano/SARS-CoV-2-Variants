@@ -734,11 +734,17 @@ def main():
         },
     ]
     df_cases_r_data_trend_pivot["range"] = ""
+    df_cases_r_data_trend_pivot["cases_100k"] = ""
 
     def range_apply(x):
         for r in ranges:
             if r["from"] <= x["end"] <= r["to"]:
                 df_cases_r_data_trend_pivot.loc[[x.name], "range"] = r["name"]
+
+        c100k = df_cases_r_data.loc[
+            (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
+            "cases_100k"].item()
+        df_cases_r_data_trend_pivot.loc[[x.name], "cases_100k"] = c100k
 
     df_cases_r_data_trend_pivot.apply(range_apply, axis=1)
 
