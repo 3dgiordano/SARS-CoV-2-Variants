@@ -88,10 +88,10 @@ def get_url(url):
 def get_cases_data():
     cd = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
     # Clean data
-    #cd = cd.loc[~cd["location"].isin(
+    # cd = cd.loc[~cd["location"].isin(
     #    ["Summer Olympics 2020", "European Union", "North America", "Asia", "Europe", "Low income", "South America",
     #     "International", "Upper middle income", "High income", "World", "Lower middle income", "Africa", "Oceania"]
-    #)]
+    # )]
     return cd
 
 
@@ -150,10 +150,11 @@ def get_locations():
 
         def ren_l(l):
             new_l = l["country"].replace("Czech Republic", "Czechia") \
-                .replace("Democratic Republic of the Congo", "Democratic Republic of Congo") \
+                .replace("Democratic Congo", "Democratic Republic of the Congo") \
                 .replace("Côte d'Ivoire", "Cote d'Ivoire") \
                 .replace("Republic of Congo", "Congo") \
-                .replace("Swaziland", "Eswatini")
+                .replace("Swaziland", "Eswatini") \
+                .replace("Macedonia", "North Macedonia")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -535,13 +536,12 @@ def main():
         {'iso': 'CIV', 'location': "Cote d'Ivoire"},
         {'iso': 'ERI', 'location': 'Eritrea'},
         {'iso': 'SWZ', 'location': 'Eswatini'},
-        {'iso': 'MK', 'location': 'North Macedonia'},
         {'iso': 'SMR', 'location': 'San Marino'},
-        {'iso': 'MTN', 'location': 'Mauritania'},
+        {'iso': 'MRT', 'location': 'Mauritania'},
         {'iso': 'YEM', 'location': 'Yemen'},
-        {'iso': 'ST', 'location': 'Sao Tome and Principe'},
+        {'iso': 'STP', 'location': 'Sao Tome and Principe'},
         {'iso': 'NIC', 'location': 'Nicaragua'},
-        {'iso': 'SY', 'location': 'Syria'},
+        {'iso': 'SYR', 'location': 'Syria'},
         {'iso': 'TZA', 'location': 'Tanzania'},
         {'iso': 'TJK', 'location': 'Tajikistan'},
         {'iso': 'LAO', 'location': 'Laos'},
@@ -557,11 +557,20 @@ def main():
     for to_add in add_iso_dict:
         if len(iso_list[iso_list["iso"] == to_add["iso"]]) == 0:
             iso_list = iso_list.append(to_add, ignore_index=True)
-    # locs = iso_list["location"].tolist()
-    # cases_locations = df_cases_data["location"].tolist()
 
-    # print(set(cases_locations).difference(locs))
-    # print(set(locs).difference(cases_locations))
+    locs = iso_list["location"].tolist()
+    cases_locations = df_cases_data["location"].tolist()
+
+    print(set(cases_locations).difference(locs))
+    print(set(locs).difference(cases_locations))
+
+    # Remap the outbreak.info code to iso code of some countries
+    def ren_to_iso(l):
+        li = l["iso"].replace("XKO", "XKX")
+        if li != l["iso"]:
+            iso_list.loc[[l.name], "iso"] = li
+
+    iso_list.apply(ren_to_iso, axis=1)
 
     with Pool(5) as p:
         locations_list += p.map(get_loc_data, locations)
