@@ -566,7 +566,7 @@ def main():
 
     # Remap the outbreak.info code to iso code of some countries
     def ren_to_iso(l):
-        li = l["iso"].replace("XKO", "XKX")
+        li = l["iso"].replace("XKO", "KSV")
         if li != l["iso"]:
             iso_list.loc[[l.name], "iso"] = li
 
