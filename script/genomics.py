@@ -86,7 +86,13 @@ def get_url(url):
 
 
 def get_cases_data():
-    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
+    cd = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/full_data.csv")
+    # Clean data
+    #cd = cd.loc[~cd["location"].isin(
+    #    ["Summer Olympics 2020", "European Union", "North America", "Asia", "Europe", "Low income", "South America",
+    #     "International", "Upper middle income", "High income", "World", "Lower middle income", "Africa", "Oceania"]
+    #)]
+    return cd
 
 
 def get_locations_data():
@@ -141,7 +147,20 @@ def get_locations():
         loc_df = pd.json_normalize(loc_json["results"])
         loc_df = loc_df[["country_id", "country"]].drop_duplicates()
         loc_df = loc_df[loc_df["country_id"] != "None"]
+
+        def ren_l(l):
+            new_l = l["country"].replace("Czech Republic", "Czechia") \
+                .replace("Democratic Republic of the Congo", "Democratic Republic of Congo") \
+                .replace("Côte d'Ivoire", "Cote d'Ivoire") \
+                .replace("Republic of Congo", "Congo") \
+                .replace("Swaziland", "Eswatini")
+            if l["country"] != new_l:
+                loc_df.loc[[l.name], "country"] = new_l
+
+        loc_df.apply(ren_l, axis=1)
+
         loc_df = loc_df.sort_values(by=['country'])
+
         loc_df.to_csv(locations_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
         loc_df = pd.read_csv(locations_file, quoting=csv.QUOTE_ALL, decimal=",")
@@ -475,15 +494,18 @@ def export_variants(main_lineage_map):
 
 
 def get_loc_data(locat):
-    print(f"Location: {locat['country']}")
-    df_loc = get_location_data(locat["country_id"], locat["country"])
-    df_loc.rename(
-        columns={'lineage': 'variant', 'prevalence_rolling': 'perc_sequences', 'total_count': 'num_sequences_total',
-                 'lineage_count': 'num_sequences'}, inplace=True)
-    df_loc.drop(['prevalence'], axis=1, inplace=True)
+    try:
+        print(f"Location: {locat['country']}")
+        df_loc = get_location_data(locat["country_id"], locat["country"])
+        df_loc.rename(
+            columns={'lineage': 'variant', 'prevalence_rolling': 'perc_sequences', 'total_count': 'num_sequences_total',
+                     'lineage_count': 'num_sequences'}, inplace=True)
+        df_loc.drop(['prevalence'], axis=1, inplace=True)
 
-    df_loc = df_loc.reindex(
-        columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
+        df_loc = df_loc.reindex(
+            columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
+    except Exception as e:
+        print(e)
     return df_loc
 
 
@@ -507,7 +529,39 @@ def main():
     iso_list = df_loc[df_loc.columns.intersection(["country_id", "country"])]
     iso_list = iso_list.rename(columns={'country_id': 'iso', 'country': 'location'})
 
-    pool = multiprocessing.Pool()
+    add_iso_dict = [
+        {'iso': 'BTN', 'location': 'Bhutan'},
+        {'iso': 'TCD', 'location': 'Chad'},
+        {'iso': 'CIV', 'location': "Cote d'Ivoire"},
+        {'iso': 'ERI', 'location': 'Eritrea'},
+        {'iso': 'SWZ', 'location': 'Eswatini'},
+        {'iso': 'MK', 'location': 'North Macedonia'},
+        {'iso': 'SMR', 'location': 'San Marino'},
+        {'iso': 'MTN', 'location': 'Mauritania'},
+        {'iso': 'YEM', 'location': 'Yemen'},
+        {'iso': 'ST', 'location': 'Sao Tome and Principe'},
+        {'iso': 'NIC', 'location': 'Nicaragua'},
+        {'iso': 'SY', 'location': 'Syria'},
+        {'iso': 'TZA', 'location': 'Tanzania'},
+        {'iso': 'TJK', 'location': 'Tajikistan'},
+        {'iso': 'LAO', 'location': 'Laos'},
+        {'iso': 'ARM', 'location': 'Armenia'},
+        {'iso': 'ARG', 'location': 'Argentina'},
+        {'iso': 'MLI', 'location': 'Mali'},
+        {'iso': 'FJI', 'location': 'Fiji'},
+        {'iso': 'BEN', 'location': 'Benin'},
+        {'iso': 'SMR', 'location': 'San Marino'},
+        {'iso': 'TWN', 'location': 'Taiwan'},
+    ]
+
+    for to_add in add_iso_dict:
+        if len(iso_list[iso_list["iso"] == to_add["iso"]]) == 0:
+            iso_list = iso_list.append(to_add, ignore_index=True)
+    # locs = iso_list["location"].tolist()
+    # cases_locations = df_cases_data["location"].tolist()
+
+    # print(set(cases_locations).difference(locs))
+    # print(set(locs).difference(cases_locations))
 
     with Pool(5) as p:
         locations_list += p.map(get_loc_data, locations)
@@ -633,30 +687,6 @@ def main():
                 val = 0
             df_cases_r_data.loc[[x.name], "x"] = val
 
-        # days = (datetime.now() - x["date"]).days
-        # if days < 0:
-        #    tot_days_data = (14 + days) - 1
-        #    pond = tot_days_data / 14
-        #    if x["cases"] > 0:
-
-        #        p_cases = (x["cases"] * 14) / tot_days_data
-        #        diff = p_cases / x["cases"]
-        #        dif_z = p_cases / prev_cases
-        #        if dif_z > 1:
-        #            dif_z = dif_z * 2
-        #        else:
-        #            dif_z = dif_z / 2
-        #        xpp = ((df_cases_r_data.loc[[x.name], "x"].item() * (1 + pond)) * diff) * dif_z  # .item() * 14 ) / (14 + days)
-
-        #        print(f"{str(x['location'])} X:{str(df_cases_r_data.loc[[x.name], 'x'].item())} C:{str(x['cases'])} PC:{str(p_cases)} TD:{tot_days_data} PO:{pond} DF:{diff} DZ:{dif_z} XPP:{str(xpp)}")
-
-        #        # if prev_r >= 0.8 and x["r"] >= 1 and xpp > df_cases_r_data.loc[[x.name], "x"].item():
-        #        #     df_cases_r_data.loc[[x.name], "x"] = xpp * x["r"]
-
-        #        df_cases_r_data.loc[[x.name], "x"] = xpp
-
-        #        df_cases_r_data.loc[[x.name], "cases_100k"] = round((p_cases / x["population"]) * 100000, 2)
-
     df_cases_r_data.apply(row_x, axis=1)
 
     with errstate(divide='ignore'):
@@ -672,6 +702,8 @@ def main():
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.gt(12), 12)  # Force upper values
 
     # df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
+
+    print(set(df_cases_r_data[df_cases_r_data['iso'].isna()]["location"].tolist()))
 
     print("Save cases_r.csv...")
     df_cases_r_data.to_csv("../data/cases_r.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
