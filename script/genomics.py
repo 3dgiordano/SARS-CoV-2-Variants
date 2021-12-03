@@ -150,9 +150,9 @@ def get_locations():
 
         def ren_l(l):
             new_l = l["country"].replace("Czech Republic", "Czechia") \
-                .replace("Democratic Congo", "Democratic Republic of the Congo") \
                 .replace("Côte d'Ivoire", "Cote d'Ivoire") \
                 .replace("Republic of Congo", "Congo") \
+                .replace("Democratic Republic of the Congo", "Democratic Republic of Congo") \
                 .replace("Swaziland", "Eswatini") \
                 .replace("Macedonia", "North Macedonia")
             if l["country"] != new_l:
