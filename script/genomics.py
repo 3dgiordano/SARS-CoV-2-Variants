@@ -649,17 +649,21 @@ def main():
 
     df_cases_r_data["x"] = 0  # init
 
+    len_cases = df_cases_r_data.index.values[-1]
+
     def row_x(x):
         prev_x = 0
         prev_r = 0
-        prev_cases = 0
         inc_cases = 1
         if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
             prev_x = df_cases_r_data.iloc[x.name - 1]["x"]
             prev_r = df_cases_r_data.iloc[x.name - 1]["r"]
             prev_cases = df_cases_r_data.iloc[x.name - 1]["cases"]
             if prev_cases > 0:
-                inc_cases = (x["cases"] / prev_cases)
+                if x.name < len_cases and df_cases_r_data.iloc[x.name + 1]["location"] != x["location"]:
+                    inc_cases = (x["cases"] / prev_cases)
+                    if inc_cases < 1:
+                        inc_cases = 1  # Only make a fix when is a important increment
 
         if x["r"] >= 0.85:
             if prev_r == 0:
@@ -684,7 +688,7 @@ def main():
             val = val_x + prev_x
             if val < 0:
                 val = 0
-            df_cases_r_data.loc[[x.name], "x"] = val
+            df_cases_r_data.loc[[x.name], "x"] = val * inc_cases
         else:
             if prev_r < 0.85:
                 val_x = prev_x
@@ -694,7 +698,7 @@ def main():
 
             if val < 0:
                 val = 0
-            df_cases_r_data.loc[[x.name], "x"] = val
+            df_cases_r_data.loc[[x.name], "x"] = val * inc_cases
 
     df_cases_r_data.apply(row_x, axis=1)
 
