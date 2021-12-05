@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COVID-19 Risk by @3dgiordano</title>
+  <meta name="generator" content="Jekyll v3.9.0" />
+  <meta property="og:title" content="COVID-19-Risk" />
+  <meta name="author" content="David Giordano" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="COVID-19 Risk by @3dgiordano" />
+  <meta property="og:description" content="COVID-19 Risk by @3dgiordano" />
+  <link rel="canonical" href="https://3dgiordano.github.io/COVID-19-Risk/" />
+  <meta property="og:url" content="https://3dgiordano.github.io/COVID-19-Risk/" />
+  <meta property="og:site_name" content="COVID-19 Risk by @3dgiordano" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="twitter:title" content="COVID-19 Risk by @3dgiordano" />
+  <meta property="og:image" content="/web/favicon.png">
+  <link rel="shortcut icon" type="image/x-icon" href="./web/favicon.ico">
+  <link rel="shortcut icon" type="image/png" href="./web/favicon.png">
+  <link rel="apple-touch-icon" sizes="170x170" href="./web/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./web/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./web/favicon-16x16.png">
+  <link rel='stylesheet' href='web/general.css'>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBJJX8MJH3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QBJJX8MJH3');
+  </script>
+  <script type="application/ld+json">
+{"headline":"COVID-19 Risk by @3dgiordano","description":"COVID-19 Risk by @3dgiordano","url":"https://3dgiordano.github.io/COVID-19-Risk/","@type":"WebSite","name":"COVID-19 Risk by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
+</script>
+  <style>
+    @media screen and (max-width: 1024px) {
+      table {
+        width: 100%;
+      }
+
+      tbody td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tbody td:before {
+        content: attr(data-th);
+        display: block;
+        width: 100% !important;
+
+      }
+    }
+  </style>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
+  <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
+
+  <script>
+        function start() {
+          dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+            var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
+            var date_str = new Date(update_date_str).toString();
+            document.getElementById("last_update").innerText = date_str;
+          });
+      }
+  </script>
+
+  <div style="margin: 20px;">
+    <h1>COVID-19 Risk</h1>
+    <div style="margin: 20px;">
+      This site tries to give a glimpse about a possible wave of cases.<br />
+      <br />
+      <b>Last update: </b><span id="last_update"></span><br>
+      <br /><br />
+      <table><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button_active" href="about_r">About</a></td></tr></table><table></table><br>
+      <br />
+      <b>About:</b><br />
+      <br />
+      The project, site, published data, and graphics are free and open source.<br />
+      A work in progress project created by <a href="https://github.com/3dgiordano"
+        target="_blank">@3dgiordano</a>.<br />
+      They can access the source code and data in their GitHub project <a
+        href="https://github.com/3dgiordano/COVID-19-Risk"
+        target="_blank">https://github.com/3dgiordano/COVID-19-Risk</a>.</br>
+      
+      <br />
+    </div>
+  </div>
+  <script>
+    start();
+  </script>
+  </body>
+
+</html>
