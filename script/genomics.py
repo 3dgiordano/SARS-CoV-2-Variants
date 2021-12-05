@@ -718,10 +718,25 @@ def main():
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.gt(12), 12)  # Force upper values
 
     df_cases_r_data["variation"] = 0
+    df_cases_r_data["var_inc"] = 0
+    df_cases_r_data["var_inc_fmt"] = ""
 
     def variation(x):
         if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
-            df_cases_r_data.loc[[x.name], "variation"] = x["risk3"] - df_cases_r_data.iloc[x.name - 1]["risk3"]
+            variation = x["risk3"] - df_cases_r_data.iloc[x.name - 1]["risk3"]
+            df_cases_r_data.loc[[x.name], "variation"] = variation
+            if variation != 0:
+                var_inc = 0
+                if df_cases_r_data.iloc[x.name - 1]["risk3"] > 0:
+                    var_inc = x["risk3"] / df_cases_r_data.iloc[x.name - 1]["risk3"]
+                    df_cases_r_data.loc[[x.name], "var_inc"] = var_inc
+                    if round(var_inc, 0) > 1:
+                        df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "x{:.0f}".format(var_inc)
+                if round(var_inc, 0) <= 1:
+                    if variation > 0:
+                        df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "+"
+                    else:
+                        df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "-"
 
     df_cases_r_data.apply(variation, axis=1)
 
@@ -795,6 +810,8 @@ def main():
     df_cases_r_data_trend_pivot["range"] = ""
     df_cases_r_data_trend_pivot["cases_100k"] = 0
     df_cases_r_data_trend_pivot["variation"] = 0
+    df_cases_r_data_trend_pivot["var_inc"] = 0
+    df_cases_r_data_trend_pivot["var_inc_fmt"] = ""
 
     def range_apply(x):
         for r in ranges:
@@ -807,8 +824,16 @@ def main():
         variation = df_cases_r_data.loc[
             (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
             "variation"].item()
+        var_inc = df_cases_r_data.loc[
+            (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
+            "var_inc"].item()
+        var_inc_fmt = df_cases_r_data.loc[
+            (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
+            "var_inc_fmt"].item()
         df_cases_r_data_trend_pivot.loc[[x.name], "cases_100k"] = c100k
         df_cases_r_data_trend_pivot.loc[[x.name], "variation"] = variation
+        df_cases_r_data_trend_pivot.loc[[x.name], "var_inc"] = var_inc
+        df_cases_r_data_trend_pivot.loc[[x.name], "var_inc_fmt"] = var_inc_fmt
 
     df_cases_r_data_trend_pivot.apply(range_apply, axis=1)
 
