@@ -520,6 +520,10 @@ def main():
 
     df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
 
+    # Get the last date in data
+
+    cases_data_date = df_cases_data.iloc[-1]['date']
+
     df_cases_data = df_cases_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
         {'new_cases': 'sum'}).rename(columns={"new_cases": "cases"}).reset_index()
 
@@ -635,7 +639,8 @@ def main():
 
     def pro_cases(x):
         if x["cases"] > 0:
-            days = (datetime.now() - x["date"]).days
+            #days = (datetime.now() - x["date"]).days
+            days = (cases_data_date - x["date"]).days
             if days < 0:
                 tot_days_data = (14 + days) - 1
                 p_cases = round((x["cases"] * 14) / tot_days_data, 0)
