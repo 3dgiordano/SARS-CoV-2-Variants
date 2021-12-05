@@ -717,6 +717,14 @@ def main():
 
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.gt(12), 12)  # Force upper values
 
+    df_cases_r_data["variation"] = 0
+
+    def variation(x):
+        if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
+            df_cases_r_data.loc[[x.name], "variation"] = x["risk3"] - df_cases_r_data.iloc[x.name - 1]["risk3"]
+
+    df_cases_r_data.apply(variation, axis=1)
+
     # df_cases_r_data["population"] = pd.to_numeric(df_cases_r_data["population"], downcast='integer')
 
     print(set(df_cases_r_data[df_cases_r_data['iso'].isna()]["location"].tolist()))
@@ -785,7 +793,8 @@ def main():
         },
     ]
     df_cases_r_data_trend_pivot["range"] = ""
-    df_cases_r_data_trend_pivot["cases_100k"] = ""
+    df_cases_r_data_trend_pivot["cases_100k"] = 0
+    df_cases_r_data_trend_pivot["variation"] = 0
 
     def range_apply(x):
         for r in ranges:
@@ -795,7 +804,11 @@ def main():
         c100k = df_cases_r_data.loc[
             (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
             "cases_100k"].item()
+        variation = df_cases_r_data.loc[
+            (df_cases_r_data["date"] == data_date_trend[1]) & (df_cases_r_data["location"] == x["location"])][
+            "variation"].item()
         df_cases_r_data_trend_pivot.loc[[x.name], "cases_100k"] = c100k
+        df_cases_r_data_trend_pivot.loc[[x.name], "variation"] = variation
 
     df_cases_r_data_trend_pivot.apply(range_apply, axis=1)
 
