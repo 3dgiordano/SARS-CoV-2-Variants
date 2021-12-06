@@ -64,6 +64,7 @@
     var chart_width = 640;
     var chart_list = [];
     var continents_chart;
+    var df = null;
     var df_dates = [];
 
     function windowSizeUpdate() {
@@ -296,6 +297,73 @@
       
     }
 
+    function load_df() {
+      if (df_dates.length == 0) {
+              df_dates = [...new Set(df.sortBy('date').toArray("date"))];
+      }
+      
+      var i = 0;
+      var row;
+
+      // console.log(continent);
+      series = [];
+
+      locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
+
+      continent_height = locations.length * 33;
+      // console.log("    " + continent_height);
+
+      locations.forEach(location => {
+        
+        df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
+        df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
+        df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
+        df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
+        df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
+        
+        data = []
+        d = 0;
+        df_dates.forEach(df_date => {
+          
+          dci = df_cases_dates.indexOf(df_date);
+          
+          dcv = 0;
+          variation = "";
+          if (dci > -1) {
+            dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
+            variation = df_cases_var_inc_fmt[dci];
+            
+          }
+          data.push(
+            { x: df_date, y: dcv, variation: variation}
+          );
+          d +=1
+        });
+
+        series.push(
+            { name: location, data: data }
+        );
+        
+      });
+      
+      continents_chart.updateOptions(
+          {
+            chart: {
+              height: continent_height,
+            },
+            title: {text:continent},
+            series: series,
+            noData: {
+              text: "No Data",
+            },
+          }, 
+          true, false, true
+        );
+        
+      document.getElementById("loading").style.visibility = "hidden";
+      document.getElementById("continent").style.visibility = "visible";
+    }
+
     function update_continent() {
       document.getElementById("loading").style.visibility = "visible";
       document.getElementById("continent").style.visibility = "hidden";
@@ -303,74 +371,15 @@
       continent = document.querySelector('input[name="continent"]:checked').id.replace("_", " ");
 
       new Promise(() => {
-          
-          dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
-  
-            if (df_dates.length == 0) {
-              df_dates = [...new Set(df.sortBy('date').toArray("date"))];
-            }
-            
-            var i = 0;
-            var row;
-  
-            // console.log(continent);
-            series = [];
-
-            locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
-
-            continent_height = locations.length * 33;
-            // console.log("    " + continent_height);
-
-            locations.forEach(location => {
-              
-              df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
-              df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
-              df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
-              df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
-              df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
-              
-              data = []
-              d = 0;
-              df_dates.forEach(df_date => {
-                
-                dci = df_cases_dates.indexOf(df_date);
-                
-                dcv = 0;
-                variation = "";
-                if (dci > -1) {
-                  dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
-                  variation = df_cases_var_inc_fmt[dci];
-                  
-                }
-                data.push(
-                  { x: df_date, y: dcv, variation: variation}
-                );
-                d +=1
-              });
-
-              series.push(
-                  { name: location, data: data }
-              );
-              
+          if (df == null) {
+            dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(r_df => {
+    
+              df = r_df;
+              load_df();    
             });
-            
-            continents_chart.updateOptions(
-                {
-                  chart: {
-                    height: continent_height,
-                  },
-                  title: {text:continent},
-                  series: series,
-                  noData: {
-                    text: "No Data",
-                  },
-                }, 
-                true, false, true
-              );
-              
-            document.getElementById("loading").style.visibility = "hidden";
-            document.getElementById("continent").style.visibility = "visible";
-          });
+          } else {
+            load_df();
+          }
         });
       
     }
