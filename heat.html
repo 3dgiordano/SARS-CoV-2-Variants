@@ -64,6 +64,8 @@
     var chart_width = 640;
     var chart_list = [];
     var continents_chart;
+    var df_dates = [];
+    var df_cases = null;
 
     function windowSizeUpdate() {
       doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -302,11 +304,13 @@
           
           dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
   
-            df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
-                      
-            df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
-            df_cases = df_cases.sortBy('continent', "location");
-            
+            if (df_dates.length == 0) {
+              df_dates = [...new Set(df.sortBy('date').toArray("date"))];
+            }
+            if (df_cases == null) {
+              df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+              df_cases = df_cases.sortBy('continent', "location");
+            }
             var i = 0;
             var row;
   
