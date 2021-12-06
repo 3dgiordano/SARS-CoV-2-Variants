@@ -297,86 +297,86 @@
         continents_charts[continent].render();
       });
 
-      dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
+      new Promise(() => {
+          
+        dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
 
-        df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
-                  
-        df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
-        df_cases = df_cases.sortBy('continent', "location");
-        
-        var i = 0;
-        var row;
-
-        continents.forEach(continent => {
-          new Promise(() => {
-
-            // console.log(continent);
-            series = [];
-
-            locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
-
-            continent_height = locations.length * 33;
-            // console.log("    " + continent_height);
-
-            locations.forEach(location => {
-              // console.log("    " + location);
-              tot_cases = df_cases.filter(row => row.get('location') == location && row.get('continent') == continent).toArray("cases");
-              // console.log("      " + tot_cases);
-              
-              if (tot_cases > 50) {
-
-                df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
-                df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
-                df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
-                df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
-                df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
-                
-                data = []
-                d = 0;
-                df_dates.forEach(df_date => {
-                  
-                  dci = df_cases_dates.indexOf(df_date);
-                  
-                  dcv = 0;
-                  variation = "";
-                  if (dci > -1) {
-                    dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
-                    variation = df_cases_var_inc_fmt[dci];
+          df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
                     
-                  }
-                  data.push(
-                    { x: df_date, y: dcv, variation: variation}
-                  );
-                  d +=1
-                });
+          df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+          df_cases = df_cases.sortBy('continent', "location");
+          
+          var i = 0;
+          var row;
 
-                series.push(
-                    { name: location, data: data }
-                  );
+          continents.forEach(continent => {
+            new Promise(() => {
 
-                i += 1;
-              }
+              // console.log(continent);
+              series = [];
+
+              locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
+
+              continent_height = locations.length * 33;
+              // console.log("    " + continent_height);
+
+              locations.forEach(location => {
+                // console.log("    " + location);
+                tot_cases = df_cases.filter(row => row.get('location') == location && row.get('continent') == continent).toArray("cases");
+                // console.log("      " + tot_cases);
+                
+                if (tot_cases > 50) {
+
+                  df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
+                  df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
+                  df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
+                  df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
+                  df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
+                  
+                  data = []
+                  d = 0;
+                  df_dates.forEach(df_date => {
+                    
+                    dci = df_cases_dates.indexOf(df_date);
+                    
+                    dcv = 0;
+                    variation = "";
+                    if (dci > -1) {
+                      dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
+                      variation = df_cases_var_inc_fmt[dci];
+                      
+                    }
+                    data.push(
+                      { x: df_date, y: dcv, variation: variation}
+                    );
+                    d +=1
+                  });
+
+                  series.push(
+                      { name: location, data: data }
+                    );
+
+                  i += 1;
+                }
+                
+              });
               
+              continents_charts[continent].updateOptions(
+                {
+                  chart: {
+                    height: continent_height,
+                  },
+                  title: {text:continent},
+                  series: series,
+                  noData: {
+                    text: "No Data",
+                  },
+                }, 
+                true, false, true
+              );
             });
-            
-            continents_charts[continent].updateOptions(
-              {
-                chart: {
-                  height: continent_height,
-                },
-                title: {text:continent},
-                series: series,
-                noData: {
-                  text: "No Data",
-                },
-              }, 
-              true, false, true
-            );
           });
         });
-
-
-
       });
     }
 
