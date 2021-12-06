@@ -16,6 +16,7 @@ p {
 }
 
 .button {
+    display: flex;
     white-space:nowrap;
     border-top: 1px solid #97f7c1;
     background: #65a9d7;
@@ -50,6 +51,7 @@ p {
     }
 
 .button_active {
+    display: flex;
     white-space:nowrap;
     border-top-color: #288f48;
     background: #288f48;
