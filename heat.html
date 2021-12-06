@@ -315,11 +315,9 @@
 
       locations.forEach(location => {
         
-        df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
-        df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
-        df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
-        df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
-        df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
+        df_location = df.filter(row => row.get('location') == location);
+
+        df_cases_dates = df_location.toArray("date");
         
         data = []
         d = 0;
@@ -330,9 +328,8 @@
           dcv = 0;
           variation = "";
           if (dci > -1) {
-            dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
-            variation = df_cases_var_inc_fmt[dci];
-            
+            dcv = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(2);
+            variation = df_location.getRow(dci).get("var_inc_fmt");
           }
           data.push(
             { x: df_date, y: dcv, variation: variation}
