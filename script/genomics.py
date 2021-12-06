@@ -307,7 +307,7 @@ def get_cdc_variants():
     from urllib.request import Request, urlopen
     from bs4 import BeautifulSoup
 
-    cdc_variants_tracking_url = "https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html"
+    cdc_variants_tracking_url = "https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-classifications.html"
 
     cdc_body = urlopen(Request(cdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
 
