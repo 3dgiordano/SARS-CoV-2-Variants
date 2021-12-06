@@ -63,6 +63,7 @@
     var doc_width = 1024;
     var chart_width = 640;
     var chart_list = [];
+    var continents_chart;
 
     function windowSizeUpdate() {
       doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -93,11 +94,12 @@
         document.getElementById("last_update").innerText = date_str;
       });
 
-      load_charts();
+      load_chart();
+      update_continent();
 
     }
 
-    function load_charts() {
+    function load_chart() {
       df_dates = [];
       series = [];
       ranges = [
@@ -277,7 +279,7 @@
               
           },
           title: {
-            text: "World Heat Map",
+            text: "",
             align: 'center',
             margi: 0,
             offsetY: -5,
@@ -288,28 +290,26 @@
           },
         };
       
-      continents = ["Asia", "Europe", "Africa", "North America", "South America", "Oceania"];
+      continents_chart = new ApexCharts(document.querySelector("#continent" ), options);
+      continents_chart.render();
+      
+    }
 
-      continents_charts = {};
-      continents.forEach(continent => {
-        options["title"]["text"] = continent;
-        continents_charts[continent] = new ApexCharts(document.querySelector("#" + continent.replace(" ","_") ), options);
-        continents_charts[continent].render();
-      });
+    function update_continent() {
+      continent = document.querySelector('input[name="continent"]:checked').id.replace("_", " ");
 
       new Promise(() => {
           
-        dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
-
-          df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
-                    
-          df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
-          df_cases = df_cases.sortBy('continent', "location");
-          
-          var i = 0;
-          var row;
-
-          continents.forEach(continent => {
+          dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
+  
+            df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
+                      
+            df_cases = df.groupBy('continent','location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+            df_cases = df_cases.sortBy('continent', "location");
+            
+            var i = 0;
+            var row;
+  
             new Promise(() => {
 
               // console.log(continent);
@@ -361,7 +361,7 @@
                 
               });
               
-              continents_charts[continent].updateOptions(
+              continents_chart.updateOptions(
                 {
                   chart: {
                     height: continent_height,
@@ -377,9 +377,8 @@
             });
           });
         });
-      });
+      
     }
-
   </script>
 
 <div style="margin: 20px;">
@@ -391,38 +390,21 @@
     <br /><br />
     <table><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button_active" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
     <br />
+    <form style="text-align: center">
+      <label><input type="radio" name="continent" id="Europe" checked onclick="update_continent();"/>Europe</label>
+      <label><input type="radio" name="continent" id="North_America" onclick="update_continent();"/>North America</label>
+      <label><input type="radio" name="continent" id="South_America" onclick="update_continent();"/>South America</label>
+      <label><input type="radio" name="continent" id="Asia" onclick="update_continent();"/>Asia</label>
+      <label><input type="radio" name="continent" id="Africa" onclick="update_continent();"/>Africa</label>
+      <label ><input type="radio" name="continent" id="Oceania" onclick="update_continent();"/>Oceania</label>
+    </form>
   </div>
 </div>
 
   <table id="content" style="width: 100%;border-spacing:30px 10px;">
     <tr>
       <td colspan=2 align="center">
-        <div id="Europe"></div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center">
-        <div id="North_America"></div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center">
-        <div id="South_America"></div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center">
-        <div id="Asia"></div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center">
-        <div id="Africa"></div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center">
-        <div id="Oceania"></div>
+        <div id="continent"></div>
       </td>
     </tr>
   </table>
