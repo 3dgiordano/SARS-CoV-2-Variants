@@ -370,7 +370,7 @@
 
       continent = document.querySelector('input[name="continent"]:checked').id.replace("_", " ");
 
-      new Promise(() => {
+      setTimeout(function(){
           if (df == null) {
             dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(r_df => {
     
@@ -380,7 +380,7 @@
           } else {
             load_df();
           }
-        });
+        }, 500);
       
     }
   </script>
