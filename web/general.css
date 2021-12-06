@@ -16,6 +16,7 @@ p {
 }
 
 .button {
+    white-space:nowrap;
     border-top: 1px solid #97f7c1;
     background: #65a9d7;
     background: -webkit-gradient(linear, left top, left bottom, from(#3e9c67), to(#65a9d7));
@@ -49,6 +50,7 @@ p {
     }
 
 .button_active {
+    white-space:nowrap;
     border-top-color: #288f48;
     background: #288f48;
     color: #ccc;
@@ -78,5 +80,34 @@ p {
     border-top-color: #1b435e;
     background: #1b435e;
 }
-    
+
+@media only screen and (max-width: 600px) {
+    .button {
+        font-size: 10px;
+        padding: 5px 9px;
+    }
+
+    .button_active {
+        font-size: 10px;
+        padding: 5px 9px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    #content table {
+      width: 100%;
+    }
+
+    #content tbody td {
+      display: block;
+      width: 100% !important;
+    }
+
+    #content tbody td:before {
+      content: attr(data-th);
+      display: block;
+      width: 100% !important;
+
+    }
+  }
     
