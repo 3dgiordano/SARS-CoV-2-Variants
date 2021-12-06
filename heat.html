@@ -36,25 +36,6 @@
   <script type="application/ld+json">
 {"headline":"COVID-19 Risk by @3dgiordano","description":"COVID-19 Risk by @3dgiordano","url":"https://3dgiordano.github.io/COVID-19-Risk/","@type":"WebSite","name":"COVID-19 Risk by @3dgiordano","author":{"@type":"Person","name":"David Giordano"},"@context":"https://schema.org"}
 </script>
-  <style>
-    @media screen and (max-width: 1024px) {
-      #content table {
-        width: 100%;
-      }
-
-      #content tbody td {
-        display: block;
-        width: 100% !important;
-      }
-
-      #content tbody td:before {
-        content: attr(data-th);
-        display: block;
-        width: 100% !important;
-
-      }
-    }
-  </style>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.27.3/apexcharts.min.js'></script>
   <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
 
@@ -390,7 +371,7 @@
     <br />
     <b>Last update: </b><span id="last_update"></span><br>
     <br /><br />
-    <table><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button_active" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
+    <table class="actions"><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button_active" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
     <br />
     <form style="text-align: center">
       <label style="white-space:nowrap"><input type="radio" name="continent" id="Europe" checked onclick="update_continent();"/>Europe</label>
