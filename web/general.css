@@ -109,10 +109,14 @@ p {
     border-spacing:30px 10px;
 }
 
+.heat_table {
+    width: 95% !important;
+}
+
 @media screen and (max-width: 1024px) {
-    .content table {
+    .content {
       width: 100%;
-      border-spacing:15px 5px;
+      border-spacing:1px 5px;
     }
 
     .content tbody td {
