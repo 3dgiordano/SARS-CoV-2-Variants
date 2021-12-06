@@ -298,6 +298,9 @@
     }
 
     function update_continent() {
+      document.getElementById("loading").style.visibility = "visible";
+      document.getElementById("continent").style.visibility = "hidden";
+
       continent = document.querySelector('input[name="continent"]:checked').id.replace("_", " ");
 
       new Promise(() => {
@@ -378,6 +381,8 @@
                 }, 
                 true, false, true
               );
+              document.getElementById("loading").style.visibility = "hidden";
+              document.getElementById("continent").style.visibility = "visible";
             });
           });
         });
@@ -408,7 +413,8 @@
   <table id="content" style="width: 100%;border-spacing:30px 10px;">
     <tr>
       <td colspan=2 align="center">
-        <div id="continent"></div>
+        <span id="loading">Loading...</span>
+        <div style="visibility: hidden" id="continent"></div>
       </td>
     </tr>
   </table>
