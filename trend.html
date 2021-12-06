@@ -94,6 +94,13 @@
       });
 
     }
+    
+    function onLoadHandler() {
+        setTimeout(function(){
+          document.getElementById("loading").style.visibility = "hidden";
+          document.getElementById("datawrapper-chart-KEimf").style.visibility = "visible";
+        }, 2000);
+    }
 
   </script>
 
@@ -106,6 +113,7 @@
     <br /><br />
     <table><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button_active" href="trend">Trends</a></td><td><a class="button" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
     <br />
+    <span id="loading">Loading...</span>
   </div>
 </div>
     
@@ -113,7 +121,7 @@
 <table width="90%" align="center">
 	<tr>
 		<td align=center>
-		<iframe title="Risk and trends" aria-label="Arrow Plot" id="datawrapper-chart-KEimf" src="https://datawrapper.dwcdn.net/KEimf/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="3136"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(e){if(void 0!==e.data["datawrapper-height"]){var t=document.querySelectorAll("iframe");for(var a in e.data["datawrapper-height"])for(var r=0;r<t.length;r++){if(t[r].contentWindow===e.source)t[r].style.height=e.data["datawrapper-height"][a]+"px"}}}))}();</script>
+		<iframe title="Risk and trends" aria-label="Arrow Plot" id="datawrapper-chart-KEimf" src="https://datawrapper.dwcdn.net/KEimf/" scrolling="no" frameborder="0" style="visibility: hidden;width: 0; min-width: 100% !important; border: none;" height="3136" onload="onLoadHandler();"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(e){if(void 0!==e.data["datawrapper-height"]){var t=document.querySelectorAll("iframe");for(var a in e.data["datawrapper-height"])for(var r=0;r<t.length;r++){if(t[r].contentWindow===e.source)t[r].style.height=e.data["datawrapper-height"][a]+"px"}}}))}();</script>
 		</td>
 	</tr>
 </table>
