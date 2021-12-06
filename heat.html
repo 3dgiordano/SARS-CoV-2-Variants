@@ -87,7 +87,7 @@
 
     function start() {
 
-      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+      dfjs.DataFrame.fromJSON("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/update.json").then(df => {
         var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
         var date_str = new Date(update_date_str).toString();
         document.getElementById("last_update").innerText = date_str;
@@ -297,7 +297,7 @@
         continents_charts[continent].render();
       });
 
-      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases_r.csv').then(df => {
+      dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(df => {
 
         df_dates = df.groupBy('date').aggregate((group) => group.count()).sortBy('date').toArray("date");
                   
@@ -308,69 +308,71 @@
         var row;
 
         continents.forEach(continent => {
-          // console.log(continent);
-          series = [];
+          new Promise(() => {
 
-          locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
+            // console.log(continent);
+            series = [];
 
-          continent_height = locations.length * 33;
-          // console.log("    " + continent_height);
+            locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
 
-          locations.forEach(location => {
-            // console.log("    " + location);
-            tot_cases = df_cases.filter(row => row.get('location') == location && row.get('continent') == continent).toArray("cases");
-            // console.log("      " + tot_cases);
-            
-            if (tot_cases > 50) {
+            continent_height = locations.length * 33;
+            // console.log("    " + continent_height);
 
-              df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
-              df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
-              df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
-              df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
-              df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
+            locations.forEach(location => {
+              // console.log("    " + location);
+              tot_cases = df_cases.filter(row => row.get('location') == location && row.get('continent') == continent).toArray("cases");
+              // console.log("      " + tot_cases);
               
-              data = []
-              d = 0;
-              df_dates.forEach(df_date => {
+              if (tot_cases > 50) {
+
+                df_cases_risk = df.filter(row => row.get('location') == location).toArray("risk3");
+                df_cases_dates = df.filter(row => row.get('location') == location).toArray("date");
+                df_cases_variations = df.filter(row => row.get('location') == location).toArray("variation");
+                df_cases_var_incs = df.filter(row => row.get('location') == location).toArray("var_inc");
+                df_cases_var_inc_fmt = df.filter(row => row.get('location') == location).toArray("var_inc_fmt");
                 
-                dci = df_cases_dates.indexOf(df_date);
-                
-                dcv = 0;
-                variation = "";
-                if (dci > -1) {
-                  dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
-                  variation = df_cases_var_inc_fmt[dci];
+                data = []
+                d = 0;
+                df_dates.forEach(df_date => {
                   
-                }
-                data.push(
-                  { x: df_date, y: dcv, variation: variation}
-                );
-                d +=1
-              });
+                  dci = df_cases_dates.indexOf(df_date);
+                  
+                  dcv = 0;
+                  variation = "";
+                  if (dci > -1) {
+                    dcv = parseFloat(df_cases_risk[dci].toString().replace(',', '.')).toFixed(2);
+                    variation = df_cases_var_inc_fmt[dci];
+                    
+                  }
+                  data.push(
+                    { x: df_date, y: dcv, variation: variation}
+                  );
+                  d +=1
+                });
 
-              series.push(
-                  { name: location, data: data }
-                );
+                series.push(
+                    { name: location, data: data }
+                  );
 
-              i += 1;
-            }
+                i += 1;
+              }
+              
+            });
             
+            continents_charts[continent].updateOptions(
+              {
+                chart: {
+                  height: continent_height,
+                },
+                title: {text:continent},
+                series: series,
+                noData: {
+                  text: "No Data",
+                },
+              }, 
+              true, false, true
+            );
           });
-          
-          continents_charts[continent].updateOptions(
-            {
-              chart: {
-                height: continent_height,
-              },
-              title: {text:continent},
-              series: series,
-              noData: {
-                text: "No Data",
-              },
-            }, 
-            true, false, true
-          );
-          
         });
 
 
