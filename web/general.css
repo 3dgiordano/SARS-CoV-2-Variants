@@ -20,6 +20,10 @@ p {
     white-space:nowrap;
 }
 
+.info {
+    margin: 20px;
+}
+
 .button {
     border-top: 1px solid #97f7c1;
     background: #65a9d7;
@@ -94,19 +98,29 @@ p {
         font-size: 10px;
         padding: 5px 9px;
     }
+
+    .info {
+        margin: 5px;
+    }
+}
+
+.content {
+    width: 100%;
+    border-spacing:30px 10px;
 }
 
 @media screen and (max-width: 1024px) {
-    #content table {
+    .content table {
       width: 100%;
+      border-spacing:15px 5px;
     }
 
-    #content tbody td {
+    .content tbody td {
       display: block;
       width: 100% !important;
     }
 
-    #content tbody td:before {
+    .content tbody td:before {
       content: attr(data-th);
       display: block;
       width: 100% !important;
