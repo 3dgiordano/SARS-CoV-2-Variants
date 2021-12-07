@@ -587,7 +587,10 @@ def main():
     df['variant'] = df['variant'].str.upper()
 
     # Drop from cases countries not in list
-    locations_to_clean = list(set(df_cases_data["location"].values) - set(df["location"].values))
+    # locations_to_clean = list(set(df_cases_data["location"].values) - set(df["location"].values))
+    locations_to_clean = list(set(df_cases_data["location"].values) - set(locs))
+    print("Drop locations")
+    print(locations_to_clean)
     df_cases_data = df_cases_data.loc[~df_cases_data.location.isin(locations_to_clean)]
 
     print("Save cases.csv...")
