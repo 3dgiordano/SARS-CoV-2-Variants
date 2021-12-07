@@ -95,6 +95,12 @@
       series = [];
       ranges = [
                   {
+                    from: -1,
+                    to: -1,
+                    name: 'No data',
+                    color: '#D5D5D5'
+                  },
+                  {
                     from: 0,
                     to: 0.0999999999,
                     name: 'low [0 to 0.09]',
@@ -305,7 +311,7 @@
       locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
 
       cont_length = {
-        "Oceania": 310,
+        "Oceania": 460,
         "Africa": 1720,
         "Asia": 1460,
         "South America": 460,
@@ -333,10 +339,13 @@
           if (dci > -1) {
             dcv = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(2);
             variation = df_location.getRow(dci).get("var_inc_fmt");
+          } else {
+            dcv = -1;
           }
           data.push(
-            { x: df_date, y: dcv, variation: variation}
+              { x: df_date, y: dcv, variation: variation}
           );
+          
           d +=1
         });
 
