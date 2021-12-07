@@ -26,6 +26,13 @@
   <link rel='stylesheet' href='web/general.css'>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QBJJX8MJH3"></script>
+
+  <!--Workarround for a bug in apexchart-->
+  <style>
+    .apexcharts-data-labels text {
+      fill: rgb(255, 255, 255);
+    }
+  </style>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
@@ -237,7 +244,12 @@
             enabled: true,
             formatter: function(value, { seriesIndex, dataPointIndex, w }) {
               return w.config.series[seriesIndex].data[dataPointIndex]["variation"]
-            }
+            },
+            style: {
+              fontSize: '10px',
+              fontFamily: 'Roboto, Verdana, Helvetica, Arial, sans-serif',
+              colors: ["#FFFFFF"]
+            },
           },
           tooltip: {
             x: {
@@ -292,7 +304,16 @@
 
       locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
 
-      continent_height = locations.length * 33;
+      cont_length = {
+        "Oceania": 310,
+        "Africa": 1720,
+        "Asia": 1460,
+        "South America": 460,
+        "North America": 810,
+        "Europe": 1460
+      }
+
+      continent_height = cont_length[continent];
       // console.log("    " + continent_height);
 
       locations.forEach(location => {
