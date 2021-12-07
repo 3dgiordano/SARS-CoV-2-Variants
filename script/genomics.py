@@ -555,6 +555,12 @@ def main():
         {'iso': 'BEN', 'location': 'Benin'},
         {'iso': 'SMR', 'location': 'San Marino'},
         {'iso': 'TWN', 'location': 'Taiwan'},
+        {'iso': 'MHL', 'location': 'Marshall Islands'},
+        {'iso': 'KIR', 'location': 'Kiribati'},
+        {'iso': 'WSM', 'location': 'Samoa'},
+        {'iso': 'TON', 'location': 'Tonga'},
+        {'iso': 'TLS', 'location': 'Timor'},
+        {'iso': 'FSM', 'location': 'Micronesia (country)'}
     ]
 
     for to_add in add_iso_dict:
