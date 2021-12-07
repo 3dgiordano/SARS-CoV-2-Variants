@@ -212,6 +212,8 @@
 "Gamma - P.1.8","P.1.8","WHO","VOC"
 "Gamma - P.1.9","P.1.9","WHO","VOC"
 "Omicron","B.1.1.529","WHO","VOC"
+"Omicron - BA.1","BA.1","WHO","VOC"
+"Omicron - BA.2","BA.2","WHO","VOC"
 "Lambda","C.37.*","WHO","VOI"
 "Mu - 21H","B.1.621.*","WHO","VOI"
 "AZ.5","AZ.5.*","WHO","AFM"
