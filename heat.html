@@ -145,26 +145,33 @@
                 ];
 
       var options = {
-            series: series,
-            noData: {
-              text: "Loading...",
+          series: series,
+          noData: {
+            text: "Loading...",
+          },
+          chart: {
+            height: 250,
+            type: 'heatmap',
+            redrawOnParentResize: false,
+            redrawOnWindowResize: true,
+            animations: { enabled: false },
+            stroke: {
+              width: 1
             },
-            chart: {
-              height: 250,
-              type: 'heatmap',
-              redrawOnParentResize: false,
-              redrawOnWindowResize: true,
-              animations: { enabled: false },
-              stroke: {
-                width: 1
-              },
-              toolbar: {
-                show: false,
-              },
-              zoom: {
-                enabled: false,
-              },
+            toolbar: {
+              show: false,
             },
+            zoom: {
+              enabled: false,
+            },
+          },
+          states: {
+            active: {
+              filter: {
+                type: 'none' /* none, lighten, darken */
+              }
+            },
+          },
           legend: {
               offsetY: -5,
               onItemClick: {
