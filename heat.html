@@ -55,6 +55,7 @@
     var df_dates = [];
     var series = [];
     var data = [];
+    var touchDevice = (navigator.maxTouchPoints || 'ontouchstart' in document.documentElement);
 
     function windowSizeUpdate() {
       doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -356,6 +357,9 @@
           d +=1
         });
 
+        if (touchDevice) {
+          data = data.slice(data.length-15,data.length);
+        }
         series.push(
             { name: location, data: data }
         );
