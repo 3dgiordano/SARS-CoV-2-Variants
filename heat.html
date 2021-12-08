@@ -74,8 +74,8 @@
     
     }
 
-    //window.addEventListener('resize', windowSizeUpdate);
-    //windowSizeUpdate();
+    window.addEventListener('resize', windowSizeUpdate);
+    windowSizeUpdate();
 
 
     function start() {
@@ -357,7 +357,7 @@
           d +=1
         });
 
-        if (touchDevice) {
+        if (touchDevice && doc_width < 1024) {
           data = data.slice(data.length-15,data.length);
         }
         series.push(
