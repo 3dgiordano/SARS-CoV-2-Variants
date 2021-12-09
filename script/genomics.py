@@ -20,6 +20,8 @@ from numpy import errstate, isneginf, array
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
 # https://www.gov.uk/government/collections/new-sars-cov-2-variant
 
+out_info_auth = "Bearer 0ed52bbfb6c79d1fd8e9c6f267f9b6311c885a4c4c6f037d6ab7b3a40d586ad0"
+
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
 lineages = None
@@ -68,14 +70,19 @@ who_pango_map = {
 }
 
 
-def get_url(url):
+def get_url(url, headers=None):
     from urllib.error import URLError
+    from urllib.request import Request
     import socket
     tries = 3
     timeout = 60000
+    if headers:
+        r = Request(url, headers=headers)
+    else:
+        r = Request(url)
     for _ in range(tries):
         try:
-            response = urlopen(url, timeout=timeout)
+            response = urlopen(r, timeout=timeout)
             break
         except URLError as err:
             if not isinstance(err.reason, socket.timeout):
@@ -140,7 +147,11 @@ def get_locations():
         last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(locations_file))).total_seconds()
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
-        response = get_url("https://api.outbreak.info/genomics/location?name=**")
+        headers = {
+            'User-Agent': 'Mozilla/5.0',
+            "Authorization": out_info_ath
+        }
+        response = get_url("https://api.outbreak.info/genomics/location?name=**", headers=headers)
         json_data = response.read().decode('utf-8', 'replace')
         loc_json = json.loads(json_data)
 
@@ -176,9 +187,13 @@ def get_location_data(location_id, location):
         last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(location_file))).total_seconds()
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
+        headers = {
+            'User-Agent': 'Mozilla/5.0',
+            "Authorization": out_info_auth
+        }
         json_data = get_url(
             f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
-            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=2048").read().decode('utf-8', 'replace')
+            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=2048", headers=headers).read().decode('utf-8', 'replace')
         loc_df = pd.json_normalize(json.loads(json_data)["results"])
         loc_df["location"] = location
         loc_df = loc_df.sort_values(['location', 'date', 'lineage'])
