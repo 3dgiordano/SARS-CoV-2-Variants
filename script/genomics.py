@@ -149,7 +149,7 @@ def get_locations():
     if not last_time or last_time > 21600:
         headers = {
             'User-Agent': 'Mozilla/5.0',
-            "Authorization": out_info_ath
+            "Authorization": out_info_auth
         }
         response = get_url("https://api.outbreak.info/genomics/location?name=**", headers=headers)
         json_data = response.read().decode('utf-8', 'replace')
