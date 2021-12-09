@@ -193,7 +193,8 @@ def get_location_data(location_id, location):
         }
         json_data = get_url(
             f"https://api.outbreak.info/genomics/prevalence-by-location-all-lineages?location_id={location_id}&"
-            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=2048", headers=headers).read().decode('utf-8', 'replace')
+            f"cumulative=false&other_threshold=0.0&nday_threshold=0&ndays=2048", headers=headers).read().decode('utf-8',
+                                                                                                                'replace')
         loc_df = pd.json_normalize(json.loads(json_data)["results"])
         loc_df["location"] = location
         loc_df = loc_df.sort_values(['location', 'date', 'lineage'])
@@ -740,6 +741,8 @@ def main():
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.lt(0.5), 0)  # Clean lowers values
 
     df_cases_r_data.risk3 = df_cases_r_data.risk3.mask(df_cases_r_data.risk3.gt(12), 12)  # Force upper values
+
+    df_cases_r_data.risk3 = round(df_cases_r_data.risk3, 2)  # Final value is rounded to 2 decimal precision
 
     df_cases_r_data["variation"] = 0
     df_cases_r_data["var_inc"] = 0
