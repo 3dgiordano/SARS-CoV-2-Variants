@@ -102,6 +102,10 @@ def get_cases_data():
     return cd
 
 
+def get_owid_cases_data():
+    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv")
+
+
 def get_locations_data():
     return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/locations.csv")
 
@@ -533,6 +537,7 @@ def main():
     locations = df_loc.to_dict('records')
 
     df_cases_data = get_cases_data()
+    df_owid_cases_data = get_owid_cases_data()
 
     df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
 
@@ -662,12 +667,20 @@ def main():
     df_cases_r_data["population"] = df_cases_r_data["population"].astype(int)
 
     def pro_cases(x):
-        if x["cases"] > 0:
-            days = (cases_data_date - x["date"]).days
-            if days < 0:
-                tot_days_data = (14 + days) - 1
-                p_cases = round((x["cases"] * 14) / tot_days_data, 0)
-                df_cases_r_data.loc[[x.name], "cases"] = p_cases
+        # Project cases to the period based on the 7 days average data
+        days = (cases_data_date - x["date"]).days
+        if days < 0:
+            cases_avg = df_owid_cases_data[df_owid_cases_data['location'] == x['location']].iloc[-1][
+                "new_cases_smoothed"]
+
+            tot_days_data = (14 + days)
+            pday_cases = (x["cases"] / tot_days_data)
+            if pday_cases < cases_avg:
+                p_cases = round(cases_avg * 14, 0)
+            else:
+                p_cases = round(pday_cases * 14, 0)
+
+            df_cases_r_data.loc[[x.name], "cases"] = p_cases
 
     df_cases_r_data.apply(pro_cases, axis=1)
 
