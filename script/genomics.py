@@ -685,10 +685,7 @@ def main():
             tot_days_data = (14 + days)
             pday_cases = round((x["cases"] / tot_days_data) * 14, 0)
             # print(x["location"] + ":" + str(cases_trend_projected) + " " + str(pday_cases))
-            if cases_trend_projected > pday_cases:  # The trend projected is more valuable than the basic projection
-                p_cases = cases_trend_projected
-            else:
-                p_cases = pday_cases
+            p_cases = cases_trend_projected
 
             df_cases_r_data.loc[[x.name], "cases"] = p_cases
 
