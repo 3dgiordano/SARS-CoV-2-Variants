@@ -666,10 +666,13 @@ def main():
     df_cases_r_data["population"] = df_cases_r_data["population"].fillna(0)
     df_cases_r_data["population"] = df_cases_r_data["population"].astype(int)
 
-    def trendline(d):
-        coeffs = np.polyfit([*range(len(d.index.values))], list(d), 1)
+    def trendline(d, ndays):
+        from_v = len(d.index.values)
+        coeffs = np.polyfit([*range(from_v)], list(d), 1)
         predict = np.poly1d(coeffs)
-        return predict(len(d.index.values) + 1)
+        predict_values = predict([*range(from_v + 1, from_v + ndays + 1)])
+        # print(predict_values)
+        return sum(predict_values)
 
     def pro_cases(x):
         # Project cases to the period based on the 7 days average data
@@ -678,14 +681,14 @@ def main():
             cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
                              "new_cases_smoothed"].iloc[-7:]
 
-            cases_avg = trendline(cases_avgs)
-
+            cases_trend_projected = round(x["cases"] + trendline(cases_avgs, ndays=(days * -1)), 0)
             tot_days_data = (14 + days)
-            pday_cases = (x["cases"] / tot_days_data)
-            if pday_cases < cases_avg:
-                p_cases = round(cases_avg * 14, 0)
+            pday_cases = round((x["cases"] / tot_days_data) * 14, 0)
+            # print(x["location"] + ":" + str(cases_trend_projected) + " " + str(pday_cases))
+            if cases_trend_projected > pday_cases:  # The trend projected is more valuable than the basic projection
+                p_cases = cases_trend_projected
             else:
-                p_cases = round(pday_cases * 14, 0)
+                p_cases = pday_cases
 
             df_cases_r_data.loc[[x.name], "cases"] = p_cases
 
