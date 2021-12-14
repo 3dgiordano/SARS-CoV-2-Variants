@@ -666,12 +666,19 @@ def main():
     df_cases_r_data["population"] = df_cases_r_data["population"].fillna(0)
     df_cases_r_data["population"] = df_cases_r_data["population"].astype(int)
 
+    def trendline(d):
+        coeffs = np.polyfit([*range(len(d.index.values))], list(d), 1)
+        predict = np.poly1d(coeffs)
+        return predict(len(d.index.values) + 1)
+
     def pro_cases(x):
         # Project cases to the period based on the 7 days average data
         days = (cases_data_date - x["date"]).days
         if days < 0:
-            cases_avg = df_owid_cases_data[df_owid_cases_data['location'] == x['location']].iloc[-1][
-                "new_cases_smoothed"]
+            cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
+                             "new_cases_smoothed"].iloc[-7:]
+
+            cases_avg = trendline(cases_avgs)
 
             tot_days_data = (14 + days)
             pday_cases = (x["cases"] / tot_days_data)
