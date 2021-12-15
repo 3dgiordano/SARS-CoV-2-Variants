@@ -770,17 +770,17 @@ def main():
 
     def variation(x):
         if x.name > 0 and x["location"] == df_cases_r_data.iloc[x.name - 1]["location"]:
-            variation = x["risk3"] - df_cases_r_data.iloc[x.name - 1]["risk3"]
-            df_cases_r_data.loc[[x.name], "variation"] = variation
-            if variation != 0:
+            var_cases = x["cases"] - df_cases_r_data.iloc[x.name - 1]["cases"]
+            df_cases_r_data.loc[[x.name], "variation"] = var_cases
+            if var_cases != 0:
                 var_inc = 0
-                if df_cases_r_data.iloc[x.name - 1]["risk3"] > 0:
-                    var_inc = x["risk3"] / df_cases_r_data.iloc[x.name - 1]["risk3"]
-                    df_cases_r_data.loc[[x.name], "var_inc"] = var_inc
+                if df_cases_r_data.iloc[x.name - 1]["cases"] > 0:
+                    var_inc = x["cases"] / df_cases_r_data.iloc[x.name - 1]["cases"]
+                    df_cases_r_data.loc[[x.name], "var_inc"] = round(var_inc, 2)
                     if round(var_inc, 0) > 1:
                         df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "x{:.0f}".format(var_inc)
                 if round(var_inc, 0) <= 1:
-                    if variation > 0:
+                    if var_cases > 0:
                         df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "+"
                     else:
                         df_cases_r_data.loc[[x.name], "var_inc_fmt"] = "-"
