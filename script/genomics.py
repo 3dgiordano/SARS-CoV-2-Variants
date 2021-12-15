@@ -169,7 +169,8 @@ def get_locations():
                 .replace("Republic of Congo", "Congo") \
                 .replace("Democratic Republic of the Congo", "Democratic Republic of Congo") \
                 .replace("Swaziland", "Eswatini") \
-                .replace("Macedonia", "North Macedonia")
+                .replace("Macedonia", "North Macedonia") \
+                .replace("Faroe Islands", "Faeroe Islands")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -527,6 +528,7 @@ def get_loc_data(locat):
             columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
     except Exception as e:
         print(e)
+        raise e
     return df_loc
 
 
