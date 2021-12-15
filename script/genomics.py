@@ -670,7 +670,7 @@ def main():
         from_v = len(d.index.values)
         coeffs = np.polyfit([*range(from_v)], list(d), 1)
         predict = np.poly1d(coeffs)
-        predict_values = predict([*range(from_v + 1, from_v + ndays + 1)])
+        predict_values = predict([*range(from_v + 1, from_v + ndays + 1)]).clip(min=0)
         # print(predict_values)
         return sum(predict_values)
 
