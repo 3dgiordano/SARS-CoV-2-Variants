@@ -316,7 +316,7 @@
       // console.log(continent);
       series = [];
 
-      locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))];
+      locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
 
       cont_length = {
         "Oceania": 460,
