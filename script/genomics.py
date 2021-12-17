@@ -175,7 +175,8 @@ def get_locations():
                 .replace("Macedonia", "North Macedonia") \
                 .replace("Faroe Islands", "Faeroe Islands") \
                 .replace("Palestina", "Palestine") \
-                .replace("Timor-Leste", "Timor")
+                .replace("Timor-Leste", "Timor") \
+                .replace("Curaçao", "Curacao")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -641,6 +642,10 @@ def main():
 
     print("get cases r")
     df_cases_r_data = get_cases_r_data()
+    cases_r_locations = df_cases_data["location"].tolist()
+
+    print(set(cases_r_locations).difference(locs))
+    print(set(locs).difference(cases_r_locations))
 
     print("Rename countries")
     df_cases_r_data.rename(columns={"Country/Region": "location", "Date": "date", "R": "r"}, inplace=True)
