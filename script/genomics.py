@@ -535,6 +535,7 @@ def get_loc_data(locat):
     except Exception as e:
         print(e)
         raise e
+        #return None
     return df_loc
 
 
@@ -610,8 +611,10 @@ def main():
 
     iso_list.apply(ren_to_iso, axis=1)
 
-    with Pool(5) as p:
+    with Pool(3) as p:
         locations_list += p.map(get_loc_data, locations)
+
+    locations_list = filter(None.__ne__, locations_list)
 
     print("Create location list...")
     df = pd.concat(locations_list)
