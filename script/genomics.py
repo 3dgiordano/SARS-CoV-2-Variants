@@ -171,7 +171,8 @@ def get_locations():
                 .replace("Swaziland", "Eswatini") \
                 .replace("Macedonia", "North Macedonia") \
                 .replace("Faroe Islands", "Faeroe Islands") \
-                .replace("Palestina", "Palestine")
+                .replace("Palestina", "Palestine") \
+                .replace("Timor-Leste", "Timor")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
