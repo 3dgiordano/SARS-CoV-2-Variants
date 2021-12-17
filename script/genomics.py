@@ -118,6 +118,9 @@ def get_cases_r_data():
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
         r_df = pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database.csv")
+        r_map = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/scripts/input/reproduction/" +
+                            "reprod_country_standardized.csv")
+        r_df = r_df.replace(dict(zip(r_map.reprod, r_map.owid)))
         r_df.to_csv(r_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
         r_df = pd.read_csv(r_file, quoting=csv.QUOTE_ALL, decimal=",")
