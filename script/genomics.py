@@ -535,7 +535,7 @@ def get_loc_data(locat):
     except Exception as e:
         print(e)
         raise e
-        #return None
+        # return None
     return df_loc
 
 
@@ -546,7 +546,7 @@ def main():
     locations = df_loc.to_dict('records')
 
     df_cases_data = get_cases_data()
-    df_owid_cases_data = get_owid_cases_data()
+    df_owid_cases_data = get_owid_cases_data().fillna(0)
 
     df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
 
@@ -694,9 +694,15 @@ def main():
         days = (cases_data_date - x["date"]).days
         if days < 0:
             cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
-                             "new_cases_smoothed"].iloc[-7:]
+                             "new_cases_smoothed"].iloc[-7:].clip(lower=0)
 
-            cases_trend_projected = round(x["cases"] + trendline(cases_avgs, ndays=(days * -1)), 0)
+            trend_val = 0
+            if sum(cases_avgs) > 0:
+                try:
+                    trend_val = trendline(cases_avgs, ndays=(days * -1))
+                except Exception as e:
+                    print("Location:" + x["location"] + " with error in trend!")
+            cases_trend_projected = round(x["cases"] + trend_val, 0)
             tot_days_data = (14 + days)
             pday_cases = round((x["cases"] / tot_days_data) * 14, 0)
             # print(x["location"] + ":" + str(cases_trend_projected) + " " + str(pday_cases))
