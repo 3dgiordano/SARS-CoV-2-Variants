@@ -176,7 +176,11 @@ def get_locations():
                 .replace("Faroe Islands", "Faeroe Islands") \
                 .replace("Palestina", "Palestine") \
                 .replace("Timor-Leste", "Timor") \
-                .replace("Curaçao", "Curacao")
+                .replace("Curaçao", "Curacao") \
+                .replace("Bonaire, Sint Eustatius and Saba", "Bonaire Sint Eustatius and Saba") \
+                .replace("Saint-Martin", "Saint Martin (French part)") \
+                .replace("Sint Maarten", "Sint Maarten (Dutch part)") \
+                .replace("French Guiana", "Guayana")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -590,17 +594,21 @@ def main():
         {'iso': 'WSM', 'location': 'Samoa'},
         {'iso': 'TON', 'location': 'Tonga'},
         {'iso': 'TLS', 'location': 'Timor'},
-        {'iso': 'FSM', 'location': 'Micronesia (country)'}
+        {'iso': 'FSM', 'location': 'Micronesia (country)'},
+        {'iso': 'MAC', 'location': 'Macao'},
     ]
 
     for to_add in add_iso_dict:
         if len(iso_list[iso_list["iso"] == to_add["iso"]]) == 0:
+            print("ISO to add:" + to_add["iso"])
             iso_list = iso_list.append(to_add, ignore_index=True)
 
     locs = iso_list["location"].tolist()
     cases_locations = df_cases_data["location"].tolist()
 
+    print("Locations without iso from outbreak")
     print(set(cases_locations).difference(locs))
+    print("Locations without cases")
     print(set(locs).difference(cases_locations))
 
     # Remap the outbreak.info code to iso code of some countries
