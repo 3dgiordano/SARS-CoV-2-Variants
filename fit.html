@@ -305,9 +305,12 @@
 
           custom: function ({ series, seriesIndex, dataPointIndex, w }) {
             var str_html = '<div style="">';
-
+			v_date = new Date(w.config.xaxis.categories[dataPointIndex]);
+            f_date = new Date(v_date - (( 3600 * 1000 * 24) * 13 )); 
+			v_date_str = f_date.toISOString().split("T")[0] + " to " + v_date.toISOString().split("T")[0];
+			
             str_html += '<div class="arrow_box apexcharts-tooltip-title" style="display:flex">' +
-              '<span style="width:100%;text-align:center;display:block;">' + w.config.xaxis.categories[dataPointIndex -1] + " to " + w.config.xaxis.categories[dataPointIndex] + '</span>' +
+              '<span style="width:100%;text-align:center;display:block;">' + v_date_str + '</span>' +
               '</div>';
 
             var sortIndex = [];
