@@ -319,12 +319,12 @@
       locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
 
       cont_length = {
-        "Oceania": 460,
-        "Africa": 1720,
-        "Asia": 1460,
-        "South America": 460,
-        "North America": 810,
-        "Europe": 1460
+        "Oceania": parseInt(35 * (Math.sqrt(locations.length) * 4)),
+        "Africa": parseInt(35 * (Math.sqrt(locations.length) * 7.1)),
+        "Asia": parseInt(35 * (Math.sqrt(locations.length) * 6.5)),
+        "South America": parseInt(35 * (Math.sqrt(locations.length) * 3.8)),
+        "North America": parseInt(35 * (Math.sqrt(locations.length) * 5.5)),
+        "Europe": parseInt(35 * (Math.sqrt(locations.length) * 6.4))
       }
 
       continent_height = cont_length[continent];
