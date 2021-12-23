@@ -557,6 +557,84 @@ def main():
     # Get the last date in data
     cases_data_date = sorted(list(set(df_cases_data["date"])))[-1]
 
+    df_owid_cases_data["org_new_cases"] = df_owid_cases_data["new_cases"]
+    df_owid_cases_data["org_new_cases_smoothed"] = df_owid_cases_data["new_cases_smoothed"]
+
+    max_idx = len(df_owid_cases_data.index.values) - 1
+    # Fix some JHU noise data
+    global csse_data_fixed
+    csse_data_fixed = 0
+
+    def fix_jhu(x):
+        global csse_data_fixed
+
+        if x.name + 2 > max_idx:
+            return
+
+        if df_owid_cases_data.iloc[[x.name + 2]]["location"].item() == x["location"]:
+            if x["new_cases"] == 0:
+                # Read 2day forward
+                d2 = df_owid_cases_data.iloc[[x.name + 1]]["new_cases"].item()
+                d3 = df_owid_cases_data.iloc[[x.name + 2]]["new_cases"].item()
+
+                if d3 < d2 and d2 > 1:
+                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
+                    if d3 == 0:
+                        nd = round(d2 / 2, 0)
+                    else:
+                        nd = round((d2 - d3) / 1.5, 0)
+                    nd2 = d2 - nd
+                    # print("nd:" + str(nd) + " nd2:" + str(nd2))
+                    df_owid_cases_data.loc[[x.name], "new_cases"] = nd
+                    df_owid_cases_data.loc[[x.name + 1], "new_cases"] = nd2
+                    csse_data_fixed += 1
+
+                elif d3 > d2 > 1:
+                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
+                    nd = round((d3 - d2) / 2, 0)
+                    nd3 = d3 - nd
+                    # print("nd:" + str(nd) + " d2:" + str(d2) + " nd3:" + str(nd3))
+                    df_owid_cases_data.loc[[x.name], "new_cases"] = nd
+                    df_owid_cases_data.loc[[x.name + 2], "new_cases"] = nd3
+                    csse_data_fixed += 1
+
+            elif x["new_cases"] < 0:
+                # Find and fix the previous peak to compensate
+                # print(str(x["date"]) + " " + str(x["new_cases"]))
+
+                from_ix = x.name - 1
+                while True:
+                    if x.name - from_ix == 30:
+                        print(x["location"])
+                    if df_owid_cases_data.iloc[[x.name + 2]]["location"].item() != x["location"]:
+                        break
+                    to_fix = df_owid_cases_data.iloc[[from_ix]]["new_cases"].item()
+                    if x["new_cases"] * - 1 < to_fix:
+                        # print("to fix:" + str(df_cases_data.iloc[[from_ix]]["date"].item()) + " " + str(to_fix))
+                        df_owid_cases_data.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
+                        df_owid_cases_data.loc[[x.name], "new_cases"] = 0
+                        csse_data_fixed += 1
+                        break
+                    from_ix -= 1
+
+    print("Fix CSSE Data")
+    for i in range(10):
+        print(f"-{i}--")
+        csse_data_fixed = 0
+        df_owid_cases_data.apply(fix_jhu, axis=1)
+        print(f"Data fixed:{csse_data_fixed}")
+
+    metric = "new_cases"
+    df_owid_cases_data[f"{metric}_smoothed"] = (
+        df_owid_cases_data.groupby(["location"]).rolling(
+            window=7,
+            min_periods=3,
+            center=False,
+        )[f"{metric}"].mean().droplevel(level=[0]).round(2)
+    )
+
+    # df_owid_cases_data.to_csv("../data/cases_fix.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
     df_cases_data = df_cases_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
         {'new_cases': 'sum'}).rename(columns={"new_cases": "cases"}).reset_index()
 
@@ -641,6 +719,8 @@ def main():
 
     print("Save cases.csv...")
     df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    # return
 
     # R
 
