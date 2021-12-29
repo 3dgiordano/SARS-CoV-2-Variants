@@ -103,7 +103,20 @@ def get_cases_data():
 
 
 def get_owid_cases_data():
-    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv")
+    owid_file = f"../temp/owid_cases_data.csv"
+    last_time = None
+    if os.path.isfile(owid_file):
+        last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(owid_file))).total_seconds()
+    # keep the stored data temporarily for one hour
+    if not last_time or last_time > 21600:
+        df_owid_cases_data = pd.read_csv(
+            "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv").fillna(0)
+        df_owid_cases_data = fix_owid_cases_data(df_owid_cases_data)
+        df_owid_cases_data.to_csv(owid_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    else:
+        df_owid_cases_data = pd.read_csv(owid_file, quoting=csv.QUOTE_ALL, decimal=",")
+
+    return df_owid_cases_data
 
 
 def get_locations_data():
@@ -543,20 +556,7 @@ def get_loc_data(locat):
     return df_loc
 
 
-def main():
-    locations_list = []
-
-    df_loc = get_locations()
-    locations = df_loc.to_dict('records')
-
-    df_cases_data = get_cases_data()
-    df_owid_cases_data = get_owid_cases_data().fillna(0)
-
-    df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
-
-    # Get the last date in data
-    cases_data_date = sorted(list(set(df_cases_data["date"])))[-1]
-
+def fix_owid_cases_data(df_owid_cases_data):
     df_owid_cases_data["org_new_cases"] = df_owid_cases_data["new_cases"]
     df_owid_cases_data["org_new_cases_smoothed"] = df_owid_cases_data["new_cases_smoothed"]
 
@@ -633,7 +633,22 @@ def main():
         )[f"{metric}"].mean().droplevel(level=[0]).round(2)
     )
 
-    # df_owid_cases_data.to_csv("../data/cases_fix.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    return df_owid_cases_data
+
+
+def main():
+    locations_list = []
+
+    df_loc = get_locations()
+    locations = df_loc.to_dict('records')
+
+    df_cases_data = get_cases_data()
+    df_owid_cases_data = get_owid_cases_data()
+
+    df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
+
+    # Get the last date in data
+    cases_data_date = sorted(list(set(df_cases_data["date"])))[-1]
 
     df_cases_data = df_cases_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
         {'new_cases': 'sum'}).rename(columns={"new_cases": "cases"}).reset_index()
@@ -1047,7 +1062,7 @@ def main():
     to_date = datetime.now() - timedelta(days=14)
     df_fit_list = []
     for location in locations:
-        print(f"Save Location: {location['country']}")
+        # print(f"Save Location: {location['country']}")
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
         if df_location.size > 0:
