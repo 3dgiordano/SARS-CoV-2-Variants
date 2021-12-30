@@ -340,7 +340,7 @@
           dcv = 0;
           variation = "";
           if (dci > -1) {
-            dcv = parseFloat(df_location.getRow(dci).get(selected_column_id).toString().replace(',', '.')).toFixed(2);
+            dcv = parseFloat(df_location.getRow(dci).get(selected_column_id).toString().replace(',', '.')).toFixed(0);
             variation = df_location.getRow(dci).get("var_inc_fmt");
           } else {
             dcv = -1;
