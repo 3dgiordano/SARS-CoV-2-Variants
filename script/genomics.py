@@ -799,10 +799,14 @@ def main():
             cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
                              "new_cases_smoothed"].iloc[-7:].clip(lower=0)
 
+            cases_avgs_3 = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
+                               "new_cases_smoothed"].iloc[-3:].clip(lower=0)
+
             trend_val = 0
             if sum(cases_avgs) > 0:
                 try:
-                    trend_val = trendline(cases_avgs, ndays=(days * -1))
+                    trend_val = (trendline(cases_avgs, ndays=(days * -1)) + trendline(cases_avgs_3,
+                                                                                      ndays=(days * -1))) / 2
                 except Exception as e:
                     print("Location:" + x["location"] + " with error in trend!")
             cases_trend_projected = round(x["cases"] + trend_val, 0)
@@ -816,7 +820,8 @@ def main():
     df_cases_r_data["org_cases"] = df_cases_r_data["cases"]  # Save copy of original cases
     df_cases_r_data.apply(pro_cases, axis=1)
 
-    df_cases_r_data["org_cases_100k"] = round((df_cases_r_data["org_cases"] / df_cases_r_data["population"]) * 100000, 2)
+    df_cases_r_data["org_cases_100k"] = round((df_cases_r_data["org_cases"] / df_cases_r_data["population"]) * 100000,
+                                              2)
     df_cases_r_data["cases_100k"] = round((df_cases_r_data["cases"] / df_cases_r_data["population"]) * 100000, 2)
 
     df_cases_r_data["risk"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["r"] + 1)) / 250, 2)
