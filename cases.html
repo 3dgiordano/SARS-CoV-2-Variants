@@ -152,13 +152,10 @@
           },
           chart: {
             height: 250,
-            type: 'heatmap',
+            type: 'line',
             redrawOnParentResize: false,
             redrawOnWindowResize: true,
             animations: { enabled: false },
-            stroke: {
-              width: 1
-            },
             toolbar: {
               show: false,
             },
@@ -166,13 +163,16 @@
               enabled: false,
             },
           },
-          states: {
-            active: {
-              filter: {
-                type: 'none' /* none, lighten, darken */
-              }
-            },
+		  stroke: {
+            width: 2,
+			curve: 'smooth',
           },
+		  forecastDataPoints: {
+            count: 1
+		  },
+		  fill: {
+			type: 'solid',
+		  },
           legend: {
               offsetY: -5,
               onItemClick: {
@@ -186,7 +186,7 @@
             show: true,
             type: 'datetime',
             categories: df_dates,
-            position: "top",
+            position: "bottom",
             axisBorder: {
               show: true,
               color: '#78909C',
@@ -218,7 +218,7 @@
             show: true,
             showAlways: true,
             opposite: true,
-            reversed: true,
+            reversed: false,
             floating: false,
             labels:{
               show:true,
@@ -243,27 +243,6 @@
               offsetY: 16
             },
               
-          },
-          plotOptions: {
-            heatmap: {
-              shadeIntensity: 0.5,
-              radius: 0,
-              useFillColorAsStroke: true,
-              colorScale: {
-                ranges: ranges
-              },
-            },
-          },
-          dataLabels: {
-            enabled: true,
-            formatter: function(value, { seriesIndex, dataPointIndex, w }) {
-              return w.config.series[seriesIndex].data[dataPointIndex]["variation"]
-            },
-            style: {
-              fontSize: '8px',
-              fontFamily: 'Roboto, Verdana, Helvetica, Arial, sans-serif',
-              colors: ["#FFFFFF"]
-            },
           },
           tooltip: {
             x: {
@@ -298,13 +277,34 @@
               fontFamily: "Verdana"
             },
           },
+		  subtitle: {
+			text: "Biweekly",
+			align: 'right',
+		  },
         };
       
       continents_chart = new ApexCharts(document.querySelector("#continent" ), options);
       continents_chart.render();
       
     }
+	
+	function load_df_locations() {
+	
+	  locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
 
+	  location_list = document.getElementById("location_list");
+	  location_list.innerHTML = '';
+	  
+	  locations.forEach(location => {
+		var option = document.createElement("option");
+		option.value = location;
+		option.text = location;
+		location_list.appendChild(option);
+	  });
+	  
+	  update_location();
+	}
+	
     function load_df() {
       if (df_dates.length == 0) {
               df_dates = [...new Set(df.sortBy('date').toArray("date"))];
@@ -313,23 +313,18 @@
       var i = 0;
       var row;
 
-      // console.log(continent);
       series = [];
+	  column_name = {
+		"cases": "Cases",
+		"cases_100k": "Cases 100k",
+	  }
+	  
+	  selected_column_id = document.querySelector('input[name="column"]:checked').id;
 
-      locations = [...new Set(df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
+      locations = [selected_location];
 
-      cont_length = {
-        "Oceania": parseInt(35 * (Math.sqrt(locations.length) * 4)),
-        "Africa": parseInt(35 * (Math.sqrt(locations.length) * 7.1)),
-        "Asia": parseInt(35 * (Math.sqrt(locations.length) * 6.5)),
-        "South America": parseInt(35 * (Math.sqrt(locations.length) * 3.8)),
-        "North America": parseInt(35 * (Math.sqrt(locations.length) * 5.5)),
-        "Europe": parseInt(35 * (Math.sqrt(locations.length) * 6.4))
-      }
-
-      continent_height = cont_length[continent];
-      // console.log("    " + continent_height);
-
+      continent_height = 500;
+      
       locations.forEach(location => {
         
         df_location = df.filter(row => row.get('location') == location);
@@ -345,7 +340,7 @@
           dcv = 0;
           variation = "";
           if (dci > -1) {
-            dcv = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(2);
+            dcv = parseFloat(df_location.getRow(dci).get(selected_column_id).toString().replace(',', '.')).toFixed(2);
             variation = df_location.getRow(dci).get("var_inc_fmt");
           } else {
             dcv = -1;
@@ -357,9 +352,9 @@
           d +=1
         });
 
-        if (touchDevice && doc_width < 1024) {
-          data = data.slice(data.length-15,data.length);
-        }
+        // Only latest data
+        data = data.slice(data.length-14,data.length);
+        
         series.push(
             { name: location, data: data }
         );
@@ -371,11 +366,14 @@
             chart: {
               height: continent_height,
             },
-            title: {text:continent},
+            title: {text:selected_location},
             series: series,
             noData: {
               text: "No Data",
             },
+			subtitle: {
+				text: "Biweekly " + column_name[selected_column_id],
+			},
           }, 
           true, false, true
         );
@@ -395,14 +393,23 @@
             dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases_r.csv').then(r_df => {
     
               df = r_df;
-              load_df();    
+              load_df_locations();    
             });
           } else {
-            load_df();
+            load_df_locations();
           }
         }, 300);
       
     }
+	function update_location() {
+	
+	  location_list = document.getElementById("location_list");
+	  selected_location = location_list.options[ location_list.selectedIndex ].value;
+	  
+	  load_df();
+		
+		
+	}
   </script>
 
 <div class="info">
@@ -412,16 +419,33 @@
     <br />
     <b>Last update: </b><span id="last_update"></span><br>
     <br /><br />
-    <table class="actions"><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button_active" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button" href="cases">Cases</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
+    <table class="actions"><tr><td><a class="button" href="./map">World Map</a></td><td><a class="button" href="trend">Trends</a></td><td><a class="button" href="heat">Heat Map</a></td><td><a class="button" href="scatter">Scatter</a></td><td><a class="button_active" href="cases">Cases</a></td><td><a class="button" href="about_r">About</a></td></tr></table><table></table><br>
     <br />
-    <form style="text-align: center">
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="Europe" checked onclick="update_continent();"/>Europe</label>
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="North_America" onclick="update_continent();"/>North America</label>
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="South_America" onclick="update_continent();"/>South America</label>
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="Asia" onclick="update_continent();"/>Asia</label>
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="Africa" onclick="update_continent();"/>Africa</label>
-      <label style="white-space:nowrap"><input type="radio" name="continent" id="Oceania" onclick="update_continent();"/>Oceania</label>
-    </form>
+	<table align="center" cellpadding=6px>
+		<tr>
+			<td colspan=2 align="center">
+				<form style="text-align: center">
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="Europe" checked onclick="update_continent();"/>Europe</label>
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="North_America" onclick="update_continent();"/>North America</label>
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="South_America" onclick="update_continent();"/>South America</label>
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="Asia" onclick="update_continent();"/>Asia</label>
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="Africa" onclick="update_continent();"/>Africa</label>
+				  <label style="white-space:nowrap"><input type="radio" name="continent" id="Oceania" onclick="update_continent();"/>Oceania</label>
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<select id="location_list" style="width:200px;" onchange="update_location();"></select>
+			</td>
+			<td align="left">
+				<form>
+					<label style="white-space:nowrap"><input type="radio" name="column" id="cases" checked onclick="update_location();"/>Cases</label>
+					<label style="white-space:nowrap"><input type="radio" name="column" id="cases_100k" onclick="update_continent();"/>Cases 100k</label>
+				</form>
+			</td>
+		</tr>
+	</table>
   </div>
 </div>
 
