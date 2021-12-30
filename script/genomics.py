@@ -813,8 +813,10 @@ def main():
 
             df_cases_r_data.loc[[x.name], "cases"] = p_cases
 
+    df_cases_r_data["org_cases"] = df_cases_r_data["cases"]  # Save copy of original cases
     df_cases_r_data.apply(pro_cases, axis=1)
 
+    df_cases_r_data["org_cases_100k"] = round((df_cases_r_data["org_cases"] / df_cases_r_data["population"]) * 100000, 2)
     df_cases_r_data["cases_100k"] = round((df_cases_r_data["cases"] / df_cases_r_data["population"]) * 100000, 2)
 
     df_cases_r_data["risk"] = round((df_cases_r_data["cases_100k"] * (df_cases_r_data["r"] + 1)) / 250, 2)
