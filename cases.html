@@ -360,7 +360,7 @@
           if (dci > -1) {
             dcv = parseFloat(df_location.getRow(dci).get(selected_column_id).toString().replace(',', '.')).toFixed(0);
 			cases_dcv = parseFloat(df_location.getRow(dci).get("cases").toString().replace(',', '.')).toFixed(0);
-			risk = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(0);
+			risk = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(2);
             variation = df_location.getRow(dci).get("var_inc_fmt");
           } else {
             dcv = -1;
