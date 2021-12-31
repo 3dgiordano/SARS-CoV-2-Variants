@@ -398,11 +398,15 @@
           d +=1
         });
 		
+		// Get the number of filtered data
+		period_list = document.getElementById("period_list");
+		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
+		
         // Only latest data
-        data = data.slice(data.length-14,data.length);
+        data = data.slice(data.length-selected_period,data.length);
         
-		colors = colors.slice(colors.length-14,colors.length);
-		colorStops = colorStops.slice(colorStops.length-14,colorStops.length);
+		colors = colors.slice(colors.length-selected_period,colors.length);
+		colorStops = colorStops.slice(colorStops.length-selected_period,colorStops.length);
 		// Reindex
 		for (var i = 0; i < colorStops.length; i++) { colors[i]["dataPointIndex"] = i; }
 		for (var i = 0; i < colorStops.length; i++) { colorStops[i]["offset"] = parseInt((i * 100) / colorStops.length); }
@@ -572,6 +576,15 @@
 
   <table id="content" class="content heat_table" align="center">
     <tr>
+		<td colspan=2 align="right">
+			Show data from last <select id="period_list" style="width:100px;" onclick="update_location();">
+				<option value="14">28 weeks</option>
+				<option value="28">56 weeks</option>
+				<option value="42">84 weeks</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
       <td colspan=2 align="center">
         <span id="loading">Loading...</span>
         <div style="visibility: hidden" id="continent"></div>
