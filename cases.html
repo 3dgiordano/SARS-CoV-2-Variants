@@ -97,6 +97,7 @@
       df_dates = [];
       series = [];
 	  colors = [];
+	  colorStops = [];
       ranges = [
                   {
                     from: -1,
@@ -167,7 +168,7 @@
             },
           },
 		  stroke: {
-            width: 4,
+            width: 5,
 			curve: 'smooth',
           },
 		  forecastDataPoints: {
@@ -175,7 +176,10 @@
 		  },
 		  colors: ["#9b9b9b"],
 		  fill: {
-			type: "solid",
+			type: "gradient",
+			gradient: {
+				colorStops: colorStops
+			}
 		  },
 		  markers: {
 			size: 1,
@@ -323,6 +327,7 @@
 	  data_points = [];
 	  date_points = [];
 	  colors = [];
+	  colorStops = [];
 	  column_name = {
 		"cases": "Cases",
 		"cases_100k": "Cases 100k",
@@ -379,7 +384,14 @@
 				dataPointIndex: d,
 				fillColor: risk_color,
 				strokeColor: risk_color,
-				size: 2,
+				size: 4,
+			}
+		  );
+		  
+		  colorStops.push(
+			{
+				offset: 0,
+				color: risk_color,
 			}
 		  );
 		  		  
@@ -390,8 +402,10 @@
         data = data.slice(data.length-14,data.length);
         
 		colors = colors.slice(colors.length-14,colors.length);
+		colorStops = colorStops.slice(colorStops.length-14,colorStops.length);
 		// Reindex
-		for (var i = 0; i < colors.length; i++) { colors[i]["dataPointIndex"] = i; }
+		for (var i = 0; i < colorStops.length; i++) { colors[i]["dataPointIndex"] = i; }
+		for (var i = 0; i < colorStops.length; i++) { colorStops[i]["offset"] = parseInt((i * 100) / colorStops.length); }
 		
 		// Only the latest point and change the date to the report date
 		today_data = data.slice(data.length-1,data.length);
@@ -467,6 +481,11 @@
             },
 			markers: {
 			  discrete: colors,
+			},
+			fill: {
+				gradient: {
+					colorStops: colorStops
+				}
 			},
             title: {text:selected_location},
             series: series,
