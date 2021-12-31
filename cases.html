@@ -55,6 +55,7 @@
     var df_dates = [];
     var series = [];
     var data = [];
+	var updated_date = null;
     var touchDevice = (navigator.maxTouchPoints || 'ontouchstart' in document.documentElement);
 
     function windowSizeUpdate() {
@@ -82,7 +83,8 @@
 
       dfjs.DataFrame.fromJSON("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/update.json").then(df => {
         var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
-        var date_str = new Date(update_date_str).toString();
+		updated_date = new Date(update_date_str)
+        var date_str = updated_date.toString();
         document.getElementById("last_update").innerText = date_str;
       });
 
@@ -94,6 +96,7 @@
     function load_chart() {
       df_dates = [];
       series = [];
+	  colors = [];
       ranges = [
                   {
                     from: -1,
@@ -164,14 +167,19 @@
             },
           },
 		  stroke: {
-            width: 2,
+            width: 4,
 			curve: 'smooth',
           },
 		  forecastDataPoints: {
             count: 1
 		  },
+		  colors: ["#9b9b9b"],
 		  fill: {
-			type: 'solid',
+			type: "solid",
+		  },
+		  markers: {
+			size: 1,
+			discrete: colors,
 		  },
           legend: {
               offsetY: -5,
@@ -245,6 +253,9 @@
               
           },
           tooltip: {
+			marker: {
+				show: false,
+			},
             x: {
               show: true,
               formatter: function(value) {
@@ -256,13 +267,8 @@
             y: {
               formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                 item_value = Number(series[seriesIndex][dataPointIndex]);
-                found = "Not found";
-                ranges.map((range, index) => {
-                  if (item_value >= range.from && item_value <= range.to) {
-                    found = item_value + " = " + range.name;
-                  }
-                })
-                return found;
+                
+                return item_value;
               }
             }
               
@@ -314,6 +320,9 @@
       var row;
 
       series = [];
+	  data_points = [];
+	  date_points = [];
+	  colors = [];
 	  column_name = {
 		"cases": "Cases",
 		"cases_100k": "Cases 100k",
@@ -331,41 +340,134 @@
 
         df_cases_dates = df_location.toArray("date");
         
-        data = []
+        data = [];
+		cases_data = [];
         d = 0;
+		
         df_dates.forEach(df_date => {
           
           dci = df_cases_dates.indexOf(df_date);
           
           dcv = 0;
+		  cases_dcv = 0;
+		  risk = 0;
           variation = "";
           if (dci > -1) {
             dcv = parseFloat(df_location.getRow(dci).get(selected_column_id).toString().replace(',', '.')).toFixed(0);
+			cases_dcv = parseFloat(df_location.getRow(dci).get("cases").toString().replace(',', '.')).toFixed(0);
+			risk = parseFloat(df_location.getRow(dci).get("risk3").toString().replace(',', '.')).toFixed(0);
             variation = df_location.getRow(dci).get("var_inc_fmt");
           } else {
             dcv = -1;
           }
           data.push(
-              { x: df_date, y: dcv, variation: variation}
+              { x: df_date, y: dcv, variation: variation, risk: risk}
           );
-          
+		  cases_data.push(
+              { x: df_date, y: cases_dcv, variation: variation, risk: risk}
+          );
+		  
+		  risk_color = "#bbbbbb";
+		  ranges.map((range, index) => {
+		    if (risk >= range.from && risk <= range.to) {
+		      risk_color = range.color;
+		    }
+		  })
+		  colors.push(
+			{
+				seriesIndex: 0,
+				dataPointIndex: d,
+				fillColor: risk_color,
+				strokeColor: risk_color,
+				size: 2,
+			}
+		  );
+		  		  
           d +=1
         });
-
+		
         // Only latest data
         data = data.slice(data.length-14,data.length);
         
+		colors = colors.slice(colors.length-14,colors.length);
+		// Reindex
+		for (var i = 0; i < colors.length; i++) { colors[i]["dataPointIndex"] = i; }
+		
+		// Only the latest point and change the date to the report date
+		today_data = data.slice(data.length-1,data.length);
+		today_cases_data = cases_data.slice(cases_data.length-1,cases_data.length);
+		
+		point_date = updated_date.getTime() + 24*60*60*1000; // updated_date.getTime(); // - 24*60*60*1000;
+		point_date_str = new Date(point_date).toISOString().split("T")[0];
+		point_prev_date_str = data.slice(data.length-2,data.length)[0]['x'];
+		point_prev_value = parseInt(data.slice(data.length-2,data.length)[0]['y']);
+		point_prev_cases_value = parseInt(cases_data.slice(cases_data.length-2,cases_data.length)[0]['y']);
+		
+		point_prev_date = new Date(point_prev_date_str).getTime();
+		point_value = parseInt(today_data[0]["y"]);
+		point_cases_value = parseInt(today_cases_data[0]["y"]);
+
+		point_dates = ((point_date - (point_prev_date + 24*60*60*1000)) / (1000 * 3600 * 24));
+
+		// Extrapolate
+		point_value = parseInt(((point_value - point_prev_value) * point_dates) / 14) + point_prev_value;
+		
+		point_cases_value = parseInt((parseInt(((point_cases_value - point_prev_cases_value) * point_dates) / 14) + point_prev_cases_value) / 10);
+		
         series.push(
             { name: location, data: data }
         );
+
+		data_points.push(
+			{
+				x: point_date,
+				y: point_value,
+				marker: {
+				  size: 6,
+				  fillColor: "#fff",
+				  strokeColor: "#2698FF",
+				  radius: 2
+				},
+				label: {
+				  borderColor: "#FF4560",
+				  offsetY: 0,
+				  style: {
+					color: "#fff",
+					background: "#FF4560"
+				  },
+
+				  text: point_cases_value + " (7 avg cases)"
+				}
+			}
+		);
+		
+		date_points.push(
+			{
+			  x: point_date,
+			  borderColor: '#775DD0',
+			  label: {
+				style: {
+				  color: '#000',
+				},
+				text: point_date_str
+			  }
+			}
+		);
         
       });
-      
+      	  
       continents_chart.updateOptions(
           {
+			annotations: {
+				points: data_points,
+				xaxis: date_points,
+			},
             chart: {
               height: continent_height,
             },
+			markers: {
+			  discrete: colors,
+			},
             title: {text:selected_location},
             series: series,
             noData: {
