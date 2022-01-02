@@ -796,6 +796,7 @@ def main():
         # Project cases to the period based on the 7 days average data
         days = (cases_data_date - x["date"]).days
         if days < 0:
+
             cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
                              "new_cases_smoothed"].iloc[-7:].clip(lower=0)
 
@@ -805,13 +806,20 @@ def main():
             trend_val = 0
             if sum(cases_avgs) > 0:
                 try:
-                    trend_val = (trendline(cases_avgs, ndays=(days * -1)) + trendline(cases_avgs_3,
-                                                                                      ndays=(days * -1))) / 2
+                    trend_val_7 = trendline(cases_avgs, ndays=(days * -1))
+
+                    trend_val_3 = trendline(cases_avgs_3, ndays=(days * -1))
+                    if trend_val_3 > trend_val_7:
+                        trend_val = (trend_val_7 + trend_val_3) / 1.5
+                    else:
+                        trend_val = trend_val_7
                 except Exception as e:
                     print("Location:" + x["location"] + " with error in trend!")
+
             cases_trend_projected = round(x["cases"] + trend_val, 0)
-            tot_days_data = (14 + days)
-            pday_cases = round((x["cases"] / tot_days_data) * 14, 0)
+
+            # tot_days_data = (14 + days)
+            # pday_cases = round((x["cases"] / tot_days_data) * 14, 0)
             # print(x["location"] + ":" + str(cases_trend_projected) + " " + str(pday_cases))
             p_cases = cases_trend_projected
 
