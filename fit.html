@@ -43,6 +43,7 @@
     var doc_width = 1024;
     var chart_width = 640;
     var chart_list = [];
+	var variants_color_map = {};
 
     function windowSizeUpdate() {
       doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -195,41 +196,47 @@
       var palettte = []
       // console.log(variants);
       columns.forEach(variant => {
-
+	  
         variant = variant.split("(")[0].trim();
-        // console.log(variant);
-        if (variant == "Other" || variant == "") {
-          palettte.push("#8B8B8B");
-		} else if (variant == "Unknown") {
-          palettte.push("#DBDBDB");		
-        } else {
-          var found = variants.indexOf(variant);
-          // console.log(found);
-          if (found > -1) {
-            var col_index = found % (colors.length - 1);
-            // console.log("Idx:" + col_index);
-            var calt = colors[found % (colors.length - 1)];
-            // console.log("P:" + calt);
-            palettte.push(calt);
+		
+		if (variant in variants_color_map) {
+			palettte.push(variants_color_map[variant]);
+		} else {
+			// console.log(variant);
+			if (variant == "Other" || variant == "") {
+			  variants_color_map[variant] = "#8B8B8B";
+			} else if (variant == "Unknown") {
+			  variants_color_map[variant] = "#DBDBDB";
+			} else {
+			  var found = variants.indexOf(variant);
+			  // console.log(found);
+			  if (found > -1) {
+				var col_index = found % (colors.length - 1);
+				// console.log("Idx:" + col_index);
+				var calt = colors[found % (colors.length - 1)];
+				// console.log("P:" + calt);
+				variants_color_map[variant] = calt;
 
-          } else {
-            // Generate color based on the letters
-            if (variant.length == 2) {
-              var calt1 = color_linages[variant[0].charCodeAt(0) - 65];
-              var pp = (color_linages.length - 1) - (variant[1].charCodeAt(0) - 65);
-              // console.log(pp);
-              var calt2 = color_linages[pp];
-              // console.log("Y:" + calt2);
-              var calt = calt1.substring(0, 4) + calt2.substring(4, 7);
-              // console.log(variant + ":ALT:" + calt);
-              palettte.push(calt);
-            } else {
-              var calt = color_linages[variant[0].charCodeAt(0) - 65];
-              // console.log(variant + ":ALT2:" + calt);
-              palettte.push(calt);
-            }
-          }
-        }
+			  } else {
+				// Generate color based on the letters
+				if (variant.length == 2) {
+				  var calt1 = color_linages[variant[0].charCodeAt(0) - 65];
+				  var pp = (color_linages.length - 1) - (variant[1].charCodeAt(0) - 65);
+				  // console.log(pp);
+				  var calt2 = color_linages[pp];
+				  // console.log("Y:" + calt2);
+				  var calt = calt1.substring(0, 4) + calt2.substring(4, 7);
+				  // console.log(variant + ":ALT:" + calt);
+				  variants_color_map[variant] = calt;
+				} else {
+				  var calt = color_linages[variant[0].charCodeAt(0) - 65];
+				  // console.log(variant + ":ALT2:" + calt);
+				  variants_color_map[variant] = calt;
+				}
+			  }
+			}
+			palettte.push(variants_color_map[variant]);
+		}
       });
       // console.log(palettte);
       return palettte;
