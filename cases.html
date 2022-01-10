@@ -425,12 +425,12 @@
 		point_value = parseInt(today_data[0]["y"]);
 		point_cases_value = parseInt(today_cases_data[0]["y"]);
 
-		point_dates = ((point_date - (point_prev_date + 24*60*60*1000)) / (1000 * 3600 * 24));
+		point_dates = ((point_date - (point_prev_date + 24*60*60*1000)) / (1000 * 3600 * 24)).toFixed(0);
 
 		// Extrapolate
 		point_value = parseInt(((point_value - point_prev_value) * point_dates) / 14) + point_prev_value;
 		
-		point_cases_value = parseInt((parseInt(((point_cases_value - point_prev_cases_value) * point_dates) / 14) + point_prev_cases_value) / 10);
+		point_cases_value = (((((point_cases_value - point_prev_cases_value) * point_dates) / 14) + point_prev_cases_value) / 10).toFixed(0);
 		
         series.push(
             { name: location, data: data }
