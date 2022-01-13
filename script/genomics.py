@@ -689,6 +689,13 @@ def main():
         {'iso': 'TLS', 'location': 'Timor'},
         {'iso': 'FSM', 'location': 'Micronesia (country)'},
         {'iso': 'MAC', 'location': 'Macao'},
+        {'iso': 'GRL', 'location': 'Greenland'},
+        {'iso': 'IMN', 'location': 'Isle of Man'},
+        {'iso': 'FLK', 'location': 'Falkland Islands'},
+        {'iso': 'SHN', 'location': 'Saint Helena'},
+        {'iso': 'COK', 'location': 'Cook Islands'},
+        {'iso': 'NCL', 'location': 'New Caledonia'},
+        {'iso': 'SPM', 'location': 'Saint Pierre and Miquelon'},
     ]
 
     for to_add in add_iso_dict:
