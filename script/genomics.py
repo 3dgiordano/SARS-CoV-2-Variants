@@ -696,6 +696,7 @@ def main():
         {'iso': 'COK', 'location': 'Cook Islands'},
         {'iso': 'NCL', 'location': 'New Caledonia'},
         {'iso': 'SPM', 'location': 'Saint Pierre and Miquelon'},
+        {'iso': 'VAT', 'location': 'Vatican'},
     ]
 
     for to_add in add_iso_dict:
