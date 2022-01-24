@@ -1171,7 +1171,7 @@ def main():
     df_world_fit_pivoted.insert(0, "location", df_world_fit_pivoted.pop("location"))
     df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
 
-    df_world_fit_pivoted[:-1].to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    df_world_fit_pivoted.to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate update file...")
     update_dict = {
