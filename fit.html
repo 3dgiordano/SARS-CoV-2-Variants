@@ -406,112 +406,87 @@
 
         chart.render();
         chart_list.push(element_selector);
-
-		if (checkUrl(data_url)) {
-			dfjs.DataFrame.fromCSV(data_url).then(df => {
-			  df.listColumns().forEach(column => {
-				if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
-				  columns.push(column);
-				  series.push(
-					{ name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
-				  );
-				};
-			  }
+		
+		dfjs.DataFrame.fromCSV(data_url).then(df => {
+		  df.listColumns().forEach(column => {
+			if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+			  columns.push(column);
+			  series.push(
+				{ name: column, data: df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) }) }
 			  );
+			};
+		  }
+		  );
 
-			  dates = df.toArray("date");
+		  dates = df.toArray("date");
 
-			  colors_columns = get_color_columns(columns, variants);
+		  colors_columns = get_color_columns(columns, variants);
 
-			  chart.updateOptions (
-				{
-				  series: series,
-				  colors: colors_columns,
-				  noData: {
-					text: "No Data",
-				  },
-				  xaxis: {
-					tooltip: {
-					  enabled: false
-					},
-					type: 'datetime',
-					categories: dates
-				  },
-				}, 
-				true, false, true
+		  chart.updateOptions (
+			{
+			  series: series,
+			  colors: colors_columns,
+			  noData: {
+				text: "No Data",
+			  },
+			  xaxis: {
+				tooltip: {
+				  enabled: false
+				},
+				type: 'datetime',
+				categories: dates
+			  },
+			}, 
+			true, false, true
 
-			  );
-			});
-		} else {
-			chart.updateOptions (
-				{
-				  series: [],
-				  colors: [],
-				  noData: {
-					text: "No Data",
-				  },
-				}, 
-				true, false, true
-
-			  );
-		}
+		  );
+		});
     }
 	
-	function checkUrl(url) {
-        var request = false;
-        if (window.XMLHttpRequest) {
-                request = new XMLHttpRequest;
-        } else if (window.ActiveXObject) {
-                request = new ActiveXObject("Microsoft.XMLHttp");
-        }
-
-        if (request) {
-                request.open("GET", url);
-                if (request.status == 200 || request.status == 0) { return true; }
-        }
-        return false;
-	}
-
     function load_charts(variants) {
 	  
       new Promise(() => {
         setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World_fit.csv', "#world", variants), 0);
       });
 	  
-      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases.csv').then(df => {
+	  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df_gen => {
+		  
+		  locations_gen = [...new Set(df_gen.toArray("location"))];
+		  
+		  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases.csv').then(df => {
 
-        df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
-        
-        // df_cases.show();
-        
-        locations = [...new Set(df.toArray("location"))];
+			df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
+			
+			// df_cases.show();
+			
+			locations = [...new Set(df.toArray("location"))];
 
-        var content_table = document.querySelector("#content");
-        var i = 0;
-        var row;
-        locations.forEach(location => {
-          // console.log(location);
-          tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
-          
-          if (tot_cases > 50) {
+			var content_table = document.querySelector("#content");
+			var i = 0;
+			var row;
+			locations.forEach(location => {
+			  // console.log(location);
+			  tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
+			  
+			  if (tot_cases > 50 && locations_gen.includes(location)) {
 
-            if (i % 2 == 0) {
-              row = content_table.insertRow();
-            }
-            var cell = row.insertCell();
-            cell.style = "width: 50%;";
-            var container = document.createElement("div");
-            container.id = "location_" + i;
-            cell.appendChild(container);
+				if (i % 2 == 0) {
+				  row = content_table.insertRow();
+				}
+				var cell = row.insertCell();
+				cell.style = "width: 50%;";
+				var container = document.createElement("div");
+				container.id = "location_" + i;
+				cell.appendChild(container);
 
-            new Promise(() => {
-			  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
-            });
+				new Promise(() => {
+				  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
+				});
 
-            i += 1;
-          }
-        });
-
+				i += 1;
+			  }
+			});
+		});
       });
     }
 
