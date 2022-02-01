@@ -951,7 +951,7 @@ def main():
     df_cases_r_data_trend_pivot = df_cases_r_data_trend_pivot.rename(
         columns={data_date_trend[0]: 'start', data_date_trend[1]: 'end'})
 
-    df_cases_r_data_trend_pivot = df_cases_r_data_trend_pivot.dropna(0)
+    df_cases_r_data_trend_pivot = df_cases_r_data_trend_pivot.dropna(axis=0)
 
     # df_continents = df_cases_location_data[df_cases_location_data.columns.intersection(["continent", "location"])]
 
