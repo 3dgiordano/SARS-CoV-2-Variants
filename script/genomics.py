@@ -140,6 +140,55 @@ def get_cases_r_data():
     return r_df
 
 
+def get_owid_iso_data():
+    return pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/scripts/input/iso/iso.csv")
+
+
+def get_mobility_data(iso_location):
+    from datetime import date
+    from urllib.error import HTTPError
+    mob_list = []
+    current_year = date.today().year
+    for mob_year in range(2020, current_year + 1, 1):
+        m_file = f"../temp/mobility_{mob_year}_{iso_location}.csv"
+
+        last_time = None
+        if os.path.isfile(m_file):
+            if mob_year != current_year:
+                last_time = 0
+            else:
+                last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(m_file))).total_seconds()
+        # keep the stored data temporarily for one hour
+        if not last_time or last_time > 21600:
+            try:
+                url_mob = f"https://www.gstatic.com/covid19/mobility/{mob_year}_{iso_location}_Region_Mobility_Report.csv"
+                df_mob = pd.read_csv(url_mob, delimiter=",", low_memory=False)
+                mob_list.append(df_mob)
+                df_mob.to_csv(m_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
+            except HTTPError as e:
+                if e.code != 404:
+                    raise e
+        else:
+            df_mob = pd.read_csv(m_file, quoting=csv.QUOTE_ALL, decimal=",")
+            mob_list.append(df_mob)
+
+    if len(mob_list) > 0:
+        df_mob = pd.concat(mob_list)
+        df_mob["mob_idx"] = (
+                df_mob["workplaces_percent_change_from_baseline"]
+                + df_mob["grocery_and_pharmacy_percent_change_from_baseline"]
+                + (df_mob["transit_stations_percent_change_from_baseline"] + 20)
+                + (df_mob["retail_and_recreation_percent_change_from_baseline"] + 20)
+                + (df_mob["parks_percent_change_from_baseline"] + 30)
+                # - (df_mob["residential_percent_change_from_baseline"] * 3)
+        ) / 5
+        df_mob['date'] = pd.to_datetime(df_mob['date'], format="%Y-%m-%d")
+        #df_mob = df_mob.groupby(["date"]).agg({'mob_idx': 'mean'}).reset_index()
+        return df_mob[["date", "mob_idx"]]
+    else:
+        return None
+
+
 def get_alias_map_sub_lineage(lineage_to_match):
     global lineages
     alias_map_sub_lineage = []
@@ -744,6 +793,39 @@ def main():
     df_cases_data.to_csv("../data/cases.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # return
+    print("get mobility")
+
+    owid_iso_data = get_owid_iso_data()
+
+    # Get Mobility Data
+    mob_exclude = ["ALB", "DZA", "AND", "AIA", "ARM", "AZE", "BMU", "BES", "VGB", "BRN", "BDI", "CYM", "CAF", "TCD",
+                   "CHN", "COM", "COG", "CUB", "CUW", "CYP", "COD", "DJI", "DMA", "GNQ", "SWZ", "ETH", "FRO", "PYF",
+                   "GMB", "GIB", "GRD", "GLP", "GUF", "GIN", "GUY", "ISL", "IRN", "LSO", "LBR", "MDG", "MWI", "MDV",
+                   "MTQ", "MYT", "MCO", "MNE", "MSR", "NAM", "PLW", "PSE", "KNA", "LCA", "MAF", "VCT", "BLM", "SYC",
+                   "SLE", "SXM", "SLB", "SOM", "SSD", "SDN", "SUR", "SYR", "TLS", "TUN", "TCA", "UZB", "VUT", "WLF",
+                   "BTN", "ERI", "SMR", "MRT", "STP", "MHL", "KIR", "WSM", "TON", "FSM", "MAC", "GRL", "IMN", "FLK",
+                   "SHN", "COK", "NCL", "SPM", "VAT"]
+
+    mob_list = []
+    for iso_location in iso_list["iso"].tolist():
+        if iso_location not in mob_exclude:
+            re_loc = owid_iso_data[owid_iso_data["iso_code"] == iso_location]
+            if re_loc.size > 0:
+                iso2 = re_loc["alpha-2"].item()
+                df_mob = get_mobility_data(iso2)
+                if df_mob is None:
+                    print("Exclude:" + iso_location)
+                else:
+                    df_mob["location"] = re_loc["location"].item()
+
+                    df_mob = df_mob.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
+                        {'mob_idx': 'mean'}).reset_index()
+
+                    mob_list.append(df_mob)
+
+    df_mobility = pd.concat(mob_list)
+    print("Save mobility.csv...")
+    df_mobility.to_csv("../data/mobility.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # R
 
