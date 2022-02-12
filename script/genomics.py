@@ -175,15 +175,15 @@ def get_mobility_data(iso_location):
     if len(mob_list) > 0:
         df_mob = pd.concat(mob_list)
         df_mob["mob_idx"] = (
-                df_mob["workplaces_percent_change_from_baseline"]
-                + df_mob["grocery_and_pharmacy_percent_change_from_baseline"]
-                + (df_mob["transit_stations_percent_change_from_baseline"] + 20)
-                + (df_mob["retail_and_recreation_percent_change_from_baseline"] + 20)
-                + (df_mob["parks_percent_change_from_baseline"] + 30)
-                # - (df_mob["residential_percent_change_from_baseline"] * 3)
-        ) / 5
+                                    df_mob["workplaces_percent_change_from_baseline"]
+                                    + df_mob["grocery_and_pharmacy_percent_change_from_baseline"]
+                                    + (df_mob["transit_stations_percent_change_from_baseline"] + 20)
+                                    + (df_mob["retail_and_recreation_percent_change_from_baseline"] + 20)
+                                    + (df_mob["parks_percent_change_from_baseline"] + 30)
+                                # - (df_mob["residential_percent_change_from_baseline"] * 3)
+                            ) / 5
         df_mob['date'] = pd.to_datetime(df_mob['date'], format="%Y-%m-%d")
-        #df_mob = df_mob.groupby(["date"]).agg({'mob_idx': 'mean'}).reset_index()
+        # df_mob = df_mob.groupby(["date"]).agg({'mob_idx': 'mean'}).reset_index()
         return df_mob[["date", "mob_idx"]]
     else:
         return None
@@ -685,6 +685,20 @@ def fix_owid_cases_data(df_owid_cases_data):
     return df_owid_cases_data
 
 
+def get_mobility(loc_mob):
+    df_mob = get_mobility_data(loc_mob["iso"])
+    if df_mob is None:
+        print("Exclude:" + iso_location)
+        return None
+    else:
+        df_mob["location"] = loc_mob["location"]
+
+        df_mob = df_mob.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
+            {'mob_idx': 'mean'}).reset_index()
+
+        return df_mob
+
+
 def main():
     locations_list = []
 
@@ -806,22 +820,20 @@ def main():
                    "BTN", "ERI", "SMR", "MRT", "STP", "MHL", "KIR", "WSM", "TON", "FSM", "MAC", "GRL", "IMN", "FLK",
                    "SHN", "COK", "NCL", "SPM", "VAT"]
 
-    mob_list = []
+    iso_mob_list = []
     for iso_location in iso_list["iso"].tolist():
         if iso_location not in mob_exclude:
             re_loc = owid_iso_data[owid_iso_data["iso_code"] == iso_location]
             if re_loc.size > 0:
                 iso2 = re_loc["alpha-2"].item()
-                df_mob = get_mobility_data(iso2)
-                if df_mob is None:
-                    print("Exclude:" + iso_location)
-                else:
-                    df_mob["location"] = re_loc["location"].item()
+                loc_nam = re_loc["location"].item()
+                iso_mob_list.append({"iso":iso2, "location":loc_nam})
 
-                    df_mob = df_mob.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
-                        {'mob_idx': 'mean'}).reset_index()
+    mob_list = []
+    with Pool(6) as p:
+        mob_list += p.map(get_mobility, iso_mob_list)
 
-                    mob_list.append(df_mob)
+    mob_list = filter(None.__ne__, mob_list)
 
     df_mobility = pd.concat(mob_list)
     print("Save mobility.csv...")
