@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","Delta (WHO VOC)","Delta - AY.107 (WHO VOC)","Delta - AY.25.1 (WHO VOC)","Delta - AY.4 (WHO VOC)","Delta - AY.47 (WHO VOC)","Delta - AY.98 (WHO VOC)","Gamma (WHO VOC)","Omicron - BA.1 (WHO VOC)","Other","Unknown"
+"location","date","Alpha (WHO VOC)","Delta (WHO VOC)","Delta - AY.107 (WHO VOC)","Delta - AY.39 (WHO VOC)","Delta - AY.4 (WHO VOC)","Delta - AY.47 (WHO VOC)","Delta - AY.98 (WHO VOC)","Gamma (WHO VOC)","Omicron - BA.1 (WHO VOC)","Other","Unknown"
 "Montserrat","2020-03-22","0","0","0","0","0","0","0","0","0","0","1"
 "Montserrat","2020-04-05","0","0","0","0","0","0","0","0","0","0","5"
 "Montserrat","2020-04-19","0","0","0","0","0","0","0","0","0","0","5"
@@ -50,3 +50,4 @@
 "Montserrat","2022-01-23","0","0","0","0","0","0","0","0","21","21","0"
 "Montserrat","2022-02-06","0","0","0","0","0","0","0","0","0","0","8"
 "Montserrat","2022-02-20","0","0","0","0","0","0","0","0","0","0","0"
+"Montserrat","2022-03-06","0","0","0","0","0","0","0","0","0","0","1"
