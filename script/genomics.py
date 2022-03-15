@@ -823,12 +823,15 @@ def main():
     iso_mob_list = []
     for iso_location in iso_list["iso"].tolist():
         if iso_location not in mob_exclude:
-            re_loc = owid_iso_data[owid_iso_data["iso_code"] == iso_location]
+            re_loc = (owid_iso_data[owid_iso_data["iso_code"] == iso_location]).drop_duplicates(subset=['iso_code'])
             if re_loc.size > 0:
-                iso2 = re_loc["alpha-2"].item()
-                loc_nam = re_loc["location"].item()
-                iso_mob_list.append({"iso":iso2, "location":loc_nam})
-
+                try:
+                    iso2 = re_loc["alpha-2"].item()
+                    loc_nam = re_loc["location"].item()
+                    iso_mob_list.append({"iso":iso2, "location":loc_nam})
+                except Exception as ex:
+                    print(iso_location)
+                    print(ex)
     mob_list = []
     with Pool(6) as p:
         mob_list += p.map(get_mobility, iso_mob_list)
