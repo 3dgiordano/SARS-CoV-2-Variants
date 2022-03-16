@@ -1,4 +1,4 @@
-"location","date","A (Lineage)","B (Lineage)","Delta - AY.122 (WHO VOC)","Delta - AY.34.1 (WHO VOC)","Eta (WHO FMV)","Omicron - BA.1 (WHO VOC)","Other"
+"location","date","A (Lineage)","B (Lineage)","Delta - AY.122 (WHO VOC)","Delta - AY.34.1 (WHO VOC)","Eta (WHO VOI)","Omicron - BA.1 (WHO VOC)","Other"
 "Mali","2020-03-22","0,0","100,0","0,0","0,0","0,0","0,0","0,0"
 "Mali","2020-04-05","100,0","0,0","0,0","0,0","0,0","0,0","0,0"
 "Mali","2020-04-19","61,904761904761905","38,095238095238095","0,0","0,0","0,0","0,0","0,0"

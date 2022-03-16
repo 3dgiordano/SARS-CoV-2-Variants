@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","B.1.1.318 (WHO AFM)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.26 (WHO VOC)","Delta - AY.37 (WHO VOC)","Eta (WHO FMV)","Iota (WHO FMV)","R.1 (WHO FMV)","Unknown"
+"location","date","Alpha (WHO VOC)","B.1.1.318 (WHO FMV)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.26 (WHO VOC)","Delta - AY.37 (WHO VOC)","Eta (WHO VOI)","Iota (WHO VOI)","R.1 (WHO FMV)","Unknown"
 "Liberia","2020-03-22","0","0","0","0","0","0","0","0","0","6"
 "Liberia","2020-04-05","0","0","0","0","0","0","0","0","0","7"
 "Liberia","2020-04-19","0","0","0","0","0","0","0","0","0","71"
