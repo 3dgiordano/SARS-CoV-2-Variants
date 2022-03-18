@@ -856,7 +856,8 @@ def main():
         df_cases_location_data.columns.intersection(["continent", "location", "population"])]
 
     print("get cases r")
-    df_cases_r_data = get_cases_r_data()
+    df_cases_r_org_data = get_cases_r_data()
+    df_cases_r_data = df_cases_r_org_data
     cases_r_locations = df_cases_data["location"].tolist()
 
     print(set(cases_r_locations).difference(locs))
@@ -905,7 +906,33 @@ def main():
         # Project cases to the period based on the 7 days average data
         days = (cases_data_date - x["date"]).days
         if days < 0:
+            # R
+            r_avgs = df_cases_r_data[df_cases_r_data['location'] == x['location']][
+                             "r"].iloc[-7:].clip(lower=0)
 
+            r_avgs_3 = df_cases_r_data[df_cases_r_data['location'] == x['location']][
+                               "r"].iloc[-3:].clip(lower=0)
+
+            trend_val = 0
+            if sum(r_avgs) > 0:
+                try:
+                    trend_val_7 = trendline(r_avgs, ndays=(days * -1))
+
+                    trend_val_3 = trendline(r_avgs_3, ndays=(days * -1))
+                    if trend_val_3 > trend_val_7:
+                        trend_val = (trend_val_7 + trend_val_3) / 1.5
+                    else:
+                        trend_val = trend_val_7
+                except Exception as e:
+                    print("Location:" + x["location"] + " with error in R trend!")
+
+            r_trend_projected = round(x["r"] + trend_val, 0)
+
+            p_r = r_trend_projected
+
+            df_cases_r_data.loc[[x.name], "r"] = p_r
+
+            # Cases
             cases_avgs = df_owid_cases_data[df_owid_cases_data['location'] == x['location']][
                              "new_cases_smoothed"].iloc[-7:].clip(lower=0)
 
@@ -934,6 +961,7 @@ def main():
 
             df_cases_r_data.loc[[x.name], "cases"] = p_cases
 
+    df_cases_r_data["org_r"] = df_cases_r_data["r"]  # Save copy of original R
     df_cases_r_data["org_cases"] = df_cases_r_data["cases"]  # Save copy of original cases
     df_cases_r_data.apply(pro_cases, axis=1)
 
