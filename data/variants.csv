@@ -319,7 +319,7 @@
 "Theta","P.3.*","WHO","VOI"
 "Zeta","P.2.*","WHO","VOI"
 "B.1.640","B.1.640.*","WHO","AFM"
-"BA.1-AY.4-Recombinant","BA.1-AY.4-Recombinant.*","WHO","AFM"
+"XD","XD.*","WHO","AFM"
 "AV.1","AV.1.*","WHO","FMV"
 "B.1.1.318","B.1.1.318","WHO","FMV"
 "B.1.1.318 - AZ.1","AZ.1","WHO","FMV"
