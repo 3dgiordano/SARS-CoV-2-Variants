@@ -915,23 +915,23 @@ def main():
             trend_val = 0
             if sum(r_avgs) > 0:
                 try:
-                    trend_val_7 = sum(trendline(r_avgs, ndays=(days * -1))) / (days * -1)
+                    trend_val_7 = trendline(r_avgs, ndays=(days * -1))[-1]
 
-                    trend_val_3 = sum(trendline(r_avgs_3, ndays=(days * -1))) / (days * -1)
+                    trend_val_3 = trendline(r_avgs_3, ndays=(days * -1))[-1]
 
                     # print(f"Location: {x['location']} Rtrn7:{trend_val_7} Rtrn3:{trend_val_3} days:{days * -1}")
                     trend_val_3_inc = 0
                     if trend_val_7 > 0:
                         trend_val_3_inc = trend_val_3 / trend_val_7
                     if trend_val_3 > trend_val_7 and trend_val_3_inc <= 4:
-                        trend_val = (trend_val_7 * (trend_val_3_inc / 2))
+                        trend_val = trend_val_3
                     else:
                         trend_val = trend_val_7
                 except Exception as e:
                     print("Location:" + x["location"] + " with error in R trend!")
 
             # print(f"Trend projected: {x['r']} + {trend_val}")
-            r_trend_projected = (x["r"] + trend_val) / 2
+            r_trend_projected = trend_val
 
             p_r = r_trend_projected
 
@@ -953,11 +953,8 @@ def main():
 
                     # print(f"Location: {x['location']} Ctrn7:{trend_val_7} Ctrn3:{trend_val_3} days:{days * -1}")
 
-                    trend_val_3_inc = 0
-                    if trend_val_7 > 0:
-                        trend_val_3_inc = trend_val_3 / trend_val_7
-                    if trend_val_3 > trend_val_7 and trend_val_3_inc <= 4:
-                        trend_val = (trend_val_7 * (trend_val_3_inc / 2))
+                    if trend_val_3 > trend_val_7:
+                        trend_val = trend_val_7 + ((trend_val_3 - trend_val_7) / 1.5)
                     else:
                         trend_val = trend_val_7
                 except Exception as e:
