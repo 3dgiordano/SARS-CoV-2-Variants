@@ -836,15 +836,15 @@ def main():
                 except Exception as ex:
                     print(iso_location)
                     print(ex)
-    mob_list = []
-    with Pool(6) as p:
-        mob_list += p.map(get_mobility, iso_mob_list)
+    #mob_list = []
+    #with Pool(6) as p:
+    #    mob_list += p.map(get_mobility, iso_mob_list)
 
-    mob_list = filter(None.__ne__, mob_list)
+    #mob_list = filter(None.__ne__, mob_list)
 
-    df_mobility = pd.concat(mob_list)
-    print("Save mobility.csv...")
-    df_mobility.to_csv("../data/mobility.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    #df_mobility = pd.concat(mob_list)
+    #print("Save mobility.csv...")
+    #df_mobility.to_csv("../data/mobility.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # R
 
@@ -899,8 +899,7 @@ def main():
         coeffs = np.polyfit([*range(from_v)], list(d), 1)
         predict = np.poly1d(coeffs)
         predict_values = predict([*range(from_v + 1, from_v + ndays + 1)]).clip(min=0)
-        # print(predict_values)
-        return sum(predict_values)
+        return predict_values
 
     def pro_cases(x):
         # Project cases to the period based on the 7 days average data
@@ -916,17 +915,23 @@ def main():
             trend_val = 0
             if sum(r_avgs) > 0:
                 try:
-                    trend_val_7 = trendline(r_avgs, ndays=(days * -1))
+                    trend_val_7 = sum(trendline(r_avgs, ndays=(days * -1))) / (days * -1)
 
-                    trend_val_3 = trendline(r_avgs_3, ndays=(days * -1))
-                    if trend_val_3 > trend_val_7:
-                        trend_val = (trend_val_7 + trend_val_3) / 1.5
+                    trend_val_3 = sum(trendline(r_avgs_3, ndays=(days * -1))) / (days * -1)
+
+                    # print(f"Location: {x['location']} Rtrn7:{trend_val_7} Rtrn3:{trend_val_3} days:{days * -1}")
+                    trend_val_3_inc = 0
+                    if trend_val_7 > 0:
+                        trend_val_3_inc = trend_val_3 / trend_val_7
+                    if trend_val_3 > trend_val_7 and trend_val_3_inc <= 4:
+                        trend_val = (trend_val_7 * (trend_val_3_inc / 2))
                     else:
                         trend_val = trend_val_7
                 except Exception as e:
                     print("Location:" + x["location"] + " with error in R trend!")
 
-            r_trend_projected = round(x["r"] + trend_val, 0)
+            # print(f"Trend projected: {x['r']} + {trend_val}")
+            r_trend_projected = (x["r"] + trend_val) / 2
 
             p_r = r_trend_projected
 
@@ -942,11 +947,17 @@ def main():
             trend_val = 0
             if sum(cases_avgs) > 0:
                 try:
-                    trend_val_7 = trendline(cases_avgs, ndays=(days * -1))
+                    trend_val_7 = sum(trendline(cases_avgs, ndays=(days * -1)))
 
-                    trend_val_3 = trendline(cases_avgs_3, ndays=(days * -1))
-                    if trend_val_3 > trend_val_7:
-                        trend_val = (trend_val_7 + trend_val_3) / 1.5
+                    trend_val_3 = sum(trendline(cases_avgs_3, ndays=(days * -1)))
+
+                    # print(f"Location: {x['location']} Ctrn7:{trend_val_7} Ctrn3:{trend_val_3} days:{days * -1}")
+
+                    trend_val_3_inc = 0
+                    if trend_val_7 > 0:
+                        trend_val_3_inc = trend_val_3 / trend_val_7
+                    if trend_val_3 > trend_val_7 and trend_val_3_inc <= 4:
+                        trend_val = (trend_val_7 * (trend_val_3_inc / 2))
                     else:
                         trend_val = trend_val_7
                 except Exception as e:
