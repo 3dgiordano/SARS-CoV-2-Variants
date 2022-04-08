@@ -130,7 +130,8 @@ def get_cases_r_data():
         last_time = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(r_file))).total_seconds()
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
-        r_df = pd.read_csv("https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database_7.csv")
+        r_df = pd.read_csv(
+            "https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database_7.csv")
         r_map = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/scripts/input/reproduction/" +
                             "reprod_country_standardized.csv")
         r_df = r_df.replace(dict(zip(r_map.reprod, r_map.owid)))
@@ -618,6 +619,19 @@ def fix_owid_cases_data(df_owid_cases_data):
     global csse_data_fixed
     csse_data_fixed = 0
 
+    def fix_owid(x):
+        if x.name < 1:
+            return
+        if df_owid_cases_data.iloc[[x.name - 1]]["location"].item() == x["location"]:
+            nc = df_owid_cases_data.iloc[[x.name]]["total_cases"].item() - df_owid_cases_data.iloc[[x.name - 1]]["total_cases"].item()
+            if nc < 0:
+                print(f' {x["location"]} {x["date"]} {nc}')
+
+            df_owid_cases_data.loc[[x.name], "new_cases"] = nc
+
+    print("Fix OWID Data")
+    df_owid_cases_data.apply(fix_owid, axis=1)
+
     def fix_jhu(x):
         global csse_data_fixed
 
@@ -685,7 +699,6 @@ def fix_owid_cases_data(df_owid_cases_data):
             center=False,
         )[f"{metric}"].mean().droplevel(level=[0]).round(2)
     )
-
     return df_owid_cases_data
 
 
@@ -711,6 +724,12 @@ def main():
 
     df_cases_data = get_cases_data()
     df_owid_cases_data = get_owid_cases_data()
+
+    # df_owid_cases_data_diff = df_owid_cases_data.loc[df_owid_cases_data.new_cases != df_owid_cases_data.org_new_cases]
+    # df_owid_cases_data_diff_counts = df_owid_cases_data_diff.groupby(['location']).size().reset_index(name='counts')
+    # df_owid_cases_data_diff_counts = df_owid_cases_data_diff_counts.sort_values(by=['counts'], ascending=False)
+    # print(df_owid_cases_data_diff_counts)
+    # return
 
     df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
 
@@ -832,19 +851,19 @@ def main():
                 try:
                     iso2 = re_loc["alpha-2"].item()
                     loc_nam = re_loc["location"].item()
-                    iso_mob_list.append({"iso":iso2, "location":loc_nam})
+                    iso_mob_list.append({"iso": iso2, "location": loc_nam})
                 except Exception as ex:
                     print(iso_location)
                     print(ex)
-    #mob_list = []
-    #with Pool(6) as p:
+    # mob_list = []
+    # with Pool(6) as p:
     #    mob_list += p.map(get_mobility, iso_mob_list)
 
-    #mob_list = filter(None.__ne__, mob_list)
+    # mob_list = filter(None.__ne__, mob_list)
 
-    #df_mobility = pd.concat(mob_list)
-    #print("Save mobility.csv...")
-    #df_mobility.to_csv("../data/mobility.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    # df_mobility = pd.concat(mob_list)
+    # print("Save mobility.csv...")
+    # df_mobility.to_csv("../data/mobility.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # R
 
@@ -907,10 +926,10 @@ def main():
         if days < 0:
             # R
             r_avgs = df_cases_r_data[df_cases_r_data['location'] == x['location']][
-                             "r"].iloc[-7:].clip(lower=0)
+                         "r"].iloc[-7:].clip(lower=0)
 
             r_avgs_3 = df_cases_r_data[df_cases_r_data['location'] == x['location']][
-                               "r"].iloc[-3:].clip(lower=0)
+                           "r"].iloc[-3:].clip(lower=0)
 
             trend_val = 0
             if sum(r_avgs) > 0:
