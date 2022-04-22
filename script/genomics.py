@@ -243,7 +243,8 @@ def get_locations():
                 .replace("Bonaire, Sint Eustatius and Saba", "Bonaire Sint Eustatius and Saba") \
                 .replace("Saint-Martin", "Saint Martin (French part)") \
                 .replace("Sint Maarten", "Sint Maarten (Dutch part)") \
-                .replace("French Guiana", "Guayana")
+                .replace("French Guiana", "Guayana") \
+                .replace("São Tomé and Príncipe", "Sao Tome and Principe")
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -623,7 +624,15 @@ def fix_owid_cases_data(df_owid_cases_data):
         if x.name < 1:
             return
         if df_owid_cases_data.iloc[[x.name - 1]]["location"].item() == x["location"]:
-            nc = df_owid_cases_data.iloc[[x.name]]["total_cases"].item() - df_owid_cases_data.iloc[[x.name - 1]]["total_cases"].item()
+            total_day = df_owid_cases_data.iloc[[x.name]]["total_cases"].item()
+            total_yesterday = df_owid_cases_data.iloc[[x.name - 1]]["total_cases"].item()
+
+            if total_day == 0 and total_yesterday > 0:
+                print(x["Location"] + " without total_cases " + x["date"])
+                total_day = total_yesterday
+                df_owid_cases_data.loc[[x.name], "total_cases"] = total_day
+
+            nc = total_day - total_yesterday
             if nc < 0:
                 print(f' {x["location"]} {x["date"]} {nc}')
 
