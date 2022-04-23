@@ -628,7 +628,7 @@ def fix_owid_cases_data(df_owid_cases_data):
             total_yesterday = df_owid_cases_data.iloc[[x.name - 1]]["total_cases"].item()
 
             if total_day == 0 and total_yesterday > 0:
-                print(x["Location"] + " without total_cases " + x["date"])
+                print(" * " + x["location"] + " without total_cases " + x["date"])
                 total_day = total_yesterday
                 df_owid_cases_data.loc[[x.name], "total_cases"] = total_day
 
