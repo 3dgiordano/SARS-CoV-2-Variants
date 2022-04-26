@@ -15,7 +15,7 @@ from numpy import errstate, isneginf, array
 # Data Sources
 # https://outbreak.info/situation-reports/methods
 # https://cov-lineages.org/index.html
-# https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/
+# https://www.who.int/activities/tracking-SARS-CoV-2-variants/tracking-SARS-CoV-2-variants
 # https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-info.html
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
 # https://www.gov.uk/government/collections/new-sars-cov-2-variant
@@ -338,7 +338,8 @@ def who_expand(data):
 def get_who_variants():
     from urllib.request import Request, urlopen
 
-    who_variants_tracking_url = "https://www.who.int/en/activities/tracking-SARS-CoV-2-variants/"
+    who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
+                                "tracking-SARS-CoV-2-variants"
 
     who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
 
