@@ -408,7 +408,8 @@ def get_cdc_variants():
 
     cdc_body = urlopen(Request(cdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
 
-    cdc_body = cdc_body.replace("and descendent lineages", "").replace(" and Q lineages", "")
+    cdc_body = cdc_body.replace("and descendent lineages", "").replace(" and Q lineages", "").replace(
+        " and AY lineages", "")
 
     soup = BeautifulSoup(cdc_body, 'lxml')
     variants_tables = soup.find_all(
