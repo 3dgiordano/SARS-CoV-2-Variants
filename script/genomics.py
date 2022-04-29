@@ -688,7 +688,11 @@ def fix_owid_cases_data(df_owid_cases_data):
                         break
                     to_fix = df_owid_cases_data.iloc[[from_ix]]["new_cases"].item()
                     if x["new_cases"] * - 1 < to_fix:
-                        # print("to fix:" + str(df_cases_data.iloc[[from_ix]]["date"].item()) + " " + str(to_fix))
+                        print(x["location"] + " from " + str(
+                            df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" + str(
+                            df_owid_cases_data.iloc[[from_ix]]["date"].item()) +
+                              " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
+                            to_fix) + ")")
                         df_owid_cases_data.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
                         df_owid_cases_data.loc[[x.name], "new_cases"] = 0
                         csse_data_fixed += 1
