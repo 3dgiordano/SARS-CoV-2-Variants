@@ -655,7 +655,7 @@ def fix_owid_cases_data(df_owid_cases_data):
                 d2 = df_owid_cases_data.iloc[[x.name + 1]]["new_cases"].item()
                 d3 = df_owid_cases_data.iloc[[x.name + 2]]["new_cases"].item()
 
-                if d3 < d2 and d2 > 1:
+                if d3 <= d2 and d2 > 0:
                     # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
                     if d3 == 0:
                         nd = round(d2 / 2, 0)
@@ -663,15 +663,33 @@ def fix_owid_cases_data(df_owid_cases_data):
                         nd = round((d2 - d3) / 1.5, 0)
                     nd2 = d2 - nd
                     # print("nd:" + str(nd) + " nd2:" + str(nd2))
+
+                    print(x["location"] + " F1.1 from " + str(
+                        df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
+                          " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+
+                    print(x["location"] + " F1.2 from " + str(
+                        df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                          " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
+
                     df_owid_cases_data.loc[[x.name], "new_cases"] = nd
                     df_owid_cases_data.loc[[x.name + 1], "new_cases"] = nd2
                     csse_data_fixed += 1
 
-                elif d3 > d2 > 1:
+                elif d3 >= d2 > 0:
                     # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
                     nd = round((d3 - d2) / 2, 0)
                     nd3 = d3 - nd
                     # print("nd:" + str(nd) + " d2:" + str(d2) + " nd3:" + str(nd3))
+
+                    print(x["location"] + " F2.1 from " + str(
+                        df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
+                          " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+
+                    print(x["location"] + " F2.2 from " + str(
+                        df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                          " " + str(d3) + " to " + str(nd3) + "(" + str(d3 - nd3) + ")")
+
                     df_owid_cases_data.loc[[x.name], "new_cases"] = nd
                     df_owid_cases_data.loc[[x.name + 2], "new_cases"] = nd3
                     csse_data_fixed += 1
@@ -688,7 +706,7 @@ def fix_owid_cases_data(df_owid_cases_data):
                         break
                     to_fix = df_owid_cases_data.iloc[[from_ix]]["new_cases"].item()
                     if x["new_cases"] * - 1 < to_fix:
-                        print(x["location"] + " from " + str(
+                        print(x["location"] + " F3 from " + str(
                             df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" + str(
                             df_owid_cases_data.iloc[[from_ix]]["date"].item()) +
                               " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
