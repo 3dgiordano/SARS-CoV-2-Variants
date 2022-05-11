@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.43 (WHO VOC)","Delta - AY.46 (WHO VOC)","Delta - AY.65 (WHO VOC)","Delta - AY.9.2 (WHO VOC)","Omicron - BA.1 (WHO VOC)"
+"location","date","Alpha (WHO VOC)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.43 (WHO VOC)","Delta - AY.46 (WHO VOC)","Delta - AY.65 (WHO VOC)","Delta - AY.9.2 (WHO VOC)","Other"
 "Burundi","2021-05-30","16,666666666666664","50,0","0,0","0,0","33,33333333333333","0,0","0,0","0,0"
 "Burundi","2021-06-13","0,0","66,66666666666666","0,0","0,0","33,33333333333333","0,0","0,0","0,0"
 "Burundi","2021-08-08","0,0","0,0","29,629629629629626","1,8518518518518516","55,55555555555556","9,25925925925926","3,7037037037037033","0,0"

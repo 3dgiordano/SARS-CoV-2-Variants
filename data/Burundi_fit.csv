@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.43 (WHO VOC)","Delta - AY.46 (WHO VOC)","Delta - AY.65 (WHO VOC)","Delta - AY.9.2 (WHO VOC)","Omicron - BA.1 (WHO VOC)","Unknown"
+"location","date","Alpha (WHO VOC)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.43 (WHO VOC)","Delta - AY.46 (WHO VOC)","Delta - AY.65 (WHO VOC)","Delta - AY.9.2 (WHO VOC)","Other","Unknown"
 "Burundi","2020-04-05","0","0","0","0","0","0","0","0","3"
 "Burundi","2020-04-19","0","0","0","0","0","0","0","0","2"
 "Burundi","2020-05-03","0","0","0","0","0","0","0","0","10"
