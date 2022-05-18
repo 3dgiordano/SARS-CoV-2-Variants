@@ -495,19 +495,21 @@ def get_phe_variants():
 
 
 def get_lineage_map():
-    (who_voc, who_voc_old, who_voi, who_afm, who_fmv) = get_who_variants()
+    (who_voc, who_voc_old, who_voc_lum, who_voi, who_afm, who_fmv) = get_who_variants()
     (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
     (phe_voc, phe_vui) = get_phe_variants()
 
     who_voc = who_expand(who_voc)
     who_voc_old = who_expand(who_voc_old)
+    who_voc_lum = who_expand(who_voc_lum)
     who_voi = who_expand(who_voi)
     who_afm = who_expand(who_afm)
     who_fmv = who_expand(who_fmv)
 
     who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
     who_voc_old_dict = who_to_dict(who_voc_old, "(WHO VOC)")
+    who_voc_lum_dict = who_to_dict(who_voc_lum, "(WHO VOC-LUM)")
     who_voi_dict = who_to_dict(who_voi, "(WHO VOI)")
     who_afm_dict = who_to_dict(who_afm, "(WHO AFM)")
     who_fmv_dict = who_to_dict(who_fmv, "(WHO FMV)")
@@ -515,6 +517,7 @@ def get_lineage_map():
     lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voc_old_dict.items()) +
+        list(who_voc_lum_dict.items()) +
         list(who_voi_dict.items()) +
         list(who_afm_dict.items()) +
         list(who_fmv_dict.items())
@@ -547,7 +550,7 @@ def get_lineage_map():
     data = {
         "map": lineage_dict_map,
         "data": {
-            "who": {"voc": {**who_voc, **who_voc_old}, "voi": who_voc, "afm": who_afm, "fmv": who_fmv},
+            "who": {"voc": {**who_voc, **who_voc_old}, "voc-lum": who_voc_lum, "voi": who_voc, "afm": who_afm, "fmv": who_fmv},
             "cdc": {"voi": cdc_voi, "voc": cdc_voc, "vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
