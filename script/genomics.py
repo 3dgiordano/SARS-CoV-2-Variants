@@ -110,7 +110,8 @@ def get_owid_cases_data():
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
         df_owid_cases_data = pd.read_csv(
-            "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv").fillna(0)
+            "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv").dropna(
+            subset=['new_cases']).reset_index(drop=True)
         df_owid_cases_data = fix_owid_cases_data(df_owid_cases_data)
         df_owid_cases_data.to_csv(owid_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
