@@ -40,9 +40,13 @@
   <script src='https://gmousse.github.io/dataframe-js/dist/dataframe.min.js'></script>
 
   <script id="rendered-js" crossorigin="anonymous">
+    var loc_df = null;
+	var continent = null;
+	var locations = [];
     var doc_width = 1024;
     var chart_width = 640;
     var chart_list = [];
+	var variants = [];
 	var variants_color_map = {};
 
     function windowSizeUpdate() {
@@ -74,13 +78,15 @@
         document.getElementById("last_update").innerText = date_str;
       });
 
-
       new Promise(() => {
-
-        dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
-          var variants = df.toArray("label");
-          load_charts(variants);
-        });
+		if (variants.length == 0){
+			dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
+			  variants = df.toArray("label");
+			  update_continent();
+			});
+		} else {
+			update_continent();
+		}
       });
     }
 
@@ -458,10 +464,16 @@
 	
     function load_charts(variants) {
 	  
-      new Promise(() => {
-        setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World_fit.csv', "#world", variants), 0);
-      });
-	  
+	  document.querySelectorAll(".location").forEach(e => e.remove());
+	
+	  if (continent == "World") {
+		  document.getElementById("world_container").style.visibility = "visible";
+		  new Promise(() => {
+			setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World_fit.csv', "#world", variants), 0);
+		  });
+	  } else {
+		document.getElementById("world_container").style.visibility = "collapse";
+	  }
 	  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df_gen => {
 		  
 		  locations_gen = [...new Set(df_gen.toArray("location"))];
@@ -472,37 +484,66 @@
 			
 			// df_cases.show();
 			
-			locations = [...new Set(df.toArray("location"))];
+			c_locations = [...new Set(df.toArray("location"))];
 
 			var content_table = document.querySelector("#content");
+			
 			var i = 0;
-			var row;
-			locations.forEach(location => {
-			  // console.log(location);
-			  tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
-			  
-			  if (tot_cases > 50 && locations_gen.includes(location)) {
+			var content_row;
+			c_locations.forEach(location => {
+			  if (locations.includes(location)) {
+				  tot_cases = df_cases.filter(row => row.get('location') == location).toArray("cases");
+				  
+				  if (tot_cases > 50 && locations_gen.includes(location)) {
 
-				if (i % 2 == 0) {
-				  row = content_table.insertRow();
+					if (i % 2 == 0) {
+					  content_row = content_table.insertRow();
+					  content_row.classList.add('location');
+					}
+					var cell = content_row.insertCell();
+					cell.style = "width: 50%;";
+					var container = document.createElement("div");
+					container.id = "location_" + i;
+					cell.appendChild(container);
+
+					new Promise(() => {
+					  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
+					});
+
+					i += 1;
+				  }
 				}
-				var cell = row.insertCell();
-				cell.style = "width: 50%;";
-				var container = document.createElement("div");
-				container.id = "location_" + i;
-				cell.appendChild(container);
-
-				new Promise(() => {
-				  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
-				});
-
-				i += 1;
-			  }
 			});
 		});
       });
     }
 
+	function load_df_locations(){
+		locations = [...new Set(loc_df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
+		console.log(locations);
+		load_charts(variants);
+		
+	}
+	
+    function update_continent() {
+
+      continent = document.querySelector('input[name="continent"]:checked').id.replace("_", " ");
+
+      setTimeout(function(){
+          if (loc_df == null) {
+            dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/locations.csv').then(l_df => {
+			  loc_df = l_df;
+			  console.log("load loc");
+              load_df_locations();    
+            });
+          } else {
+		    console.log("no load loc");
+            load_df_locations();
+          }
+        }, 300);
+      
+    }
+	
   </script>
 
   <div class="info">
@@ -521,16 +562,31 @@
 
   <table id="content" class="content">
     <tr>
-      <td colspan=2 align="right">
-        Show data from last <select id="period_list" style="width:100px;" onchange="start();">
-          <option value="14">28 weeks</option>
-          <option value="28">56 weeks</option>
-          <option value="42">84 weeks</option>
-          <option value="-1">All</option>
-        </select>
-      </td>
+		<td colspan=2 align="center">
+			<form style="text-align: center">
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="World" checked onclick="update_continent();"/>World</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="Europe" onclick="update_continent();"/>Europe</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="North_America" onclick="update_continent();"/>North America</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="South_America" onclick="update_continent();"/>South America</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="Asia" onclick="update_continent();"/>Asia</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="Africa" onclick="update_continent();"/>Africa</label>
+			  <label style="white-space:nowrap"><input type="radio" name="continent" id="Oceania" onclick="update_continent();"/>Oceania</label>
+			</form>
+		</td>
+	</tr>
+	<tr>
+		<td colspan=2 align="right">
+			Show data from last <select id="period_list" style="width:100px;" onchange="start();">
+			<option value="3">6 weeks</option>
+			<option value="7">14 weeks</option>
+			<option value="14">28 weeks</option>
+			<option value="28">56 weeks</option>
+			<option value="42">84 weeks</option>
+			<option value="-1">All</option>
+		</select>
+		</td>
     </tr>
-    <tr>
+    <tr id="world_container">
       <td colspan=2 align="center">
         <div id="world"></div>
       </td>
