@@ -1278,10 +1278,10 @@ def main():
         # print(f"Save Location: {location['country']}")
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
-        if df_location.size > 0:
-            if df_location.tail(1).iloc[0]['date'] > to_date:
-                # Remove the last register because probably is noise
-                df_location = df_location[:-1]
+        # if df_location.size > 0:
+        #     if df_location.tail(1).iloc[0]['date'] > to_date:
+        #         # Remove the last register because probably is noise
+        #         df_location = df_location[:-1]
         df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
@@ -1308,10 +1308,10 @@ def main():
 
             df_fit.drop(columns=['cases'], inplace=True)
 
-            if df_fit.size > 0:
-                if df_fit.tail(1).iloc[0]['date'] > to_date:
-                    # Remove the last register because probably is noise
-                    df_fit = df_fit[:-1]
+            # if df_fit.size > 0:
+            #     if df_fit.tail(1).iloc[0]['date'] > to_date:
+            #         # Remove the last register because probably is noise
+            #         df_fit = df_fit[:-1]
 
             df_fit.to_csv(
                 f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
@@ -1339,7 +1339,7 @@ def main():
     df_world_pivoted = df_world_pivoted.fillna(0)
 
     print("Save World.csv...")
-    df_world_pivoted[:-1].to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+    df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     # Generate World Fit
     print("Create location list...")
