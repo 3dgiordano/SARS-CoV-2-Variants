@@ -48,6 +48,7 @@
     var chart_list = [];
 	var variants = [];
 	var variants_color_map = {};
+	var updated_date = null;
 
     function windowSizeUpdate() {
       doc_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -74,7 +75,8 @@
 
       dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
         var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
-        var date_str = new Date(update_date_str).toString();
+		updated_date = new Date(update_date_str)
+        var date_str = updated_date.toString();
         document.getElementById("last_update").innerText = date_str;
       });
 
@@ -258,6 +260,7 @@
       }
 
       var series = [];
+	  var date_points = [];
       var columns = [];
       var dates = [];
       var colors_columns = [];
@@ -424,12 +427,29 @@
 			  columns.push(column);
         // Only latest data
         data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) })
+		
+		point_date = new Date().getTime() + 24*60*60*1000;
+		point_date_str = "Today"; // new Date(point_date).toISOString().split("T")[0];
+		
         if (selected_period != -1) {
           data = data.slice(data.length-selected_period,data.length);
         }
 			  series.push(
 				{ name: column, data: data }
 			  );
+			  
+			  date_points.push(
+				{
+				  x: point_date,
+				  borderColor: '#606060',
+				  label: {
+					style: {
+					  color: '#000',
+					},
+					text: point_date_str
+				  }
+				}
+			  );		
 			};
 		  }
 		  );
@@ -443,6 +463,9 @@
 
 		  chart.updateOptions (
 			{
+			  annotations: {
+				xaxis: date_points,
+			  },
 			  series: series,
 			  colors: colors_columns,
 			  noData: {
@@ -577,7 +600,6 @@
 	<tr>
 		<td colspan=2 align="right">
 			Show data from last <select id="period_list" style="width:100px;" onchange="start();">
-			<option value="3">6 weeks</option>
 			<option value="7">14 weeks</option>
 			<option value="14">28 weeks</option>
 			<option value="28">56 weeks</option>
