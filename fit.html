@@ -428,37 +428,51 @@
         // Only latest data
         data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) })
 		
-		point_date = new Date().getTime() + 24*60*60*1000;
-		point_date_str = "Today"; // new Date(point_date).toISOString().split("T")[0];
-		
         if (selected_period != -1) {
           data = data.slice(data.length-selected_period,data.length);
         }
 			  series.push(
 				{ name: column, data: data }
-			  );
-			  
-			  date_points.push(
-				{
-				  x: point_date,
-				  borderColor: '#606060',
-				  label: {
-					style: {
-					  color: '#000',
-					},
-					text: point_date_str
-				  }
-				}
 			  );		
 			};
 		  }
 		  );
 
 		  dates = df.toArray("date");
-      if (selected_period != -1) {
-        dates = dates.slice(dates.length-selected_period,dates.length);
-      }
+		  if (selected_period != -1) {
+			dates = dates.slice(dates.length-selected_period,dates.length);
+		  }
 
+			date_points.push(
+				{
+				  x: new Date().getTime(),
+				  borderColor: '#606060',
+				  label: {
+					style: {
+					  color: '#000',
+					},
+					text: ""
+				  }
+				}
+			);
+			  
+			estimate_start = new Date(dates.at(-2)).getTime();
+			estimate_end = new Date(dates.at(-1)).getTime();
+			date_points.push(
+				{
+				  x: estimate_start,
+				  x2: estimate_end,
+				  fillColor: '#FEB01970',
+				  borderColor: '#606060',
+				  label: {
+					style: {
+					  color: '#000',
+					},
+					text: "Estimate start"
+				  }
+				}
+			  );
+			  
 		  colors_columns = get_color_columns(columns, variants);
 
 		  chart.updateOptions (
