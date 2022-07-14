@@ -424,16 +424,19 @@
       df.listColumns().forEach(column => {
       
 			if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
-			  columns.push(column);
-        // Only latest data
-        data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) })
+				columns.push(column);
+				// Only latest data
+				data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.')) })
+				
+				if (selected_period != -1) {
+				  data = data.slice(data.length-selected_period,data.length);
+				}
+				//Temporal WA
+				data.forEach(function(item, i) { if (item == 0 && i == data.length - 1) data[i] = null; });
 		
-        if (selected_period != -1) {
-          data = data.slice(data.length-selected_period,data.length);
-        }
-			  series.push(
-				{ name: column, data: data }
-			  );		
+				series.push(
+					{ name: column, data: data }
+				);		
 			};
 		  }
 		  );
