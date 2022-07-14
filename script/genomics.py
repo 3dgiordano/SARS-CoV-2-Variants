@@ -1278,10 +1278,7 @@ def main():
         # print(f"Save Location: {location['country']}")
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
-        # if df_location.size > 0:
-        #     if df_location.tail(1).iloc[0]['date'] > to_date:
-        #         # Remove the last register because probably is noise
-        #         df_location = df_location[:-1]
+
         df_location.to_csv(
             f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
@@ -1292,6 +1289,11 @@ def main():
                                                                                            how='outer')
 
             df_fit = df_fit.sort_values(['location', 'date', 'cases'])
+
+            # Fix the cases of the last value and put the projected value
+            df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
+            df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
+                df_fit_r_data.index[-1], 'cases']
 
             # Fit
             columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
@@ -1307,11 +1309,6 @@ def main():
             df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
 
             df_fit.drop(columns=['cases'], inplace=True)
-
-            # if df_fit.size > 0:
-            #     if df_fit.tail(1).iloc[0]['date'] > to_date:
-            #         # Remove the last register because probably is noise
-            #         df_fit = df_fit[:-1]
 
             df_fit.to_csv(
                 f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
