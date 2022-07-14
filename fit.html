@@ -283,7 +283,7 @@
           },
         },
         grid: {
-          show: true,
+          show: false,
         },
         colors: colors_columns,
         chart: {
@@ -294,7 +294,8 @@
           redrawOnParentResize: false,
           redrawOnWindowResize: false,
           stacked: true,
-          animations: { enabled: false },
+          animations: { enabled: false, dynamicAnimation: {enabled: false}, },
+		  
           offsetY: 0,
           toolbar: {
             show: false,
@@ -302,6 +303,9 @@
           zoom: {
             enabled: false,
           },
+		  sparkline: {
+			enabled: true,
+		  },
         },
         noData: {
           text: "Loading...",
@@ -382,9 +386,11 @@
           }
         },
         fill: {
-          type: 'solid'
+          type: 'solid',
+		  opacity: 1,
         },
         stroke: {
+		  show: false,
           curve: 'smooth',
           width: 0,
         },
@@ -421,34 +427,27 @@
 
 		dfjs.DataFrame.fromCSV(data_url).then(df => {
 		  
-		  fltdf = df.drop("Unknown").drop("location").drop("date").toArray();
+		  var fltdf = df.drop("Unknown").drop("location").drop("date").toArray();
 		  if (selected_period != -1) {
 		    fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
 		  }
 		  // Reverse value to optimize the find
 		  fltdf = fltdf.reverse();
-		  null_from = 0;
-		  var BreakException = {};
-		  try {
-			  fltdf.forEach(function(item, i) {	  
-				sum = item.map(function (x) { return parseFloat(x.toString().replace(',', '.'))}).reduce((partialSum, a) => partialSum + a, 0);
-				if (sum == 0) {
-				  null_from = i + 1;
-				} else {
-				  throw BreakException;
-				}
-			  });
-		  } catch (e) {
-            if (e !== BreakException) throw e;
-          }
-		  null_from_idx = null_from;
+		  var null_from_idx = 0;
+		  for (let i = 0; i < fltdf.length; i++) {
+			if (fltdf[i].map(function (x) { return parseFloat(x.toString().replace(',', '.'))}).reduce((partialSum, a) => partialSum + a, 0) == 0) {
+			  null_from_idx = i + 1;
+			} else {
+			  break;
+			}
+		  }
 		  
 		  df.listColumns().forEach(column => {
           
 			if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
 				columns.push(column);
 				// Only latest data
-				data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
+				var data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
 				
 				if (selected_period != -1) {
 				  data = data.slice(data.length-selected_period,data.length);
