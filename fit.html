@@ -543,7 +543,6 @@
 
 	function load_df_locations(){
 		locations = [...new Set(loc_df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
-		console.log(locations);
 		load_charts(variants);
 		
 	}
@@ -556,11 +555,9 @@
           if (loc_df == null) {
             dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/jhu/locations.csv').then(l_df => {
 			  loc_df = l_df;
-			  console.log("load loc");
               load_df_locations();    
             });
           } else {
-		    console.log("no load loc");
             load_df_locations();
           }
         }, 300);
