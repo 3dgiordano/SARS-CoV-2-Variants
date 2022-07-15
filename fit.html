@@ -70,6 +70,21 @@
     window.addEventListener('resize', windowSizeUpdate);
     windowSizeUpdate();
 
+	function getLastValidIdx(flt_df) {
+		
+		// Reverse value to optimize the find
+		flt_df = flt_df.reverse();
+		var null_from_idx = 0;
+		for (let i = 0; i < flt_df.length; i++) {
+			if (flt_df[i].map(function (x) { return parseFloat(x.toString().replace(',', '.'))}).reduce((partialSum, a) => partialSum + a, 0) == 0) {
+			  null_from_idx = i + 1;
+			} else {
+			  break;
+			}
+		}
+		return null_from_idx;
+		  
+	}
 
     function start() {
 
@@ -422,7 +437,7 @@
         chart.render();
         chart_list.push(element_selector);
 
-    period_list = document.getElementById("period_list");
+		period_list = document.getElementById("period_list");
 		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
 
 		dfjs.DataFrame.fromCSV(data_url).then(df => {
@@ -431,35 +446,28 @@
 		  if (selected_period != -1) {
 		    fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
 		  }
-		  // Reverse value to optimize the find
-		  fltdf = fltdf.reverse();
-		  var null_from_idx = 0;
-		  for (let i = 0; i < fltdf.length; i++) {
-			if (fltdf[i].map(function (x) { return parseFloat(x.toString().replace(',', '.'))}).reduce((partialSum, a) => partialSum + a, 0) == 0) {
-			  null_from_idx = i + 1;
-			} else {
-			  break;
-			}
-		  }
 		  
-		  df.listColumns().forEach(column => {
-          
-			if ((['location', 'date']).indexOf(column) == -1 && df.toArray(column).reduce(function (pv, cv) { return parseFloat(pv.toString().replace(',', '.')) + parseFloat(cv.toString().replace(',', '.')); }, 0) > 0) {
+		  var null_from_idx =  getLastValidIdx(fltdf);
+		  
+		  df.listColumns().filter(function(column){return (['location', 'date']).indexOf(column) == -1}).forEach(column => {
+			var data = df.toArray(column);
+            if (selected_period != -1) {
+			  data = data.slice(data.length-selected_period,data.length);
+			}
+			data = data.map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
+			var data_sum = data.reduce(function (pv, cv) { return pv + cv }, 0)
+						
+			if (data_sum > 0) {
 				columns.push(column);
-				// Only latest data
-				var data = df.toArray(column).map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
-				
-				if (selected_period != -1) {
-				  data = data.slice(data.length-selected_period,data.length);
-				}
-								  
-				//Temporal WA
+									  
+				// Set at the end the "cut" with null values from the last sequencial data
 				data.forEach(function(item, i) { if (item == 0 && i == data.length - null_from_idx) data[i] = null; });
 		
 				series.push(
 					{ name: column, data: data }
-				);		
-			};
+				);
+			}
+			
 		  });
 
 		  dates = df.toArray("date");
@@ -522,7 +530,7 @@
 		  );
 		});
     }
-	
+		
     function load_charts(variants) {
 	  
 	  document.querySelectorAll(".location").forEach(e => e.remove());
