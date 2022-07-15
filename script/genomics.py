@@ -1265,6 +1265,10 @@ def main():
     print("Save genomics.csv...")
     df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    print("Save gen_locations.csv...")
+    pd.DataFrame(df.location.unique(), columns=['location']).to_csv("../data/gen_locations.csv", index=False,
+                                                                    quoting=csv.QUOTE_ALL, decimal=",")
+
     print("Pivot data...")
     df_pivoted = df.pivot(index=["location", "date"], columns=["variant"], values="perc_sequences").reset_index()
     df_pivoted = df_pivoted.fillna(0)
