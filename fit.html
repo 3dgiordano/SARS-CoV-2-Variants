@@ -543,7 +543,7 @@
 	  } else {
 		document.getElementById("world_container").style.visibility = "collapse";
 	  }
-	  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df_gen => {
+	  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/gen_locations.csv').then(df_gen => {
 		  
 		  locations_gen = [...new Set(df_gen.toArray("location"))];
 		  
