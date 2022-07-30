@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","B.1.1.318 (WHO FMV)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.26 (WHO VOC)","Delta - AY.37 (WHO VOC)","Eta (WHO VOI)","Iota (WHO VOI)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.1.1.14 (WHO VOC)","Omicron - BA.1.15 (WHO VOC)","Other","R.1 (WHO FMV)","Unknown"
+"location","date","Alpha (WHO VOC)","B.1.1.318 (WHO FMV)","Beta (WHO VOC)","Delta (WHO VOC)","Delta - AY.26 (WHO VOC)","Delta - AY.37 (WHO VOC)","Eta (CDC VBM)","Iota (CDC VBM)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.1.1.14 (WHO VOC)","Omicron - BA.1.15 (WHO VOC)","Other","R.1 (WHO FMV)","Unknown"
 "Liberia","2020-03-22","0","0","0","0","0","0","0","0","0","0","0","0","0","0","6"
 "Liberia","2020-04-05","0","0","0","0","0","0","0","0","0","0","0","0","0","0","7"
 "Liberia","2020-04-19","0","0","0","0","0","0","0","0","0","0","0","0","0","0","71"
@@ -61,4 +61,4 @@
 "Liberia","2022-06-26","0","0","0","0","0","0","0","0","0","0","0","0","0","0","34"
 "Liberia","2022-07-10","0","0","0","0","0","0","0","0","0","0","0","0","0","0","7"
 "Liberia","2022-07-24","0","0","0","0","0","0","0","0","0","0","0","0","0","0","8"
-"Liberia","2022-08-07","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"
+"Liberia","2022-08-07","0","0","0","0","0","0","0","0","0","0","0","0","0","0","138"

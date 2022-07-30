@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","B (Lineage)","Delta (WHO VOC)","Delta - AY.100 (WHO VOC)","Delta - AY.129 (WHO VOC)","Delta - AY.30 (WHO VOC)","Delta - AY.31 (WHO VOC)","Delta - AY.4.6 (WHO VOC)","Delta - AY.59 (WHO VOC)","Delta - AY.67 (WHO VOC)","Delta - AY.75.2 (WHO VOC)","Delta - AY.79 (WHO VOC)","Delta - AY.85 (WHO VOC)","Kappa (WHO VOI)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.10 (WHO VOC)","Omicron - BA.2.10.1 (WHO VOC)","Omicron - BA.2.3 (WHO VOC)","Other","Unknown"
+"location","date","Alpha (WHO VOC)","B (Lineage)","Delta (WHO VOC)","Delta - AY.100 (WHO VOC)","Delta - AY.129 (WHO VOC)","Delta - AY.30 (WHO VOC)","Delta - AY.31 (WHO VOC)","Delta - AY.4.6 (WHO VOC)","Delta - AY.59 (WHO VOC)","Delta - AY.67 (WHO VOC)","Delta - AY.75.2 (WHO VOC)","Delta - AY.79 (WHO VOC)","Delta - AY.85 (WHO VOC)","Kappa (CDC VBM)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.10 (WHO VOC)","Omicron - BA.2.10.1 (WHO VOC)","Omicron - BA.2.3 (WHO VOC)","Other","Unknown"
 "Myanmar","2020-04-05","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","21"
 "Myanmar","2020-04-19","0","90","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"
 "Myanmar","2020-05-03","0","44","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"
@@ -60,4 +60,4 @@
 "Myanmar","2022-06-26","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","113"
 "Myanmar","2022-07-10","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","180"
 "Myanmar","2022-07-24","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","215"
-"Myanmar","2022-08-07","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","251"
+"Myanmar","2022-08-07","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","338"
