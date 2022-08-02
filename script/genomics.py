@@ -346,10 +346,15 @@ def get_who_variants():
 
     who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
 
+    who_body = _who_data_wa(who_body)
+
+    return pd.read_html(who_body, match=r'GISAID\sclade')
+
+
+def _who_data_wa(who_body):
     # WA: generate spaces to solve new lines and unexpected new lines with div/p inside column values
     who_body = who_body.replace("<br />", "<br />&nbsp;").replace("</div>", "</div>&nbsp;").replace("</p>",
                                                                                                     "</p>&nbsp;")
-
     # Workaround
     who_body = who_body.replace("#", "")
     who_body = who_body.replace("Omicron*", "Omicron")
@@ -359,6 +364,32 @@ def get_who_variants():
     who_body = who_body.replace("BA.1 x AY.4 recombinant", "BA.1-AY.4-Recombinant")
     # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
     # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
+
+    return who_body
+
+
+def get_who_fmv_variants():
+    from urllib.request import Request, urlopen
+
+    who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
+                                "formerly-monitored-variants"
+
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+
+    who_body = _who_data_wa(who_body)
+
+    return pd.read_html(who_body, match=r'GISAID\sclade')
+
+
+def get_who_pre_voi_variants():
+    from urllib.request import Request, urlopen
+
+    who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
+                                "previously-circulating-vois"
+
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+
+    who_body = _who_data_wa(who_body)
 
     return pd.read_html(who_body, match=r'GISAID\sclade')
 
@@ -498,7 +529,10 @@ def get_phe_variants():
 
 
 def get_lineage_map():
-    (who_voc, who_voc_old, who_voc_sum, who_fmv) = get_who_variants()
+    (who_voc, who_voc_old, who_voc_sum) = get_who_variants()
+    who_fmv = get_who_fmv_variants()[0]
+    who_voi = get_who_pre_voi_variants()[0]
+    
     (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
     (phe_voc, phe_vui) = get_phe_variants()
@@ -506,17 +540,20 @@ def get_lineage_map():
     who_voc = who_expand(who_voc)
     who_voc_old = who_expand(who_voc_old)
     who_voc_sum = who_expand(who_voc_sum)
+    who_voi = who_expand(who_voi)
     who_fmv = who_expand(who_fmv)
 
     who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
     who_voc_old_dict = who_to_dict(who_voc_old, "(WHO VOC)")
     who_voc_sum_dict = who_to_dict(who_voc_sum, "(WHO VOC-SUM)")
+    who_voi_dict = who_to_dict(who_voi, "(WHO VOI)")
     who_fmv_dict = who_to_dict(who_fmv, "(WHO FMV)")
 
     lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voc_old_dict.items()) +
         list(who_voc_sum_dict.items()) +
+        list(who_voi_dict.items()) +
         list(who_fmv_dict.items())
     )
 
