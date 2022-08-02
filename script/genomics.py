@@ -532,7 +532,7 @@ def get_lineage_map():
     (who_voc, who_voc_old, who_voc_sum) = get_who_variants()
     who_fmv = get_who_fmv_variants()[0]
     who_voi = get_who_pre_voi_variants()[0]
-    
+
     (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
     (phe_voc, phe_vui) = get_phe_variants()
