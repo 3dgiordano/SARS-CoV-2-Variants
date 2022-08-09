@@ -701,13 +701,13 @@ def fix_owid_cases_data(df_owid_cases_data):
                     nd2 = d2 - nd
                     # print("nd:" + str(nd) + " nd2:" + str(nd2))
 
-                    print(x["location"] + " F1.1 from " + str(
-                        df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
-                          " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+                    # print(x["location"] + " F1.1 from " + str(
+                    #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
+                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
 
-                    print(x["location"] + " F1.2 from " + str(
-                        df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
-                          " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
+                    #print(x["location"] + " F1.2 from " + str(
+                    #    df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                    #      " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
 
                     df_owid_cases_data.loc[[x.name], "new_cases"] = nd
                     df_owid_cases_data.loc[[x.name + 1], "new_cases"] = nd2
@@ -719,13 +719,13 @@ def fix_owid_cases_data(df_owid_cases_data):
                     nd3 = d3 - nd
                     # print("nd:" + str(nd) + " d2:" + str(d2) + " nd3:" + str(nd3))
 
-                    print(x["location"] + " F2.1 from " + str(
-                        df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
-                          " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+                    # print(x["location"] + " F2.1 from " + str(
+                    #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
+                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
 
-                    print(x["location"] + " F2.2 from " + str(
-                        df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
-                          " " + str(d3) + " to " + str(nd3) + "(" + str(d3 - nd3) + ")")
+                    # print(x["location"] + " F2.2 from " + str(
+                    #     df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                    #       " " + str(d3) + " to " + str(nd3) + "(" + str(d3 - nd3) + ")")
 
                     df_owid_cases_data.loc[[x.name], "new_cases"] = nd
                     df_owid_cases_data.loc[[x.name + 2], "new_cases"] = nd3
@@ -743,11 +743,11 @@ def fix_owid_cases_data(df_owid_cases_data):
                         break
                     to_fix = df_owid_cases_data.iloc[[from_ix]]["new_cases"].item()
                     if x["new_cases"] * - 1 < to_fix:
-                        print(x["location"] + " F3 from " + str(
-                            df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" + str(
-                            df_owid_cases_data.iloc[[from_ix]]["date"].item()) +
-                              " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
-                            to_fix) + ")")
+                        # print(x["location"] + " F3 from " + str(
+                        #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" + str(
+                        #     df_owid_cases_data.iloc[[from_ix]]["date"].item()) +
+                        #       " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
+                        #     to_fix) + ")")
                         df_owid_cases_data.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
                         df_owid_cases_data.loc[[x.name], "new_cases"] = 0
                         csse_data_fixed += 1
