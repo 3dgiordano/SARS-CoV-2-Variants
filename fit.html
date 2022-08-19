@@ -442,7 +442,7 @@
 
 		dfjs.DataFrame.fromCSV(data_url).then(df => {
 		  
-		  var fltdf = df.drop("Unknown").drop("location").drop("date").toArray();
+		  var fltdf = df.drop("Unknown").drop("Other").drop("location").drop("date").toArray();
 		  if (selected_period != -1) {
 		    fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
 		  }
