@@ -137,6 +137,7 @@ def get_cases_r_data():
             "https://raw.githubusercontent.com/crondonm/TrackingR/main/Estimates-Database/database_7.csv")
         r_map = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/scripts/input/reproduction/" +
                             "reprod_country_standardized.csv")
+        r_map = r_map[r_map.reprod != "Micronesia"]
         r_df = r_df.replace(dict(zip(r_map.reprod, r_map.owid)))
         r_df.to_csv(r_file, index=False, quoting=csv.QUOTE_ALL, decimal=",")
     else:
@@ -247,7 +248,9 @@ def get_locations():
                 .replace("Saint-Martin", "Saint Martin (French part)") \
                 .replace("Sint Maarten", "Sint Maarten (Dutch part)") \
                 .replace("French Guiana", "Guayana") \
-                .replace("São Tomé and Príncipe", "Sao Tome and Principe")
+                .replace("São Tomé and Príncipe", "Sao Tome and Principe")  # \
+            # .replace("Micronesia", "Micronesia (country)")
+
             if l["country"] != new_l:
                 loc_df.loc[[l.name], "country"] = new_l
 
@@ -362,6 +365,8 @@ def _who_data_wa(who_body):
     who_body = who_body.replace("&bull;", "")
     who_body = who_body.replace("lineage*", "lineage")
     who_body = who_body.replace("BA.1 x AY.4 recombinant", "BA.1-AY.4-Recombinant")
+    who_body = who_body.replace(" (+ mutation)", "")
+    who_body = who_body.replace("BA.5** (+R346X or +K444X or +V445X or +N450D or +N460X)", "BA.5")
     # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
     # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
 
@@ -533,8 +538,10 @@ def get_lineage_map():
     who_fmv = get_who_fmv_variants()[0]
     who_voi = get_who_pre_voi_variants()[0]
 
-    (cdc_voi, cdc_voc, cdc_vbm) = get_cdc_variants()
+    (cdc_vbm) = get_cdc_variants()[1]
+
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
+
     (phe_voc, phe_vui) = get_phe_variants()
 
     who_voc = who_expand(who_voc)
@@ -557,12 +564,13 @@ def get_lineage_map():
         list(who_fmv_dict.items())
     )
 
-    cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
-    cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    #cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
+    #cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    print(cdc_vbm)
     cdc_vbm_dict = filter_to_dict(lineage_dict_map, cdc_vbm, "(CDC VBM)")
 
-    lineage_dict_map.update(cdc_voi_dict)
-    lineage_dict_map.update(cdc_voc_dict)
+    #lineage_dict_map.update(cdc_voi_dict)
+    #lineage_dict_map.update(cdc_voc_dict)
     lineage_dict_map.update(cdc_vbm_dict)
 
     ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
@@ -585,7 +593,7 @@ def get_lineage_map():
         "map": lineage_dict_map,
         "data": {
             "who": {"voc": {**who_voc, **who_voc_old}, "voc-lum": who_voc_sum, "voi": who_voc, "fmv": who_fmv},
-            "cdc": {"voi": cdc_voi, "voc": cdc_voc, "vbm": cdc_vbm},
+            "cdc": {"vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
         }
@@ -643,10 +651,13 @@ def get_loc_data(locat):
 
         df_loc = df_loc.reindex(
             columns=['iso', 'location', 'date', 'variant', 'num_sequences', 'perc_sequences', 'num_sequences_total'])
-    except Exception as e:
-        print(e)
-        raise e
-        # return None
+    # except Exception as e:
+    #    print(e)
+    #    raise e
+    #    # return None
+    except:
+        df_loc = None
+    print(type(df_loc))
     return df_loc
 
 
@@ -705,7 +716,7 @@ def fix_owid_cases_data(df_owid_cases_data):
                     #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
                     #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
 
-                    #print(x["location"] + " F1.2 from " + str(
+                    # print(x["location"] + " F1.2 from " + str(
                     #    df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
                     #      " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
 
@@ -794,6 +805,8 @@ def main():
 
     df_cases_data = get_cases_data()
     df_owid_cases_data = get_owid_cases_data()
+
+    df_owid_cases_data["location"] = df_owid_cases_data["location"].replace("Micronesia (country)", "Micronesia")
 
     # df_owid_cases_data_diff = df_owid_cases_data.loc[df_owid_cases_data.new_cases != df_owid_cases_data.org_new_cases]
     # df_owid_cases_data_diff_counts = df_owid_cases_data_diff.groupby(['location']).size().reset_index(name='counts')
@@ -903,6 +916,8 @@ def main():
     print("get mobility")
 
     owid_iso_data = get_owid_iso_data()
+
+    owid_iso_data["location"] = owid_iso_data["location"].replace("Micronesia (country)", "Micronesia")
 
     # Get Mobility Data
     mob_exclude = ["ALB", "DZA", "AND", "AIA", "ARM", "AZE", "BMU", "BES", "VGB", "BRN", "BDI", "CYM", "CAF", "TCD",
@@ -1316,44 +1331,56 @@ def main():
     df_fit_list = []
     for location in locations:
         # print(f"Save Location: {location['country']}")
+
         df_location = df_pivoted[df_pivoted["location"] == location['country']]
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
 
-        df_location.to_csv(
-            f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+        if not df_location.empty:
+            df_location.to_csv(
+                f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+        else:
+            print("Location emptu " + location['country'])
 
-        if location["country"] in df_cases_data["location"].values:
+        if not df_location.empty and location["country"] in df_cases_data["location"].values:
+            print(df_location)
+            print("---")
+            print(df_location.columns)
+            print("---")
+            print(df_cases_data.columns)
 
-            df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
-                                                                                           on=['location', 'date'],
-                                                                                           how='outer')
+            if location["country"] not in df_location["location"].values:
+                print("Country not found in location " + location["country"])
+            else:
+                df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
+                                                                                               on=['location', 'date'],
+                                                                                               how='outer')
 
-            df_fit = df_fit.sort_values(['location', 'date', 'cases'])
+                df_fit = df_fit.sort_values(['location', 'date', 'cases'])
 
-            # Fix the cases of the last value and put the projected value
-            df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
-            df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
-                df_fit_r_data.index[-1], 'cases']
+                # Fix the cases of the last value and put the projected value
+                df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
+                df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
+                    df_fit_r_data.index[-1], 'cases']
 
-            # Fit
-            columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
-            for v in columns:
-                df_fit[v] = df_fit["cases"] * (df_fit[v] / 100)
-                df_fit[v] = df_fit[v].fillna(0.0)
-                df_fit[v] = df_fit[v].apply(np.ceil).astype(int)
+                # Fit
+                columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
+                for v in columns:
+                    df_fit[v] = df_fit["cases"] * (df_fit[v] / 100)
+                    df_fit[v] = df_fit[v].fillna(0.0)
+                    df_fit[v] = df_fit[v].apply(np.ceil).astype(int)
 
-            df_fit['Unknown'] = df_fit.loc[:, columns].sum(axis=1)
-            df_fit['Unknown'] = df_fit["cases"] - df_fit['Unknown']
-            df_fit['Unknown'] = df_fit['Unknown'].fillna(0.0)
-            df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
-            df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
+                df_fit['Unknown'] = df_fit.loc[:, columns].sum(axis=1)
+                df_fit['Unknown'] = df_fit["cases"] - df_fit['Unknown']
+                df_fit['Unknown'] = df_fit['Unknown'].fillna(0.0)
+                df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
+                df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
 
-            df_fit.drop(columns=['cases'], inplace=True)
+                df_fit.drop(columns=['cases'], inplace=True)
 
-            df_fit.to_csv(
-                f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+                df_fit.to_csv(
+                    f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-            df_fit_list.append(df_fit)
+                df_fit_list.append(df_fit)
 
     print("Generate Variants World data...")
     df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
