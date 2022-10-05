@@ -1336,17 +1336,15 @@ def main():
         df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
 
         if not df_location.empty:
+            if "Other" not in df_location.columns:
+                df_location["Other"] = 0 # Init the column Other when not exist
+
             df_location.to_csv(
                 f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
         else:
             print("Location emptu " + location['country'])
 
         if not df_location.empty and location["country"] in df_cases_data["location"].values:
-            print(df_location)
-            print("---")
-            print(df_location.columns)
-            print("---")
-            print(df_cases_data.columns)
 
             if location["country"] not in df_location["location"].values:
                 print("Country not found in location " + location["country"])
