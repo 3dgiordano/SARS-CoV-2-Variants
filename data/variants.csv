@@ -813,7 +813,7 @@
 "C.1.2","C.1.2.*","WHO","FMV"
 "C.36.3","C.36.3.*","WHO","FMV"
 "R.1","R.1.*","WHO","FMV"
-"XBB$","XBB.*","WHO","VOC-SUM"
+"XBB","XBB.*","WHO","VOC-SUM"
 "XD","XD.*","WHO","FMV"
 "N.7","N.7.*","UY-GTI",""
 "P.6","P.6.*","UY-GTI",""
