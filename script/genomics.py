@@ -367,6 +367,11 @@ def _who_data_wa(who_body):
     who_body = who_body.replace("BA.1 x AY.4 recombinant", "BA.1-AY.4-Recombinant")
     who_body = who_body.replace(" (+ mutation)", "")
     who_body = who_body.replace("BA.5** (+R346X or +K444X or +V445X or +N450D or +N460X)", "BA.5")
+    who_body = who_body.replace("BA.5** (+R346X or +K444X or +V445X or +N450D or +N460X)", "BA.5")
+    who_body = who_body.replace("<sup>$</sup>", "")
+    who_body = who_body.replace("****", "")
+    who_body = who_body.replace("***", "")
+    who_body = who_body.replace("**", "")
     # who_body = who_body.replace("B.1.1.7", "B.1.1.7 Q ")
     # who_body = who_body.replace("B.1.617.2", "B.1.617.2 AY ")
 
