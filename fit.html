@@ -441,8 +441,14 @@
 		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
 
 		dfjs.DataFrame.fromCSV(data_url).then(df => {
-		  
-		  var fltdf = df.drop("Unknown").drop("Other").drop("location").drop("date").toArray();
+		  var fltdf = df;
+		  if ("Other" in fltdf.listColumns()){
+			fltdf = fltdf.drop("Other");
+		  }
+		  if ("Unknown" in fltdf.listColumns()){
+			fltdf = fltdf.drop("Unknown");
+		  }
+		  fltdf = fltdf.drop("location").drop("date").toArray();
 		  if (selected_period != -1) {
 		    fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
 		  }
