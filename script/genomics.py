@@ -906,6 +906,7 @@ def main():
     df = df[df.perc_sequences != 0]
 
     df['variant'] = df['variant'].str.upper()
+    df['variant'] = df['variant'].str.replace("UNASSIGNED", "Other")
 
     # Drop from cases countries not in list
     # locations_to_clean = list(set(df_cases_data["location"].values) - set(df["location"].values))
@@ -1342,7 +1343,7 @@ def main():
 
         if not df_location.empty:
             if "Other" not in df_location.columns:
-                df_location["Other"] = 0 # Init the column Other when not exist
+                df_location["Other"] = 0  # Init the column Other when not exist
 
             df_location.to_csv(
                 f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
