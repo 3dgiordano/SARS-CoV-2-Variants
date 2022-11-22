@@ -442,10 +442,10 @@
 
 		dfjs.DataFrame.fromCSV(data_url).then(df => {
 		  var fltdf = df;
-		  if ("Other" in fltdf.listColumns()){
+		  if (fltdf.listColumns().indexOf("Other") != -1){
 			fltdf = fltdf.drop("Other");
 		  }
-		  if ("Unknown" in fltdf.listColumns()){
+		  if (fltdf.listColumns().indexOf("Unknown") != -1){
 			fltdf = fltdf.drop("Unknown");
 		  }
 		  fltdf = fltdf.drop("location").drop("date").toArray();
@@ -454,7 +454,6 @@
 		  }
 		  
 		  var null_from_idx =  getLastValidIdx(fltdf);
-		  
 		  df.listColumns().filter(function(column){return (['location', 'date']).indexOf(column) == -1}).forEach(column => {
 			var data = df.toArray(column);
             if (selected_period != -1) {
@@ -462,10 +461,9 @@
 			}
 			data = data.map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
 			var data_sum = data.reduce(function (pv, cv) { return pv + cv }, 0)
-						
+			
 			if (data_sum > 0) {
 				columns.push(column);
-									  
 				// Set at the end the "cut" with null values from the last sequencial data
 				data.forEach(function(item, i) { if (item == 0 && i == data.length - null_from_idx) data[i] = null; });
 		
