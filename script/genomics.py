@@ -71,7 +71,6 @@ who_pango_map = {
     f"^BB\\.2{t}": "Mu",
 }
 
-
 def get_url(url, headers=None):
     from urllib.error import URLError
     from urllib.request import Request
@@ -802,6 +801,35 @@ def get_mobility(loc_mob):
         return df_mob
 
 
+def parallel_df(df, func, data):
+    cores = multiprocessing.cpu_count()
+    num_partitions = cores
+    split = np.array_split(df, num_partitions)
+    pool = Pool(cores, initializer=worker_init, initargs=(data,))
+    df = pd.concat(pool.map(func, split))
+    pool.close()
+    pool.join()
+    return df
+
+
+_worker_data = None
+
+
+def worker_init(data):
+  global _worker_data
+  _worker_data = data
+
+
+def replace_variant(x):
+    x["variant"].replace(_worker_data, inplace=True, regex=True)
+    return x
+
+
+def replace_lineage_to_parent(x):
+    x["variant"].replace(_worker_data, inplace=True, regex=False)
+    return x
+
+
 def main():
     locations_list = []
 
@@ -1285,22 +1313,25 @@ def main():
 
     print("Map lineage...")
     data = get_lineage_map()
-    main_lineage_map = data["map"]
+    lineage_map = data["map"]
 
-    df["variant"].replace(main_lineage_map, inplace=True, regex=True)
+    #df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
-    main_lineage = list(dict.fromkeys([v for k, v in main_lineage_map.items()]))
+    df = parallel_df(df, replace_variant, lineage_map)
+
+    main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
     other_lineage = list(dict.fromkeys([str(l) for l in df["variant"].unique() if l not in main_lineage]))
 
     print("Save lineage map...")
-    export_variants(main_lineage_map)
+    export_variants(lineage_map)
 
     print("Transform not monitored lineage to parent...")
     # Transform no specific lineage to parent lineage
     lineage_to_parent = {}
     for o in other_lineage:
         lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
-    df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
+    #df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
+    df = parallel_df(df, replace_lineage_to_parent, lineage_to_parent)
 
     print("Group and calculate percentage of sequences...")
     df['date'] = pd.to_datetime(df['date'])
