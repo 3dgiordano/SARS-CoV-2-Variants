@@ -64,7 +64,6 @@
           }
         });
       });
-    
     }
 
     window.addEventListener('resize', windowSizeUpdate);
@@ -88,17 +87,21 @@
 		}
 	}
 
-	function evaluateInViewport() {
-		window.Apex._chartInstances.forEach(chart => {
-			if (isInViewport(chart.chart.el)) {
-				if (chart.chart.w.config.series.length == 0 && chart.chart.w.config.noData.text == "Loading..." && (!chart.chart.w.globals.hasOwnProperty("loading") || chart.chart.w.globals.loading == false)) {
-					// console.log(chart.id);
-					// console.log(chart.chart.opts.origin_data_url);
-					loadChartData(chart.chart, chart.chart.opts.origin_data_url);
-				}
+	function evaluateChartInViewport(chart) {
+		if (isInViewport(chart.el)) {
+			if (chart.w.config.series.length == 0 && chart.w.config.noData.text == "Loading..." && (!chart.w.globals.hasOwnProperty("loading") || chart.w.globals.loading == false)) {
+				// console.log(chart.opts.origin_data_url);
+				loadChartData(chart, chart.opts.origin_data_url);
 			}
-			
-		});	
+		}
+	}
+
+	function evaluateInViewport() {
+		if (window.hasOwnProperty("Apex") && window.Apex.hasOwnProperty("_chartInstances")) {
+			window.Apex._chartInstances.forEach(chart => {
+				evaluateChartInViewport(chart.chart);
+			});	
+		}
 	}
 
 	function loadChartData(chart, data_url) {
@@ -582,6 +585,7 @@
 
         chart.render();
         chart_list.push(element_selector);
+		evaluateChartInViewport(chart);
 		
     }
 		
@@ -645,9 +649,6 @@
 	function load_df_locations(){
 		locations = [...new Set(loc_df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
 		load_charts(variants);
-		setTimeout(function(){
-			evaluateInViewport();
-		}, 1000);
 	}
 	
     function update_continent() {
