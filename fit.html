@@ -70,6 +70,151 @@
     window.addEventListener('resize', windowSizeUpdate);
     windowSizeUpdate();
 
+	function isInViewport(element) {
+		// Get the bounding client rectangle position in the viewport
+		var bounding = element.getBoundingClientRect();
+		
+		// Checking part. Here the code checks if it's *fully* visible
+		// Edit this part if you just want a partial visibility
+		if (
+			bounding.top >= 0 &&
+			bounding.left >= 0 &&
+			bounding.left <= (window.innerWidth || document.documentElement.clientWidth) &&
+			bounding.top <= (window.innerHeight || document.documentElement.clientHeight)
+		) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	function evaluateInViewport() {
+		window.Apex._chartInstances.forEach(chart => {
+			if (isInViewport(chart.chart.el)) {
+				if (chart.chart.w.config.series.length == 0 && chart.chart.w.config.noData.text == "Loading..." && (!chart.chart.w.globals.hasOwnProperty("loading") || chart.chart.w.globals.loading == false)) {
+					// console.log(chart.id);
+					// console.log(chart.chart.opts.origin_data_url);
+					loadChartData(chart.chart, chart.chart.opts.origin_data_url);
+				}
+			}
+			
+		});	
+	}
+
+	function loadChartData(chart, data_url) {
+		chart.w.globals.loading = true;	
+		period_list = document.getElementById("period_list");
+		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
+
+		new Promise(() => {
+			var date_points = [];
+			var series = [];
+			var columns = [];
+			var dates = [];
+			var colors_columns = [];
+			
+			dfjs.DataFrame.fromCSV(data_url).then(df => {
+			  var fltdf = df;
+			  if (fltdf.listColumns().indexOf("Other") != -1){
+				fltdf = fltdf.drop("Other");
+			  }
+			  if (fltdf.listColumns().indexOf("Unknown") != -1){
+				fltdf = fltdf.drop("Unknown");
+			  }
+			  fltdf = fltdf.drop("location").drop("date").toArray();
+			  if (selected_period != -1) {
+				fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
+			  }
+			  
+			  var null_from_idx =  getLastValidIdx(fltdf);
+			  df.listColumns().filter(function(column){return (['location', 'date']).indexOf(column) == -1}).forEach(column => {
+				var data = df.toArray(column);
+				if (selected_period != -1) {
+				  data = data.slice(data.length-selected_period,data.length);
+				}
+				data = data.map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
+				var data_sum = data.reduce(function (pv, cv) { return pv + cv }, 0)
+				
+				if (data_sum > 0) {
+					columns.push(column);
+					// Set at the end the "cut" with null values from the last sequencial data
+					data.forEach(function(item, i) { if (item == 0 && i == data.length - null_from_idx) data[i] = null; });
+			
+					series.push(
+						{ name: column, data: data }
+					);
+				}
+				
+			  });
+
+			  dates = df.toArray("date");
+			  if (selected_period != -1) {
+				dates = dates.slice(dates.length-selected_period,dates.length);
+			  }
+
+				date_points.push(
+					{
+					  x: new Date().getTime(),
+					  borderColor: '#606060',
+					  label: {
+						style: {
+						  color: '#000',
+						},
+						text: ""
+					  }
+					}
+				);
+				  
+				estimate_start = new Date(dates.at(-2)).getTime();
+				estimate_end = new Date(dates.at(-1)).getTime();
+				date_points.push(
+					{
+					  x: estimate_start,
+					  x2: estimate_end,
+					  fillColor: '#FEB01970',
+					  borderColor: '#606060',
+					  label: {
+						style: {
+						  color: '#000',
+						},
+						text: "Estimate start"
+					  }
+					}
+				  );
+				  
+			  colors_columns = get_color_columns(columns, variants);
+
+			  chart.updateOptions (
+				{
+				  annotations: {
+					xaxis: date_points,
+				  },
+				  series: series,
+				  colors: colors_columns,
+				  noData: {
+					text: "No Data",
+				  },
+				  xaxis: {
+					tooltip: {
+					  enabled: false
+					},
+					type: 'datetime',
+					categories: dates
+				  },
+				}, 
+				true, false, true
+
+			  );
+			  chart.w.globals.loading = false;
+			});
+		});
+		
+	}
+
+	window.addEventListener('scroll', function (event) {
+		evaluateInViewport();
+	}, false);
+
 	function getLastValidIdx(flt_df) {
 		
 		// Reverse value to optimize the find
@@ -275,8 +420,8 @@
       }
 
       var series = [];
-	  var date_points = [];
       var columns = [];
+	  var date_points = [];
       var dates = [];
       var colors_columns = [];
 
@@ -429,110 +574,15 @@
               }
             }
           }
-        }
+        },
+		origin_data_url: data_url
         };
 
         var chart = new ApexCharts(document.querySelector(element_selector), options);
 
         chart.render();
         chart_list.push(element_selector);
-
-		period_list = document.getElementById("period_list");
-		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
-
-		dfjs.DataFrame.fromCSV(data_url).then(df => {
-		  var fltdf = df;
-		  if (fltdf.listColumns().indexOf("Other") != -1){
-			fltdf = fltdf.drop("Other");
-		  }
-		  if (fltdf.listColumns().indexOf("Unknown") != -1){
-			fltdf = fltdf.drop("Unknown");
-		  }
-		  fltdf = fltdf.drop("location").drop("date").toArray();
-		  if (selected_period != -1) {
-		    fltdf = fltdf.slice(fltdf.length-selected_period,fltdf.length);
-		  }
-		  
-		  var null_from_idx =  getLastValidIdx(fltdf);
-		  df.listColumns().filter(function(column){return (['location', 'date']).indexOf(column) == -1}).forEach(column => {
-			var data = df.toArray(column);
-            if (selected_period != -1) {
-			  data = data.slice(data.length-selected_period,data.length);
-			}
-			data = data.map(function (x) { return parseFloat(x.toString().replace(',', '.'))});
-			var data_sum = data.reduce(function (pv, cv) { return pv + cv }, 0)
-			
-			if (data_sum > 0) {
-				columns.push(column);
-				// Set at the end the "cut" with null values from the last sequencial data
-				data.forEach(function(item, i) { if (item == 0 && i == data.length - null_from_idx) data[i] = null; });
 		
-				series.push(
-					{ name: column, data: data }
-				);
-			}
-			
-		  });
-
-		  dates = df.toArray("date");
-		  if (selected_period != -1) {
-			dates = dates.slice(dates.length-selected_period,dates.length);
-		  }
-
-			date_points.push(
-				{
-				  x: new Date().getTime(),
-				  borderColor: '#606060',
-				  label: {
-					style: {
-					  color: '#000',
-					},
-					text: ""
-				  }
-				}
-			);
-			  
-			estimate_start = new Date(dates.at(-2)).getTime();
-			estimate_end = new Date(dates.at(-1)).getTime();
-			date_points.push(
-				{
-				  x: estimate_start,
-				  x2: estimate_end,
-				  fillColor: '#FEB01970',
-				  borderColor: '#606060',
-				  label: {
-					style: {
-					  color: '#000',
-					},
-					text: "Estimate start"
-				  }
-				}
-			  );
-			  
-		  colors_columns = get_color_columns(columns, variants);
-
-		  chart.updateOptions (
-			{
-			  annotations: {
-				xaxis: date_points,
-			  },
-			  series: series,
-			  colors: colors_columns,
-			  noData: {
-				text: "No Data",
-			  },
-			  xaxis: {
-				tooltip: {
-				  enabled: false
-				},
-				type: 'datetime',
-				categories: dates
-			  },
-			}, 
-			true, false, true
-
-		  );
-		});
     }
 		
     function load_charts(variants) {
@@ -546,8 +596,8 @@
 		  });
 	  } else {
 		document.getElementById("world_container").style.visibility = "collapse";
-	  }
-	  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/gen_locations.csv').then(df_gen => {
+		
+		   dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/gen_locations.csv').then(df_gen => {
 		  
 		  locations_gen = [...new Set(df_gen.toArray("location"))];
 		  
@@ -589,12 +639,15 @@
 			});
 		});
       });
+	  }
     }
 
 	function load_df_locations(){
 		locations = [...new Set(loc_df.filter(row => row.get('continent') == continent).toArray("location"))].sort();
 		load_charts(variants);
-		
+		setTimeout(function(){
+			evaluateInViewport();
+		}, 1000);
 	}
 	
     function update_continent() {
