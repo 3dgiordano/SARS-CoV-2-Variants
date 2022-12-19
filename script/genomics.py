@@ -20,6 +20,8 @@ from numpy import errstate, isneginf, array
 # https://www.ecdc.europa.eu/en/covid-19/variants-concern
 # https://www.gov.uk/government/collections/new-sars-cov-2-variant
 
+csse_data_fixed = 0
+
 out_info_auth = "Bearer 0ed52bbfb6c79d1fd8e9c6f267f9b6311c885a4c4c6f037d6ab7b3a40d586ad0"
 
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
@@ -70,6 +72,7 @@ who_pango_map = {
     f"^B\\.1\\.621{t}": "Mu",
     f"^BB\\.2{t}": "Mu",
 }
+
 
 def get_url(url, headers=None):
     from urllib.error import URLError
@@ -568,13 +571,13 @@ def get_lineage_map():
         list(who_fmv_dict.items())
     )
 
-    #cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
-    #cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
+    # cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
+    # cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
     print(cdc_vbm)
     cdc_vbm_dict = filter_to_dict(lineage_dict_map, cdc_vbm, "(CDC VBM)")
 
-    #lineage_dict_map.update(cdc_voi_dict)
-    #lineage_dict_map.update(cdc_voc_dict)
+    # lineage_dict_map.update(cdc_voi_dict)
+    # lineage_dict_map.update(cdc_voc_dict)
     lineage_dict_map.update(cdc_vbm_dict)
 
     ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
@@ -669,111 +672,22 @@ def fix_owid_cases_data(df_owid_cases_data):
     df_owid_cases_data["org_new_cases"] = df_owid_cases_data["new_cases"]
     df_owid_cases_data["org_new_cases_smoothed"] = df_owid_cases_data["new_cases_smoothed"]
 
-    max_idx = len(df_owid_cases_data.index.values) - 1
     # Fix some JHU noise data
     global csse_data_fixed
     csse_data_fixed = 0
 
-    def fix_owid(x):
-        if x.name < 1:
-            return
-        if df_owid_cases_data.iloc[[x.name - 1]]["location"].item() == x["location"]:
-            total_day = df_owid_cases_data.iloc[[x.name]]["total_cases"].item()
-            total_yesterday = df_owid_cases_data.iloc[[x.name - 1]]["total_cases"].item()
-
-            if total_day == 0 and total_yesterday > 0:
-                print(" * " + x["location"] + " without total_cases " + x["date"])
-                total_day = total_yesterday
-                df_owid_cases_data.loc[[x.name], "total_cases"] = total_day
-
-            nc = total_day - total_yesterday
-            if nc < 0:
-                print(f' {x["location"]} {x["date"]} {nc}')
-
-            df_owid_cases_data.loc[[x.name], "new_cases"] = nc
-
     print("Fix OWID Data")
-    df_owid_cases_data.apply(fix_owid, axis=1)
-
-    def fix_jhu(x):
-        global csse_data_fixed
-
-        if x.name + 2 > max_idx:
-            return
-
-        if df_owid_cases_data.iloc[[x.name + 2]]["location"].item() == x["location"]:
-            if x["new_cases"] == 0:
-                # Read 2day forward
-                d2 = df_owid_cases_data.iloc[[x.name + 1]]["new_cases"].item()
-                d3 = df_owid_cases_data.iloc[[x.name + 2]]["new_cases"].item()
-
-                if d3 <= d2 and d2 > 0:
-                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
-                    if d3 == 0:
-                        nd = round(d2 / 2, 0)
-                    else:
-                        nd = round((d2 - d3) / 1.5, 0)
-                    nd2 = d2 - nd
-                    # print("nd:" + str(nd) + " nd2:" + str(nd2))
-
-                    # print(x["location"] + " F1.1 from " + str(
-                    #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
-                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
-
-                    # print(x["location"] + " F1.2 from " + str(
-                    #    df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
-                    #      " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
-
-                    df_owid_cases_data.loc[[x.name], "new_cases"] = nd
-                    df_owid_cases_data.loc[[x.name + 1], "new_cases"] = nd2
-                    csse_data_fixed += 1
-
-                elif d3 >= d2 > 0:
-                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
-                    nd = round((d3 - d2) / 2, 0)
-                    nd3 = d3 - nd
-                    # print("nd:" + str(nd) + " d2:" + str(d2) + " nd3:" + str(nd3))
-
-                    # print(x["location"] + " F2.1 from " + str(
-                    #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" +
-                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
-
-                    # print(x["location"] + " F2.2 from " + str(
-                    #     df_owid_cases_data.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
-                    #       " " + str(d3) + " to " + str(nd3) + "(" + str(d3 - nd3) + ")")
-
-                    df_owid_cases_data.loc[[x.name], "new_cases"] = nd
-                    df_owid_cases_data.loc[[x.name + 2], "new_cases"] = nd3
-                    csse_data_fixed += 1
-
-            elif x["new_cases"] < 0:
-                # Find and fix the previous peak to compensate
-                # print(str(x["date"]) + " " + str(x["new_cases"]))
-
-                from_ix = x.name - 1
-                while True:
-                    if x.name - from_ix == 30:
-                        print(x["location"])
-                    if df_owid_cases_data.iloc[[x.name + 2]]["location"].item() != x["location"]:
-                        break
-                    to_fix = df_owid_cases_data.iloc[[from_ix]]["new_cases"].item()
-                    if x["new_cases"] * - 1 < to_fix:
-                        # print(x["location"] + " F3 from " + str(
-                        #     df_owid_cases_data.iloc[[x.name]]["date"].item()) + " to fix:" + str(
-                        #     df_owid_cases_data.iloc[[from_ix]]["date"].item()) +
-                        #       " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
-                        #     to_fix) + ")")
-                        df_owid_cases_data.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
-                        df_owid_cases_data.loc[[x.name], "new_cases"] = 0
-                        csse_data_fixed += 1
-                        break
-                    from_ix -= 1
+    #df_owid_cases_data.apply(fix_owid, axis=1)
+    df_owid_cases_data = parallel_df(df_owid_cases_data, fix_owid_data, None)
 
     print("Fix CSSE Data")
     for i in range(10):
         print(f"-{i}--")
         csse_data_fixed = 0
-        df_owid_cases_data.apply(fix_jhu, axis=1)
+
+        # df_owid_cases_data.apply(fix_jhu, axis=1)
+        df_owid_cases_data = parallel_df(df_owid_cases_data, fix_jhu_data, None)
+
         print(f"Data fixed:{csse_data_fixed}")
 
     metric = "new_cases"
@@ -816,8 +730,8 @@ _worker_data = None
 
 
 def worker_init(data):
-  global _worker_data
-  _worker_data = data
+    global _worker_data
+    _worker_data = data
 
 
 def replace_variant(x):
@@ -828,6 +742,115 @@ def replace_variant(x):
 def replace_lineage_to_parent(x):
     x["variant"].replace(_worker_data, inplace=True, regex=False)
     return x
+
+
+def fix_owid_data(df):
+
+    def fix_owid(x):
+        if x.name < 1:
+            return
+        if df.iloc[[x.name - 1]]["location"].item() == x["location"]:
+            total_day = df.iloc[[x.name]]["total_cases"].item()
+            total_yesterday = df.iloc[[x.name - 1]]["total_cases"].item()
+
+            if total_day == 0 and total_yesterday > 0:
+                print(" * " + x["location"] + " without total_cases " + x["date"])
+                total_day = total_yesterday
+                df.loc[[x.name], "total_cases"] = total_day
+
+            nc = total_day - total_yesterday
+            if nc < 0:
+                print(f' {x["location"]} {x["date"]} {nc}')
+
+            df.loc[[x.name], "new_cases"] = nc
+
+    df.reset_index(drop=True, inplace=True)
+    df.apply(fix_owid, axis=1)
+    return df
+
+
+def fix_jhu_data(df):
+    global csse_data_fixed
+
+    df.reset_index(drop=True, inplace=True)
+    max_idx = len(df.index.values) - 1
+
+    def fix_jhu(x):
+        global csse_data_fixed
+
+        if x.name + 2 > max_idx:
+            return
+
+        if df.iloc[[x.name + 2]]["location"].item() == x["location"]:
+            if x["new_cases"] == 0:
+                # Read 2day forward
+                d2 = df.iloc[[x.name + 1]]["new_cases"].item()
+                d3 = df.iloc[[x.name + 2]]["new_cases"].item()
+
+                if d3 <= d2 and d2 > 0:
+                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
+                    if d3 == 0:
+                        nd = round(d2 / 2, 0)
+                    else:
+                        nd = round((d2 - d3) / 1.5, 0)
+                    nd2 = d2 - nd
+                    # print("nd:" + str(nd) + " nd2:" + str(nd2))
+
+                    # print(x["location"] + " F1.1 from " + str(
+                    #     df.iloc[[x.name]]["date"].item()) + " to fix:" +
+                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+
+                    # print(x["location"] + " F1.2 from " + str(
+                    #    df.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                    #      " " + str(d2) + " to " + str(nd2) + "(" + str(d3 - nd2) + ")")
+
+                    df.loc[[x.name], "new_cases"] = nd
+                    df.loc[[x.name + 1], "new_cases"] = nd2
+                    csse_data_fixed += 1
+
+                elif d3 >= d2 > 0:
+                    # print(str(x["date"]) + " " + str(x["new_cases"]) + " " + str(d2) + " " + str(d3))
+                    nd = round((d3 - d2) / 2, 0)
+                    nd3 = d3 - nd
+                    # print("nd:" + str(nd) + " d2:" + str(d2) + " nd3:" + str(nd3))
+
+                    # print(x["location"] + " F2.1 from " + str(
+                    #     df.iloc[[x.name]]["date"].item()) + " to fix:" +
+                    #       " " + str(x["new_cases"]) + " to " + str(nd) + "(" + str(x["new_cases"] - nd) + ")")
+
+                    # print(x["location"] + " F2.2 from " + str(
+                    #     df.iloc[[x.name + 2]]["date"].item()) + " to fix:" +
+                    #       " " + str(d3) + " to " + str(nd3) + "(" + str(d3 - nd3) + ")")
+
+                    df.loc[[x.name], "new_cases"] = nd
+                    df.loc[[x.name + 2], "new_cases"] = nd3
+                    csse_data_fixed += 1
+
+            elif x["new_cases"] < 0:
+                # Find and fix the previous peak to compensate
+                # print(str(x["date"]) + " " + str(x["new_cases"]))
+
+                from_ix = x.name - 1
+                while True:
+                    if x.name - from_ix == 30:
+                        print(x["location"])
+                    if df.iloc[[x.name + 2]]["location"].item() != x["location"]:
+                        break
+                    to_fix = df.iloc[[from_ix]]["new_cases"].item()
+                    if x["new_cases"] * - 1 < to_fix:
+                        # print(x["location"] + " F3 from " + str(
+                        #     df.iloc[[x.name]]["date"].item()) + " to fix:" + str(
+                        #     df.iloc[[from_ix]]["date"].item()) +
+                        #       " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
+                        #     to_fix) + ")")
+                        df.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
+                        df.loc[[x.name], "new_cases"] = 0
+                        csse_data_fixed += 1
+                        break
+                    from_ix -= 1
+
+    df.apply(fix_jhu, axis=1)
+    return df
 
 
 def main():
@@ -1315,7 +1338,7 @@ def main():
     data = get_lineage_map()
     lineage_map = data["map"]
 
-    #df["variant"].replace(main_lineage_map, inplace=True, regex=True)
+    # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
     df = parallel_df(df, replace_variant, lineage_map)
 
@@ -1330,7 +1353,7 @@ def main():
     lineage_to_parent = {}
     for o in other_lineage:
         lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
-    #df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
+    # df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
     df = parallel_df(df, replace_lineage_to_parent, lineage_to_parent)
 
     print("Group and calculate percentage of sequences...")
