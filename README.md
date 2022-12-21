@@ -33,6 +33,22 @@ The project, site, published data, and graphics are free and open source.
 A work in progress project created by @3dgiordano.
 They can access the source code and data in their GitHub project https://github.com/3dgiordano/SARS-CoV-2-Variants.
 
+#### External projects that use our data
+
+_poreCov_
+
+poreCov - an easy to use, fast, and robust workflow for SARS-CoV-2 genome reconstruction via nanopore sequencing
+Christian Brandt, Sebastian Krautwurst, Riccardo Spott, Mara Lohde, Mateusz Jundzill, Mike Marquet, Martin Hölzer
+https://www.frontiersin.org/articles/10.3389/fgene.2021.711437/full
+
+https://github.com/replikation/poreCov
+
+_VOCAL_
+
+VOCAL: Variant Of Concern ALert and prioritization
+https://github.com/rki-mf1/vocal
+ 
+
 #### Inspiration ideas
 If it inspires, it is worth not to miss the opportunity to cite the people and their work.
 
