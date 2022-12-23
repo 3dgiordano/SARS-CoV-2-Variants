@@ -71,7 +71,7 @@
 
     function start() {
 
-      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+      dfjs.DataFrame.fromJSON("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/update.json").then(df => {
         var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
         var date_str = new Date(update_date_str).toString();
         document.getElementById("last_update").innerText = date_str;
@@ -80,8 +80,8 @@
 
       new Promise(() => {
 		if (variants.length == 0){
-			dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
-			  variants = df.toArray("label");
+			dfjs.DataFrame.fromCSV("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/variants.csv").then(df => {
+			  variants = df.toArray("label").reverse();
 			  update_continent();
 			});
 		} else {
@@ -447,13 +447,13 @@
 	  if (continent == "World") {
 	      document.getElementById("world_container").style.visibility = "visible";
 		  new Promise(() => {
-			setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World.csv', "#world", variants), 0);
+			setTimeout(renderChart("World", 'https://3dgiordano.github.io/SARS-CoV-2-Variants/data/World.csv', "#world", variants), 0);
 		  });
       } else {
 		document.getElementById("world_container").style.visibility = "collapse";
 	  }
 	  
-      dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/genomics.csv').then(df => {
+      dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/genomics.csv').then(df => {
 
         df_sequence = df.groupBy('location').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
         df_variant = df.groupBy('location', 'variant').aggregate(group => group.stat.sum('num_sequences')).rename('aggregation', 'tot_sequences');
@@ -485,7 +485,7 @@
 				cell.appendChild(container);
 
 				new Promise(() => {
-				  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + ".csv", "#" + container.id, variants), 0);
+				  setTimeout(renderChart(location, 'https://3dgiordano.github.io/SARS-CoV-2-Variants/data/' + location.replace(' ', '%20') + ".csv", "#" + container.id, variants), 0);
 				});
 
 				i += 1;

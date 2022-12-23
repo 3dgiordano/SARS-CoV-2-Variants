@@ -93,7 +93,9 @@
 		if (isInViewport(chart.el)) {
 			if (chart.w.config.series.length == 0 && chart.w.config.noData.text == "Loading..." && (!chart.w.globals.hasOwnProperty("loading") || chart.w.globals.loading == false)) {
 				// console.log(chart.opts.origin_data_url);
-				loadChartData(chart, chart.opts.origin_data_url);
+				new Promise(() => {
+					setTimeout(loadChartData(chart, chart.opts.origin_data_url),0);
+				});
 			}
 		}
 	}
@@ -111,7 +113,7 @@
 		period_list = document.getElementById("period_list");
 		selected_period = parseInt(period_list.options[ period_list.selectedIndex ].value);
 
-		new Promise(() => {
+		// new Promise(() => {
 			var date_points = [];
 			var series = [];
 			var columns = [];
@@ -212,7 +214,7 @@
 			  );
 			  chart.w.globals.loading = false;
 			});
-		});
+		// });
 		
 	}
 
@@ -238,7 +240,7 @@
 
     function start() {
 
-      dfjs.DataFrame.fromJSON("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/update.json").then(df => {
+      dfjs.DataFrame.fromJSON("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/update.json").then(df => {
         var update_date_str = df.select("last_update_utc").toArray().join('') + "Z";
 		updated_date = new Date(update_date_str)
         var date_str = updated_date.toString();
@@ -247,8 +249,8 @@
 
       new Promise(() => {
 		if (variants.length == 0){
-			dfjs.DataFrame.fromCSV("https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/variants.csv").then(df => {
-			  variants = df.toArray("label");
+			dfjs.DataFrame.fromCSV("https://3dgiordano.github.io/SARS-CoV-2-Variants/data/variants.csv").then(df => {
+			  variants = df.toArray("label").reverse();
 			  update_continent();
 			});
 		} else {
@@ -598,16 +600,16 @@
 	  if (continent == "World") {
 		  document.getElementById("world_container").style.visibility = "visible";
 		  new Promise(() => {
-			setTimeout(renderChart("World", 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/World_fit.csv', "#world", variants), 0);
+			setTimeout(renderChart("World", 'https://3dgiordano.github.io/SARS-CoV-2-Variants/data/World_fit.csv', "#world", variants), 0);
 		  });
 	  } else {
 		document.getElementById("world_container").style.visibility = "collapse";
 		
-		   dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/gen_locations.csv').then(df_gen => {
+		   dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/gen_locations.csv').then(df_gen => {
 		  
 		  locations_gen = [...new Set(df_gen.toArray("location"))];
 		  
-		  dfjs.DataFrame.fromCSV('https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/cases.csv').then(df => {
+		  dfjs.DataFrame.fromCSV('https://3dgiordano.github.io/SARS-CoV-2-Variants/data/cases.csv').then(df => {
 
 			df_cases = df.groupBy('location').aggregate(group => group.stat.sum('cases')).rename('aggregation', 'cases');
 			
@@ -635,9 +637,9 @@
 					container.id = "location_" + i;
 					cell.appendChild(container);
 
-					new Promise(() => {
-					  setTimeout(renderChart(location, 'https://raw.githubusercontent.com/3dgiordano/SARS-CoV-2-Variants/main/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
-					});
+					//new Promise(() => {
+					  setTimeout(renderChart(location, 'https://3dgiordano.github.io/SARS-CoV-2-Variants/data/' + location.replace(' ', '%20') + "_fit.csv", "#" + container.id, variants), 0);
+					//});
 
 					i += 1;
 				  }
