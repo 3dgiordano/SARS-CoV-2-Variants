@@ -61,16 +61,16 @@ who_detail_map = {
 }
 
 who_pango_map = {
-    f"^B\\.1\\.427{t}": "Epsilon",
-    f"^B\\.1\\.429{t}": "Epsilon",
-    f"^P\\.1{t}": "Gamma - P.1",
-    f"^P\\.2{t}": "Zeta - P.2",
-    f"^P\\.3{t}": "Theta - P.3",
-    f"^B\\.1\\.525{t}": "Eta",
-    f"^B\\.1\\.526{t}": "Iota",
-    f"^B\\.1\\.617\\.1$": "Kappa",
-    f"^B\\.1\\.621{t}": "Mu",
-    f"^BB\\.2{t}": "Mu",
+    # f"^B\\.1\\.427{t}": "Epsilon",
+    # f"^B\\.1\\.429{t}": "Epsilon",
+    # f"^P\\.1{t}": "Gamma - P.1",
+    # f"^P\\.2{t}": "Zeta - P.2",
+    # f"^P\\.3{t}": "Theta - P.3",
+    # f"^B\\.1\\.525{t}": "Eta",
+    # f"^B\\.1\\.526{t}": "Iota",
+    # f"^B\\.1\\.617\\.1$": "Kappa",
+    # f"^B\\.1\\.621{t}": "Mu",
+    # f"^BB\\.2{t}": "Mu",
 }
 
 
@@ -199,21 +199,90 @@ def get_mobility_data(iso_location):
 def get_alias_map_sub_lineage(lineage_to_match):
     global lineages
     alias_map_sub_lineage = []
+    lineage_to_match = lineage_to_match.lower()
     if not lineages:
         response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
         lineages = response.read().decode('utf-8', 'replace').splitlines()
     for lineage in lineages:
+        lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
         alias = lineage.split("\t")[0]
         if "\t" in lineage:
-            is_alias_of = lineage.split("\t")[1].split("Alias of ")
+            is_alias_of = lineage.split("\t")[1].split("alias of ")
         else:
-            is_alias_of = lineage.split(", ")[1].split("Alias of ")
+            is_alias_of = lineage.split(", ")[1].split("alias of ")
         if len(is_alias_of) > 1 and not alias.startswith("*"):
+            # print(is_alias_of)
             alias_of = is_alias_of[1].split(",")[0]
             alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
             if lineage_to_match == alias_of_x:
-                alias_map_sub_lineage.append(alias)
+                alias_map_sub_lineage.append(alias.upper())
     return alias_map_sub_lineage
+
+
+def get_pango_from_alias(lineage_to_match):
+    global lineages
+    lineage_to_match = lineage_to_match.upper()
+    alias_map_pango = []
+    if not lineages:
+        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
+        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    for lineage in lineages:
+        lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
+        alias = lineage.split("\t")[0]
+        if "\t" in lineage:
+            is_alias_of = lineage.split("\t")[1].split("alias of ")
+        else:
+            is_alias_of = lineage.split(", ")[1].split("alias of ")
+        if len(is_alias_of) > 1 and not alias.startswith("*"):
+            # print(is_alias_of)
+            alias_of = is_alias_of[1].split(",")[0]
+            alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
+            if alias.upper() == lineage_to_match:
+                alias_map_pango.append(alias_of.upper())
+
+    if len(alias_map_pango) > 1:
+        print("Pango with more than 1 alias:" + lineage_to_match)
+        print(alias_map_pango)
+
+    if len(alias_map_pango) >= 1:
+        # print("Pango number: " + lineage_to_match + " = " + alias_map_pango[0])
+        return alias_map_pango[0]
+    else:
+        # print("Pango number: " + lineage_to_match + " = " + lineage_to_match)
+        return lineage_to_match
+
+
+def get_alias_from_pango(lineage_to_match):
+    global lineages
+    lineage_to_match = lineage_to_match.upper()
+    alias_map_pango = []
+    if not lineages:
+        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
+        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    for lineage in lineages:
+        lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
+        alias = lineage.split("\t")[0]
+        if "\t" in lineage:
+            is_alias_of = lineage.split("\t")[1].split("alias of ")
+        else:
+            is_alias_of = lineage.split(", ")[1].split("alias of ")
+        if len(is_alias_of) > 1 and not alias.startswith("*"):
+            # print(is_alias_of)
+            alias_of = is_alias_of[1].split(",")[0]
+            alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
+            if alias_of.upper() == lineage_to_match:
+                alias_map_pango.append(alias.upper())
+
+    if len(alias_map_pango) > 1:
+        print("Pango with more than 1 alias:" + lineage_to_match)
+        print(alias_map_pango)
+
+    if len(alias_map_pango) >= 1:
+        # print("Pango number: " + lineage_to_match + " = " + alias_map_pango[0])
+        return alias_map_pango[0]
+    else:
+        # print("Pango number: " + lineage_to_match + " = " + lineage_to_match)
+        return lineage_to_match
 
 
 def get_locations():
@@ -321,21 +390,62 @@ def who_to_dict(data, who_type):
     for ind, row in data.iterrows():
         pango = row['pango']
 
-        if with_who_label:
-            label = who_detail(row[who_label])
-        else:
-            label = f"{who_pango_rename(row['pango'].replace('*', ''))}"
+        # print("P:" + pango)
+        pango = get_alias_from_pango(pango)  # Resolve when the reference is the pango_id
+        # print(pango)
 
-        if pango == "P.1":
-            who_dict["^P.1$"] = f"{label} {who_type}"
-            pango_alias_lineages = get_alias_map_sub_lineage("B.1.1.28.1")
+        pango_id = get_pango_from_alias(pango.replace('*', ''))
+        pango_alias = get_alias_from_pango(pango_id)
+
+        if with_who_label:
+            who_label_data = row[who_label]
+            label = who_detail(who_label_data)
+            # Add the pango number to the pango rename map
+            # print("Pango:" + pango + " " + pango_id + " " + label)
+            if label == who_label_data:
+                to_replace = '\\.'
+                map_key = f"^{pango_id.replace('.', to_replace)}{t}"
+                # Add to map if not exist
+                who_label_data_map = f"{label} - {pango}"
+                if map_key not in who_pango_map and who_label_data_map not in who_pango_map.values():
+                    # print("Add " + map_key + " " + who_label_data_map)
+
+                    who_pango_map[map_key] = who_label_data
+
         else:
-            who_dict[pango_regex(pango)] = f"{label} {who_type}"
-            pango_alias_lineages = get_alias_map_sub_lineage(pango)
+            label = f"{who_pango_rename(pango_id)}"
+
+            if label == pango_id:
+                #print("Without who label " + pango_id + " " + label)
+                label = ""  # f"{pango_alias}"
+
+        #if pango == "P.1":
+        #    who_dict["^P.1$"] = f"{label} {who_type}"
+        #    pango_alias_lineages = get_alias_map_sub_lineage("B.1.1.28.1")
+        #else:
+
+        #
+
+        if label != "":
+            who_label_data_map = f"{label} - {pango_alias} {who_type}"
+        else:
+            who_label_data_map = f"{pango_alias} {who_type}"
+
+        if who_label_data_map not in who_dict.values():
+            who_dict[pango_regex(pango)] =who_label_data_map
+
+        pango_alias_lineages = get_alias_map_sub_lineage(pango_id)
         if pango_alias_lineages:
             for p_alias_l in pango_alias_lineages:
-                who_dict[pango_regex(p_alias_l, no_sub=True)] = f"{label} - {p_alias_l} {who_type}"
+                if label != "":
+                    who_label_data_map = f"{label} - {p_alias_l} {who_type}"
+                else:
+                    who_label_data_map = f"{p_alias_l} {who_type}"
 
+                if who_label_data_map not in who_dict.values():
+                    who_dict[pango_regex(p_alias_l, no_sub=True)] = who_label_data_map
+
+    #print(json.dumps(who_dict, indent=4))
     return who_dict
 
 
@@ -558,9 +668,9 @@ def get_lineage_map():
     who_fmv = who_expand(who_fmv)
 
     who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
-    who_voc_old_dict = who_to_dict(who_voc_old, "(WHO VOC)")
+    who_voc_old_dict = who_to_dict(who_voc_old, "(WHO PVOC)")
     who_voc_sum_dict = who_to_dict(who_voc_sum, "(WHO VOC-SUM)")
-    who_voi_dict = who_to_dict(who_voi, "(WHO VOI)")
+    who_voi_dict = who_to_dict(who_voi, "(WHO PVOI)")
     who_fmv_dict = who_to_dict(who_fmv, "(WHO FMV)")
 
     lineage_dict_map = dict(
@@ -570,6 +680,8 @@ def get_lineage_map():
         list(who_voi_dict.items()) +
         list(who_fmv_dict.items())
     )
+
+    print(json.dumps(who_pango_map, indent=4))
 
     # cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
     # cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
@@ -599,7 +711,7 @@ def get_lineage_map():
     data = {
         "map": lineage_dict_map,
         "data": {
-            "who": {"voc": {**who_voc, **who_voc_old}, "voc-lum": who_voc_sum, "voi": who_voc, "fmv": who_fmv},
+            "who": {"voc": {**who_voc, **who_voc_old}, "voc-lum": who_voc_sum, "voi": who_voi, "fmv": who_fmv},
             "cdc": {"vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
@@ -854,6 +966,11 @@ def fix_jhu_data(df):
 
 
 def main():
+
+    #print(get_alias_map_sub_lineage("BJ.1"))
+    #print(get_pango_from_alias("BA.5"))
+    #exit(0)
+
     locations_list = []
 
     df_loc = get_locations()
@@ -1338,6 +1455,9 @@ def main():
     data = get_lineage_map()
     lineage_map = data["map"]
 
+    # print(json.dumps(lineage_map, indent=4))
+
+    print("Replace variants")
     # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
     df = parallel_df(df, replace_variant, lineage_map)
