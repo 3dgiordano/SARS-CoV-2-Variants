@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","B.1.466.2 - AU.1 (WHO FMV)","Delta - AY.5.4 (WHO VOC)","Omicron - BA.1.14 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.10 (WHO VOC)","Omicron - BA.2.62 (WHO VOC)","Omicron - BA.5.2.1 (WHO VOC)","Omicron - BE.4 (WHO VOC)","Other","Unknown"
+"location","date","AU.1 (WHO FMV)","Alpha - B.1.1.7 (WHO PVOC)","Delta - AY.5.4 (WHO PVOC)","Omicron - BA.1.14 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.10 (WHO VOC)","Omicron - BA.2.62 (WHO VOC)","Omicron - BA.5.2.1 (WHO VOC-SUM)","Omicron - BE.4 (WHO VOC-SUM)","Other","Unknown"
 "Vanuatu","2020-04-19","0","0","0","0","0","0","0","0","0","0","0"
 "Vanuatu","2020-11-15","0","0","0","0","0","0","0","0","0","0","1"
 "Vanuatu","2020-11-29","0","0","0","0","0","0","0","0","0","0","0"

@@ -1,4 +1,4 @@
-"location","date","B (Lineage)","Beta (WHO VOC)","Delta (WHO VOC)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.1.18 (WHO VOC)","Other","Unknown"
+"location","date","B (Lineage)","Beta - B.1.351 (WHO PVOC)","Delta - B.1.617.2 (WHO PVOC)","Omicron - BA.1 (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.1.18 (WHO VOC)","Other","Unknown"
 "Tanzania","2020-03-22","0","0","0","0","0","0","0","12"
 "Tanzania","2020-04-05","0","0","0","0","0","0","0","10"
 "Tanzania","2020-04-19","0","0","0","0","0","0","0","148"
@@ -72,4 +72,4 @@
 "Tanzania","2022-11-27","0","0","0","0","0","0","0","319"
 "Tanzania","2022-12-11","0","0","0","0","0","0","0","335"
 "Tanzania","2022-12-25","0","0","0","0","0","0","0","1305"
-"Tanzania","2023-01-08","0","0","0","0","0","0","0","804"
+"Tanzania","2023-01-08","0","0","0","0","0","0","0","708"

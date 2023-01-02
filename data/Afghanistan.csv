@@ -1,4 +1,4 @@
-"location","date","Alpha (WHO VOC)","B (Lineage)","Delta (WHO VOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.23 (WHO VOC)","Omicron - BA.2.65 (WHO VOC)","Other"
+"location","date","Alpha - B.1.1.7 (WHO PVOC)","B (Lineage)","Delta - B.1.617.2 (WHO PVOC)","Omicron - BA.1.1 (WHO VOC)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.23 (WHO VOC)","Omicron - BA.2.65 (WHO VOC)","Other"
 "Afghanistan","2020-05-31","0,0","100,0","0,0","0,0","0,0","0,0","0,0","0"
 "Afghanistan","2020-06-14","0,0","100,0","0,0","0,0","0,0","0,0","0,0","0"
 "Afghanistan","2020-06-28","0,0","100,0","0,0","0,0","0,0","0,0","0,0","0"

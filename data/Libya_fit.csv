@@ -1,4 +1,4 @@
-"location","date","A (Lineage)","Alpha (WHO VOC)","B (Lineage)","Delta - AY.127 (WHO VOC)","Delta - AY.4 (WHO VOC)","Eta (WHO VOI)","L (Lineage)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.12.1 (WHO VOC)","Omicron - BA.2.3 (WHO VOC)","Omicron - BA.2.5 (WHO VOC)","Omicron - BA.2.65 (WHO VOC)","Omicron - BA.4.1 (WHO VOC)","Omicron - BA.5.2 (WHO VOC)","Omicron - BA.5.2.1 (WHO VOC)","Omicron - BA.5.2.20 (WHO VOC)","Omicron - BA.5.2.33 (WHO VOC)","Other","Unknown"
+"location","date","A (Lineage)","Alpha - B.1.1.7 (WHO PVOC)","B (Lineage)","Delta - AY.127 (WHO PVOC)","Delta - AY.4 (WHO PVOC)","Eta - B.1.525 (WHO PVOI)","L (Lineage)","Omicron - BA.2 (WHO VOC)","Omicron - BA.2.12.1 (WHO VOC)","Omicron - BA.2.3 (WHO VOC)","Omicron - BA.2.5 (WHO VOC)","Omicron - BA.2.65 (WHO VOC)","Omicron - BA.4.1 (WHO VOC)","Omicron - BA.5.2 (WHO VOC-SUM)","Omicron - BA.5.2.1 (WHO VOC-SUM)","Omicron - BA.5.2.20 (WHO VOC-SUM)","Omicron - BA.5.2.33 (WHO VOC-SUM)","Other","Unknown"
 "Libya","2020-04-05","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","18"
 "Libya","2020-04-19","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","33"
 "Libya","2020-05-03","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","12"
@@ -71,4 +71,4 @@
 "Libya","2022-11-27","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","18"
 "Libya","2022-12-11","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","22"
 "Libya","2022-12-25","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","21"
-"Libya","2023-01-08","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","50"
+"Libya","2023-01-08","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","32"
