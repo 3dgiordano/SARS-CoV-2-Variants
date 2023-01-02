@@ -404,7 +404,10 @@ def who_to_dict(data, who_type):
             # print("Pango:" + pango + " " + pango_id + " " + label)
             if label == who_label_data:
                 to_replace = '\\.'
-                map_key = f"^{pango_id.replace('.', to_replace)}{t}"
+                if pango_alias != pango_id:
+                    map_key = f"^{pango_alias.replace('.', to_replace)}{t}"
+                else:
+                    map_key = f"^{pango_id.replace('.', to_replace)}{t}"
                 # Add to map if not exist
                 who_label_data_map = f"{label} - {pango}"
                 if map_key not in who_pango_map and who_label_data_map not in who_pango_map.values():
