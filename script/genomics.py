@@ -197,12 +197,9 @@ def get_mobility_data(iso_location):
 
 
 def get_alias_map_sub_lineage(lineage_to_match):
-    global lineages
     alias_map_sub_lineage = []
     lineage_to_match = lineage_to_match.lower()
-    if not lineages:
-        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
-        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    lineages = get_all_pango_lines()
     for lineage in lineages:
         lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
         alias = lineage.split("\t")[0]
@@ -212,7 +209,7 @@ def get_alias_map_sub_lineage(lineage_to_match):
             is_alias_of = lineage.split(", ")[1].split("alias of ")
         if len(is_alias_of) > 1 and not alias.startswith("*"):
             # print(is_alias_of)
-            alias_of = is_alias_of[1].split(",")[0]
+            alias_of = is_alias_of[1].split(",")[0].split(" ")[0]
             alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
             if lineage_to_match == alias_of_x:
                 alias_map_sub_lineage.append(alias.upper())
@@ -220,12 +217,9 @@ def get_alias_map_sub_lineage(lineage_to_match):
 
 
 def get_pango_from_alias(lineage_to_match):
-    global lineages
     lineage_to_match = lineage_to_match.upper()
     alias_map_pango = []
-    if not lineages:
-        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
-        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    lineages = get_all_pango_lines()
     for lineage in lineages:
         lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
         alias = lineage.split("\t")[0]
@@ -235,7 +229,7 @@ def get_pango_from_alias(lineage_to_match):
             is_alias_of = lineage.split(", ")[1].split("alias of ")
         if len(is_alias_of) > 1 and not alias.startswith("*"):
             # print(is_alias_of)
-            alias_of = is_alias_of[1].split(",")[0]
+            alias_of = is_alias_of[1].split(",")[0].split(" ")[0]
             alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
             if alias.upper() == lineage_to_match:
                 alias_map_pango.append(alias_of.upper())
@@ -253,12 +247,9 @@ def get_pango_from_alias(lineage_to_match):
 
 
 def get_alias_from_pango(lineage_to_match):
-    global lineages
     lineage_to_match = lineage_to_match.upper()
     alias_map_pango = []
-    if not lineages:
-        response = get_url("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
-        lineages = response.read().decode('utf-8', 'replace').splitlines()
+    lineages = get_all_pango_lines()
     for lineage in lineages:
         lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
         alias = lineage.split("\t")[0]
@@ -268,7 +259,7 @@ def get_alias_from_pango(lineage_to_match):
             is_alias_of = lineage.split(", ")[1].split("alias of ")
         if len(is_alias_of) > 1 and not alias.startswith("*"):
             # print(is_alias_of)
-            alias_of = is_alias_of[1].split(",")[0]
+            alias_of = is_alias_of[1].split(",")[0].split(" ")[0]
             alias_of_x = ".".join(alias_of.split(".")[:lineage_to_match.count(".") + 1])
             if alias_of.upper() == lineage_to_match:
                 alias_map_pango.append(alias.upper())
@@ -283,6 +274,128 @@ def get_alias_from_pango(lineage_to_match):
     else:
         # print("Pango number: " + lineage_to_match + " = " + lineage_to_match)
         return lineage_to_match
+
+
+def get_all_pango_lines():
+    global lineages
+    if not lineages:
+        response = get_url(
+            "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
+        lineages = response.read().decode('utf-8', 'replace').splitlines()[1:]
+    return lineages
+
+
+def get_all_linages():
+    all_alias = []
+    lineages = get_all_pango_lines()
+    for lineage in lineages:
+
+        alias = lineage.split("\t")[0]
+        if alias.startswith("*"):
+            continue
+
+        all_alias.append(alias)
+    return all_alias
+
+
+def get_all_alias_of():
+    all_alias_of = {}
+    lineages = get_all_pango_lines()
+    for lineage in lineages:
+
+        alias = lineage.split("\t")[0]
+        if alias.startswith("*"):
+            continue
+
+        if "\t" in lineage:
+            is_alias_of = lineage.lower().split("\t")[1].split("alias of ")
+        else:
+            is_alias_of = lineage.lower().split(", ")[1].split("alias of ")
+
+        if len(is_alias_of) > 1:
+
+            alias_of = is_alias_of[1].split(",")[0].split(" ")[0].upper()
+
+            all_alias_of[alias] = alias_of
+
+    return all_alias_of
+
+
+def get_all_recombinant_alias():
+    all_recombinant_alias = []
+    lineages = get_all_pango_lines()
+    for lineage in lineages:
+
+        alias = lineage.split("\t")[0]
+        if alias.startswith("*"):
+            continue
+
+        is_recombinant_of = lineage.lower().split("\t")[1].split("recombinant lineage of ")
+
+        if len(is_recombinant_of) > 1:
+            all_recombinant_alias.append(alias)
+
+    return all_recombinant_alias
+
+
+def get_metadata_from_pango():
+    all_alias = get_all_linages()
+    lineages = get_all_pango_lines()
+    all_alias_of = get_all_alias_of()
+    all_recombinants_alias = get_all_recombinant_alias()
+    alias_metadata = {}
+    for lineage in lineages:
+        is_recombinant = False
+        alias = lineage.split("\t")[0]
+        if alias.startswith("*"):
+            continue
+
+        alias_of = None
+        if alias in all_alias_of:
+            alias_of = all_alias_of[alias]
+
+        # Get the top and check if is a recombinant
+        is_recombinant = alias.split(".")[0] in all_recombinants_alias
+
+        # Is Recombinant?
+        is_recombinant_of = lineage.lower().split("\t")[1].split("recombinant lineage of ")
+
+        parents = []
+        if len(is_recombinant_of) > 1:
+
+            parents = [x.strip().upper() for x in
+                       is_recombinant_of[1].replace("perhaps ", "").replace("and ", " ").replace(",", " ")
+                           .replace(". ", " ").replace("delta", "b.1.617.2").split(" ")]
+            parents = [x.replace("*", "") for x in parents if len(x) > 0]
+            parents = [x for x in parents if x in all_alias]
+
+        else:
+            if alias_of:
+                parent_id = ".".join(alias_of.split(".")[:alias_of.count(".")])
+                parent_alias = get_alias_from_pango(parent_id)
+            else:
+                parent_id = ".".join(alias.split(".")[:alias.count(".")])
+                parent_alias = parent_id
+            parents.append(parent_alias)
+
+        if alias_of is None:
+            if is_recombinant:
+                if alias.find(".") == -1:
+                    alias_of = "[" + ", ".join(parents) + "]"
+            if alias_of is None:
+                alias_of = alias
+
+        # print(alias)
+        # print(" alias of " + str(alias_of))
+        # print(parents)
+
+        alias_metadata[alias] = {
+            "recombinant": is_recombinant,
+            "alias_of": alias_of,
+            "parents": parents
+        }
+
+    return alias_metadata
 
 
 def get_locations():
@@ -970,10 +1083,6 @@ def fix_jhu_data(df):
 
 def main():
 
-    #print(get_alias_map_sub_lineage("BJ.1"))
-    #print(get_pango_from_alias("BA.5"))
-    #exit(0)
-
     locations_list = []
 
     df_loc = get_locations()
@@ -1607,6 +1716,13 @@ def main():
     df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
 
     df_world_fit_pivoted.to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    print("Pango information")
+    pango_metadata = get_metadata_from_pango()
+
+    df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
+    df_pango = df_pango.rename(columns={'index': 'pango'})
+    df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate update file...")
     update_dict = {
