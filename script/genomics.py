@@ -330,7 +330,8 @@ def get_all_recombinant_alias():
         if alias.startswith("*"):
             continue
 
-        is_recombinant_of = lineage.lower().split("\t")[1].split("recombinant lineage of ")
+        is_recombinant_of = lineage.lower().split("\t")[1].replace("with parental lineages ", "of ")\
+            .split("recombinant lineage of ")
 
         if len(is_recombinant_of) > 1:
             all_recombinant_alias.append(alias)
