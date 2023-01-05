@@ -358,7 +358,8 @@ def get_metadata_from_pango():
         is_recombinant = alias.split(".")[0] in all_recombinants_alias
 
         # Is Recombinant?
-        is_recombinant_of = lineage.lower().split("\t")[1].split("recombinant lineage of ")
+        is_recombinant_of = lineage.lower().split("\t")[1].replace("with parental lineages ", "of ")\
+            .split("recombinant lineage of ")
 
         parents = []
         if len(is_recombinant_of) > 1:
@@ -376,7 +377,8 @@ def get_metadata_from_pango():
             else:
                 parent_id = ".".join(alias.split(".")[:alias.count(".")])
                 parent_alias = parent_id
-            parents.append(parent_alias)
+            if len(parent_alias) > 0:
+                parents.append(parent_alias)
 
         if alias_of is None:
             if is_recombinant:
@@ -1082,6 +1084,15 @@ def fix_jhu_data(df):
 
 
 def main():
+
+    # print("Pango information")
+    # pango_metadata = get_metadata_from_pango()
+
+    # df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
+    # df_pango = df_pango.rename(columns={'index': 'pango'})
+    # df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    # exit(0)
 
     locations_list = []
 
