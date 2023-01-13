@@ -1,4 +1,4 @@
-"location","date","CM (Lineage)","Omicron - BA.2 (WHO VOC)","Omicron - BA.4.1 (WHO VOC)","Omicron - BA.5.1 (WHO VOC-SUM)","Omicron - BA.5.1.1 (WHO VOC-SUM)","Omicron - BF.8 (WHO VOC-SUM)","XBB (WHO VOC-SUM)","Other"
+"location","date","CM (Lineage)","Omicron - BA.2 (WHO VOC)","Omicron - BA.4.1 (WHO VOC)","Omicron - BA.5.1 (WHO VOC)","Omicron - BA.5.1.1 (WHO VOC)","Omicron - BF.8 (WHO VOC)","XBB (ECDC VOI)","Other"
 "Marshall Islands","2022-04-17","0,0","100,0","0,0","0,0","0,0","0,0","0,0","0"
 "Marshall Islands","2022-07-10","0,0","0,0","0,0","100,0","0,0","0,0","0,0","0"
 "Marshall Islands","2022-08-07","0,0","0,0","50,0","0,0","25,0","25,0","0,0","0"
