@@ -600,6 +600,7 @@ def _who_data_wa(who_body):
     who_body = who_body.replace("BA.5** (+R346X or +K444X or +V445X or +N450D or +N460X)", "BA.5")
     who_body = who_body.replace("BA.5** (+R346X or +K444X or +V445X or +N450D or +N460X)", "BA.5")
     who_body = who_body.replace("<sup>$</sup>", "")
+    who_body = who_body.replace("<sup>&micro;</sup>", "")
     who_body = who_body.replace("****", "")
     who_body = who_body.replace("***", "")
     who_body = who_body.replace("**", "")
