@@ -987,6 +987,7 @@
 "Omicron - DR.1","DR.1","WHO","VOC-SUM"
 "Omicron - DS.1","DS.1","WHO","VOC-SUM"
 "Omicron - DT.1","DT.1","WHO","VOC-SUM"
+"Omicron - DU.1","DU.1","WHO","VOC-SUM"
 "R.1","R.1.*","WHO","FMV"
 "Theta - P.3","P.3.*","WHO","PVOI"
 "XBB","XBB.*","WHO","VOC-SUM"
