@@ -1582,6 +1582,22 @@ def main():
 
     # print(json.dumps(lineage_map, indent=4))
 
+    print("Pango information")
+    pango_metadata = get_metadata_from_pango()
+
+    df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
+    df_pango = df_pango.rename(columns={'index': 'pango'})
+    df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    print("Fix outbreak.info to alias")
+
+    # Fix outbreak.info variant name to correct alias
+    # First create the "map" for alias of as key and the alias as value
+    alias_map = {x["alias_of"]: x["pango"] for x in df_pango.to_dict('records') if x["alias_of"] != x["pango"] and not x["recombinant"]}
+
+    # print(json.dumps(alias_map, indent=4))
+    df = parallel_df(df, replace_variant, alias_map)
+
     print("Replace variants")
     # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
@@ -1729,13 +1745,6 @@ def main():
     df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
 
     df_world_fit_pivoted.to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
-
-    print("Pango information")
-    pango_metadata = get_metadata_from_pango()
-
-    df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
-    df_pango = df_pango.rename(columns={'index': 'pango'})
-    df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate update file...")
     update_dict = {
