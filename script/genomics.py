@@ -970,6 +970,9 @@ def replace_variant(x):
     x["variant"].replace(_worker_data, inplace=True, regex=True)
     return x
 
+def replace_variant_wo_regex(x):
+    x["variant"].replace(_worker_data, inplace=True, regex=False)
+    return x
 
 def replace_lineage_to_parent(x):
     x["variant"].replace(_worker_data, inplace=True, regex=False)
@@ -1580,7 +1583,7 @@ def main():
     data = get_lineage_map()
     lineage_map = data["map"]
 
-    # print(json.dumps(lineage_map, indent=4))
+    print(json.dumps(lineage_map, indent=4))
 
     print("Pango information")
     pango_metadata = get_metadata_from_pango()
@@ -1596,7 +1599,7 @@ def main():
     alias_map = {x["alias_of"]: x["pango"] for x in df_pango.to_dict('records') if x["alias_of"] != x["pango"] and not x["recombinant"]}
 
     # print(json.dumps(alias_map, indent=4))
-    df = parallel_df(df, replace_variant, alias_map)
+    df = parallel_df(df, replace_variant_wo_regex, alias_map)
 
     print("Replace variants")
     # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
