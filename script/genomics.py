@@ -196,6 +196,20 @@ def get_mobility_data(iso_location):
         return None
 
 
+def get_sub_lineage(lineage_to_match):
+    alias_map_sub_lineage = []
+    lineage_to_match = lineage_to_match.lower()
+    lineages = get_all_pango_lines()
+    for lineage in lineages:
+        lineage = lineage.lower()  # Support 'Alias of' and 'alias of'
+        alias = lineage.split("\t")[0]
+
+        alias_match = ".".join(alias.split(".")[:lineage_to_match.count(".") + 1])
+        if lineage_to_match == alias_match and alias != lineage_to_match:
+            alias_map_sub_lineage.append(alias.upper())
+    return alias_map_sub_lineage
+
+
 def get_alias_map_sub_lineage(lineage_to_match):
     alias_map_sub_lineage = []
     lineage_to_match = lineage_to_match.lower()
@@ -551,9 +565,11 @@ def who_to_dict(data, who_type):
             who_label_data_map = f"{pango_alias} {who_type}"
 
         if who_label_data_map not in who_dict.values():
-            who_dict[pango_regex(pango)] =who_label_data_map
+            who_dict[pango_regex(pango)] = who_label_data_map
 
-        pango_alias_lineages = get_alias_map_sub_lineage(pango_id)
+        pango_alias_lineages = get_alias_map_sub_lineage(pango_id) + get_sub_lineage(pango_id)
+        # print("Id:" + pango_id + " pango " + pango + " label " + who_label_data_map)
+        # print(pango_alias_lineages)
         if pango_alias_lineages:
             for p_alias_l in pango_alias_lineages:
                 if label != "":
@@ -564,7 +580,8 @@ def who_to_dict(data, who_type):
                 if who_label_data_map not in who_dict.values():
                     who_dict[pango_regex(p_alias_l, no_sub=True)] = who_label_data_map
 
-    #print(json.dumps(who_dict, indent=4))
+    # print(json.dumps(who_dict, indent=4))
+
     return who_dict
 
 
@@ -896,7 +913,7 @@ def get_loc_data(locat):
     #    # return None
     except:
         df_loc = None
-    print(type(df_loc))
+    # print(type(df_loc))
     return df_loc
 
 
@@ -1101,6 +1118,8 @@ def main():
     # df_pango = df_pango.rename(columns={'index': 'pango'})
     # df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
+    # x = get_sub_lineage("XBB")
+    # print(x)
     # exit(0)
 
     locations_list = []
