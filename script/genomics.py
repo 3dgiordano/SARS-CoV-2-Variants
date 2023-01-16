@@ -1078,9 +1078,13 @@ def fix_jhu_data(df):
                         #     df.iloc[[from_ix]]["date"].item()) +
                         #       " " + str(x["new_cases"]) + " to " + str(to_fix + x["new_cases"]) + "(" + str(
                         #     to_fix) + ")")
-                        df.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
-                        df.loc[[x.name], "new_cases"] = 0
-                        csse_data_fixed += 1
+                        try:
+                            df.loc[[from_ix], "new_cases"] = to_fix + x["new_cases"]
+                            df.loc[[x.name], "new_cases"] = 0
+                            csse_data_fixed += 1
+                        except Exception as ex:
+                            print(x)
+                            print(ex)
                         break
                     from_ix -= 1
 
