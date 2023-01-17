@@ -565,7 +565,7 @@ def who_to_dict(data, who_type):
             who_label_data_map = f"{pango_alias} {who_type}"
 
         if who_label_data_map not in who_dict.values():
-            who_dict[pango_regex(pango)] = who_label_data_map
+            who_dict[pango_regex(pango, no_sub=True)] = who_label_data_map
 
         pango_alias_lineages = get_alias_map_sub_lineage(pango_id) + get_sub_lineage(pango_id)
         # print("Id:" + pango_id + " pango " + pango + " label " + who_label_data_map)
@@ -1630,7 +1630,11 @@ def main():
     df = parallel_df(df, replace_variant, lineage_map)
 
     main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
+    #print("main lineages")
+    #print(main_lineage)
     other_lineage = list(dict.fromkeys([str(l) for l in df["variant"].unique() if l not in main_lineage]))
+    #print("others lineages")
+    #print(other_lineage)
 
     print("Save lineage map...")
     export_variants(lineage_map)
