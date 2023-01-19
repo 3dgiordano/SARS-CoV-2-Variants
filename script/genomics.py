@@ -1622,7 +1622,14 @@ def main():
     alias_map = {x["alias_of"]: x["pango"] for x in df_pango.to_dict('records') if x["alias_of"] != x["pango"] and not x["recombinant"]}
 
     # print(json.dumps(alias_map, indent=4))
+    originals = df["variant"].unique()
     df = parallel_df(df, replace_variant_wo_regex, alias_map)
+
+    updated = df["variant"].unique()
+    diff = set(originals) ^ set(updated)
+    diff = set(diff) - set(alias_map.values())
+    print("Variants on outbreak.info without alias:")
+    print(sorted(diff))
 
     print("Replace variants")
     # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
