@@ -27,6 +27,8 @@ out_info_auth = "Bearer 0ed52bbfb6c79d1fd8e9c6f267f9b6311c885a4c4c6f037d6ab7b3a4
 interest_map = {"WHO": 1000, "CDC": 2000, "ECDC": 3000, "UY-GTI": 4000, "": 9000}
 interest_type_map = {"VOC": 100, "VOI": 200, "AFM": 300, "VUM": 400, "": 900}
 lineages = None
+pango_metadata = None
+
 t = "($|\\..*$)"  # Tail Regex
 lineage_map = {
     f"^A\\.2\\.5{t}": "A.2.5",
@@ -61,6 +63,66 @@ who_detail_map = {
 }
 
 who_pango_map = {
+    # TODO: This is a WA, something smarter is needed for the categorization of recombinants with the WHO label
+    f"^XA$": "Alpha+B.1.177",
+    f"^XB$": "B.1.634+B.1.631",
+    f"^XC$": "Delta+Alpha",
+    f"^XD$": "Delta+Omicron",
+    f"^XE$": "Omicron",
+    f"^XF$": "Delta+Omicron",
+    f"^XG$": "Omicron",
+    f"^XH$": "Omicron",
+    f"^XJ$": "Omicron",
+    f"^XK$": "Omicron",
+    f"^XL$": "Omicron",
+    f"^XM$": "Omicron",
+    f"^XN$": "Omicron",
+    f"^XP$": "Omicron",
+    f"^XQ$": "Omicron",
+    f"^XR$": "Omicron",
+    f"^XS$": "Delta+Omicron",
+    f"^XT$": "Omicron",
+    f"^XU$": "Omicron",
+    f"^XV$": "Omicron",
+    f"^XW$": "Omicron",
+    f"^XY$": "Omicron",
+    f"^XZ$": "Omicron",
+    f"^XAA$": "Omicron",
+    f"^XAB$": "Omicron",
+    f"^XAC$": "Omicron",
+    f"^XAD$": "Omicron",
+    f"^XAE$": "Omicron",
+    f"^XAF$": "Omicron",
+    f"^XAG$": "Omicron",
+    f"^XAH$": "Omicron",
+    f"^XAJ$": "Omicron",
+    f"^XAK$": "Omicron",
+    f"^XAL$": "Omicron",
+    f"^XAM$": "Omicron",
+    f"^XAN$": "Omicron",
+    f"^XAP$": "Omicron",
+    f"^XAQ$": "Omicron",
+    f"^XAR$": "Omicron",
+    f"^XAS$": "Omicron",
+    f"^XAT$": "Omicron",
+    f"^XAU$": "Omicron",
+    f"^XAV$": "Omicron",
+    f"^XAW$": "Omicron+Delta",
+    f"^XAY$": "Omicron+Delta",
+    f"^XAZ$": "Omicron",
+    f"^XBA$": "Delta+Omicron",
+    f"^XBB$": "Omicron",
+    f"^XBC$": "Omicron+Delta",
+    f"^XBD$": "Omicron",
+    f"^XBE$": "Omicron",
+    f"^XBF$": "Omicron",
+    f"^XBG$": "Omicron",
+    f"^XBH$": "Omicron",
+    f"^XBJ$": "Omicron",
+    f"^XBK$": "Omicron",
+    f"^XBL$": "Omicron",
+    f"^XBM$": "Omicron",
+    f"^XBN$": "Omicron",
     # f"^B\\.1\\.427{t}": "Epsilon",
     # f"^B\\.1\\.429{t}": "Epsilon",
     # f"^P\\.1{t}": "Gamma - P.1",
@@ -360,7 +422,6 @@ def get_metadata_from_pango():
     all_recombinants_alias = get_all_recombinant_alias()
     alias_metadata = {}
     for lineage in lineages:
-        is_recombinant = False
         alias = lineage.split("\t")[0]
         if alias.startswith("*"):
             continue
@@ -510,7 +571,22 @@ def pango_regex(pango, no_sub=False):
     return f"^{pango}$" if sub_depth == 3 or no_sub else f"^{pango}{t}"
 
 
+def get_recombinant_by_parent_references(parent_lineages):
+    global pango_metadata
+    aliases = []
+    for p, v in pango_metadata.items():
+        if v["recombinant"]:
+            parents = [x.strip() for x in v["alias_of"][1:-1].split(",")]
+            for pp in parents:
+                if pp in parent_lineages:
+                    if pp not in aliases:
+                        aliases.append(p)
+
+    return aliases
+
+
 def who_to_dict(data, who_type):
+
     who_label = 'WHO\xa0label'
     with_who_label = False
     if who_label in data.columns:
@@ -524,6 +600,7 @@ def who_to_dict(data, who_type):
         pango = get_alias_from_pango(pango)  # Resolve when the reference is the pango_id
         # print(pango)
 
+        # TODO: Migrate to pango_metadata
         pango_id = get_pango_from_alias(pango.replace('*', ''))
         pango_alias = get_alias_from_pango(pango_id)
 
@@ -568,6 +645,10 @@ def who_to_dict(data, who_type):
             who_dict[pango_regex(pango, no_sub=True)] = who_label_data_map
 
         pango_alias_lineages = get_alias_map_sub_lineage(pango_id) + get_sub_lineage(pango_id)
+
+        # Get any recombinant with some of the lineas as a referenced parent
+        pango_alias_lineages = set(pango_alias_lineages + get_recombinant_by_parent_references(pango_alias_lineages))
+
         # print("Id:" + pango_id + " pango " + pango + " label " + who_label_data_map)
         # print(pango_alias_lineages)
         if pango_alias_lineages:
@@ -735,7 +816,7 @@ def filter_to_dict(who_dict_map, cdc_variants, cdc_type):
             if match:
                 variant_regex = variant_regex.replace(f"{t}", "$")
             if k_normal != variant_regex:
-                variants[variant_regex] = f"{who_pango_rename(cdc_variant)} {cdc_type}"
+                variants[variant_regex] = f"{who_pango_rename(cdc_variant)} - {cdc_variant} {cdc_type}"
 
     return variants
 
@@ -1110,9 +1191,13 @@ def fix_jhu_data(df):
 
 
 def main():
+    global pango_metadata
 
     # print("Pango information")
-    # pango_metadata = get_metadata_from_pango()
+    #pango_metadata = get_metadata_from_pango()
+
+    #print(get_recombinant_by_parent_references(["BA.2.75"]))
+    #exit(0)
 
     # df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
     # df_pango = df_pango.rename(columns={'index': 'pango'})
@@ -1602,18 +1687,18 @@ def main():
 
     # return
 
-    print("Map lineage...")
-    data = get_lineage_map()
-    lineage_map = data["map"]
-
-    print(json.dumps(lineage_map, indent=4))
-
     print("Pango information")
     pango_metadata = get_metadata_from_pango()
 
     df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
     df_pango = df_pango.rename(columns={'index': 'pango'})
     df_pango.to_csv("../data/pango.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+
+    print("Map lineage...")
+    data = get_lineage_map()
+    lineage_map = data["map"]
+
+    print(json.dumps(lineage_map, indent=4))
 
     print("Fix outbreak.info to alias")
 
