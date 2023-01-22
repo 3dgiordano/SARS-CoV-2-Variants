@@ -582,6 +582,11 @@ def get_recombinant_by_parent_references(parent_lineages):
                     if pp not in aliases:
                         aliases.append(p)
 
+    # Add Sublineages
+    for a in aliases:
+        sl = get_sub_lineage(a)
+        aliases = aliases + sl
+
     return aliases
 
 
@@ -1196,7 +1201,7 @@ def main():
     # print("Pango information")
     #pango_metadata = get_metadata_from_pango()
 
-    #print(get_recombinant_by_parent_references(["BA.2.75"]))
+    #print(get_recombinant_by_parent_references(["AY.45"]))
     #exit(0)
 
     # df_pango = pd.DataFrame.from_dict(pango_metadata, orient='index').reset_index()
