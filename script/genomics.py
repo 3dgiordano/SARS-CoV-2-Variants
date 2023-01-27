@@ -358,6 +358,7 @@ def get_all_pango_lines():
         response = get_url(
             "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt")
         lineages = response.read().decode('utf-8', 'replace').splitlines()[1:]
+        lineages = [x for x in lineages if x != ''] # Remove empty lines
     return lineages
 
 
