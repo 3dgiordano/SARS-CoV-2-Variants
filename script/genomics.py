@@ -1223,8 +1223,8 @@ def main():
     df_loc = get_locations()
     locations = df_loc.to_dict('records')
 
-    df_cases_data = get_cases_data()
-    df_owid_cases_data = get_owid_cases_data()
+    df_owid_cases_data = get_owid_cases_data() # get_cases_data()
+    # df_owid_cases_data = get_owid_cases_data()
 
     df_owid_cases_data["location"] = df_owid_cases_data["location"].replace("Micronesia (country)", "Micronesia")
 
@@ -1234,7 +1234,9 @@ def main():
     # print(df_owid_cases_data_diff_counts)
     # return
 
-    df_cases_data['date'] = pd.to_datetime(df_cases_data['date'])
+    df_owid_cases_data['date'] = pd.to_datetime(df_owid_cases_data['date'])
+
+    df_cases_data = df_owid_cases_data
 
     # Get the last date in data
     cases_data_date = sorted(list(set(df_cases_data["date"])))[-1]
@@ -1811,8 +1813,9 @@ def main():
 
                 # Fix the cases of the last value and put the projected value
                 df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
-                df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
-                    df_fit_r_data.index[-1], 'cases']
+                if df_fit_r_data.size > 1:
+                    df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
+                        df_fit_r_data.index[-1], 'cases']
 
                 # Fit
                 columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
