@@ -1395,9 +1395,13 @@ def main():
 
     df_cases_r_data['date'] = pd.to_datetime(df_cases_r_data['date'])
 
-    df_cases_r_data = df_cases_r_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
-        {'r': 'mean'}).reset_index()
+#     df_cases_r_data = df_cases_r_data.groupby(['location', pd.Grouper(key='date', freq='2W')]).agg(
+#         {'r': 'mean'}).reset_index()
 
+    df_cases_r_data = df_cases_r_data.groupby(['location', pd.Grouper(key='date', freq='2W',label='left',offset="6D")]).agg(
+    {'r': 'mean'}).reset_index()
+    df_cases_r_data['date']=df_cases_r_data['date']+pd.DateOffset(days=7)
+    
     print("Merge cases")
     df_cases_r_data = pd.merge(df_cases_r_data, df_cases_data, on=['location', 'date'], how='outer', sort=True)
     df_cases_r_data = pd.merge(df_cases_r_data, iso_list, on=['location'], how='outer', sort=False)
