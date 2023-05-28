@@ -2918,7 +2918,7 @@
 "XBJ.4","True","XBJ.4","['XBJ']"
 "XBK","True","[BA.5.2, CJ.1]","['BA.5.2', 'CJ.1']"
 "XBK.1","True","XBK.1","['XBK']"
-"XBL","True","[]","[]"
+"XBL","True","[XBB.1.5.57, BA.2.75, XBB.1.5.57]","['XBB.1.5.57', 'BA.2.75', 'XBB.1.5.57']"
 "XBL.1","True","XBL.1","['XBL']"
 "XBL.2","True","XBL.2","['XBL']"
 "XBL.3","True","XBL.3","['XBL']"
