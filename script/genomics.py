@@ -443,6 +443,7 @@ def get_metadata_from_pango():
 
             parents = [x.strip().upper() for x in
                        is_recombinant_of[1].replace("perhaps ", "").replace("and ", " ").replace(",", " ")
+                           .replace("-", " ")
                            .replace(". ", " ").replace("delta", "b.1.617.2").split(" ")]
             parents = [x.replace("*", "") for x in parents if len(x) > 0]
             parents = [x for x in parents if x in all_alias]
@@ -485,7 +486,7 @@ def get_locations():
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
         headers = {
-            'User-Agent': 'Mozilla/5.0',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
             "Authorization": out_info_auth
         }
         response = get_url("https://api.outbreak.info/genomics/location?name=**", headers=headers)
@@ -536,7 +537,7 @@ def get_location_data(location_id, location):
     # keep the stored data temporarily for one hour
     if not last_time or last_time > 21600:
         headers = {
-            'User-Agent': 'Mozilla/5.0',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
             "Authorization": out_info_auth
         }
         json_data = get_url(
@@ -687,11 +688,11 @@ def get_who_variants():
     who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
                                 "tracking-SARS-CoV-2-variants"
 
-    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
     who_body = _who_data_wa(who_body)
 
-    return pd.read_html(who_body, match=r'GISAID\sclade')
+    return pd.read_html(who_body, match=r'Genetic features')
 
 
 def _who_data_wa(who_body):
@@ -725,7 +726,7 @@ def get_who_fmv_variants():
     who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
                                 "formerly-monitored-variants"
 
-    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
     who_body = _who_data_wa(who_body)
 
@@ -738,7 +739,7 @@ def get_who_pre_voi_variants():
     who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
                                 "previously-circulating-vois"
 
-    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+    who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
     who_body = _who_data_wa(who_body)
 
@@ -791,7 +792,7 @@ def get_cdc_variants():
 
     cdc_variants_tracking_url = "https://www.cdc.gov/coronavirus/2019-ncov/variants/variant-classifications.html"
 
-    cdc_body = urlopen(Request(cdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+    cdc_body = urlopen(Request(cdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
     cdc_body = cdc_body.replace("and descendent lineages", "").replace(" and Q lineages", "").replace(
         " and AY lineages", "")
@@ -842,7 +843,7 @@ def get_ecdc_variants():
 
     ecdc_variants_tracking_url = "https://www.ecdc.europa.eu/en/covid-19/variants-concern"
 
-    ecdc_body = urlopen(Request(ecdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode(
+    ecdc_body = urlopen(Request(ecdc_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode(
         'UTF-8')
 
     # Fix errors in HTML
@@ -869,7 +870,7 @@ def get_phe_variants():
 
     phe_variants_tracking_url = "https://github.com/phe-genomics/variant_definitions/blob/main/README.md"
 
-    phe_body = urlopen(Request(phe_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0'})).read().decode('UTF-8')
+    phe_body = urlopen(Request(phe_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
     phe_tables = pd.read_html(phe_body, match=r'Lineages')
 
@@ -879,12 +880,68 @@ def get_phe_variants():
     return phe_voc, phe_vui
 
 
+def who_header_wa(data):
+    # Set the first row as a header
+    data.columns = data.iloc[0]
+    # remove first row from DataFrame
+    data = data[1:]
+    return data
+
+
+def get_who_voc_old_variants():
+    data = [
+        ['Alpha', "B.1.1.7"],
+        ['Beta', "B.1.351"],
+        ['Gamma', "P.1"],
+        ['Delta', "B.1.617.2"],
+        ['Omicron', "B.1.1.529"],
+    ]
+    df = pd.DataFrame(data, columns=['WHO\xa0label', 'Pango lineage'])
+    return df
+
+
+def get_who_voc_sum_old_variants():
+    data = [
+        ["BF.7"],
+        ["BQ.1"],
+        ["BA.2.75"],
+        ["CH.1.1"],
+        ["XBB"],
+        ["XBB.1.5"],
+        ["XBF"],
+    ]
+    df = pd.DataFrame(data, columns=['Pango lineage'])
+    return df
+
+
+def get_who_voi_old_variants():
+    data = [
+        ['Epsilon', "B.1.427 B.1.429"],
+        ['Zeta', "P.2"],
+        ['Eta', "B.1.525"],
+        ['Theta ', "P.3"],
+        ['Iota', "B.1.526"],
+        ['Kappa', "B.1.617.1"],
+        ['Lambda', "C.37"],
+    ]
+    df = pd.DataFrame(data, columns=['WHO\xa0label', 'Pango lineage'])
+    return df
+
+
 def get_lineage_map():
-    (who_voc, who_voc_old, who_voc_sum) = get_who_variants()
+    (who_voc, who_voc_sum) = get_who_variants()
+
+    # Who change the tables to no header and usethe first row as a header
+    who_voc = who_header_wa(who_voc)
+    who_voc_sum = who_header_wa(who_voc_sum)
+
+    who_voc_old = get_who_voc_old_variants()
+    who_voc_sum_old = get_who_voc_sum_old_variants()
     who_fmv = get_who_fmv_variants()[0]
     who_voi = get_who_pre_voi_variants()[0]
+    who_voi_old = get_who_voi_old_variants()
 
-    (cdc_vbm) = get_cdc_variants()[1]
+    #(cdc_vbm) = get_cdc_variants()[1]
 
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
 
@@ -893,20 +950,26 @@ def get_lineage_map():
     who_voc = who_expand(who_voc)
     who_voc_old = who_expand(who_voc_old)
     who_voc_sum = who_expand(who_voc_sum)
+    who_voc_sum_old = who_expand(who_voc_sum_old)
     who_voi = who_expand(who_voi)
+    who_voi_old = who_expand(who_voi_old)
     who_fmv = who_expand(who_fmv)
 
     who_voc_dict = who_to_dict(who_voc, "(WHO VOC)")
     who_voc_old_dict = who_to_dict(who_voc_old, "(WHO PVOC)")
     who_voc_sum_dict = who_to_dict(who_voc_sum, "(WHO VOC-SUM)")
+    who_voc_sum_old_dict = who_to_dict(who_voc_sum_old, "(WHO PVOC-SUM)")
     who_voi_dict = who_to_dict(who_voi, "(WHO PVOI)")
+    who_voi_old_dict = who_to_dict(who_voi_old, "(WHO PVOI)")
     who_fmv_dict = who_to_dict(who_fmv, "(WHO FMV)")
 
     lineage_dict_map = dict(
         list(who_voc_dict.items()) +
         list(who_voc_old_dict.items()) +
         list(who_voc_sum_dict.items()) +
+        list(who_voc_sum_old_dict.items()) +
         list(who_voi_dict.items()) +
+        list(who_voi_old_dict.items()) +
         list(who_fmv_dict.items())
     )
 
@@ -914,12 +977,11 @@ def get_lineage_map():
 
     # cdc_voc_dict = filter_to_dict(lineage_dict_map, cdc_voc, "(CDC VOC)")
     # cdc_voi_dict = filter_to_dict(lineage_dict_map, cdc_voi, "(CDC VOI)")
-    print(cdc_vbm)
-    cdc_vbm_dict = filter_to_dict(lineage_dict_map, cdc_vbm, "(CDC VBM)")
+    # cdc_vbm_dict = filter_to_dict(lineage_dict_map, cdc_vbm, "(CDC VBM)")
 
     # lineage_dict_map.update(cdc_voi_dict)
     # lineage_dict_map.update(cdc_voc_dict)
-    lineage_dict_map.update(cdc_vbm_dict)
+    # lineage_dict_map.update(cdc_vbm_dict)
 
     ecdc_voc_dict = filter_to_dict(lineage_dict_map, ecdc_voc, "(ECDC VOC)")
     ecdc_voi_dict = filter_to_dict(lineage_dict_map, ecdc_voi, "(ECDC VOI)")
@@ -940,8 +1002,16 @@ def get_lineage_map():
     data = {
         "map": lineage_dict_map,
         "data": {
-            "who": {"voc": {**who_voc, **who_voc_old}, "voc-lum": who_voc_sum, "voi": who_voi, "fmv": who_fmv},
-            "cdc": {"vbm": cdc_vbm},
+            "who": {
+                "voc": who_voc,
+                "pvoc": who_voc_old,
+                "voc-lum": who_voc_sum,
+                "pvoc-lum": who_voc_sum_old,
+                "voi": who_voi,
+                "pvoi": who_voi_old,
+                "fmv": who_fmv
+            },
+            # "cdc": {"vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
             "phe": {"voc": phe_voc, "vui": phe_vui},
         }
@@ -1003,7 +1073,8 @@ def get_loc_data(locat):
     #    print(e)
     #    raise e
     #    # return None
-    except:
+    except Exception as e:
+        print(e)
         df_loc = None
     # print(type(df_loc))
     return df_loc
@@ -1205,7 +1276,7 @@ def main():
     global pango_metadata
 
     # print("Pango information")
-    #pango_metadata = get_metadata_from_pango()
+    pango_metadata = get_metadata_from_pango()
 
     #print(get_recombinant_by_parent_references(["B.1.617.2"]))
     #exit(0)
@@ -1217,6 +1288,8 @@ def main():
     # x = get_sub_lineage("XBB")
     # print(x)
     # exit(0)
+
+    # data = get_lineage_map()
 
     locations_list = []
 
@@ -1317,13 +1390,18 @@ def main():
     locations_list = filter(None.__ne__, locations_list)
 
     print("Create location list...")
-    df = pd.concat(locations_list)
+    try:
+        df = pd.concat(locations_list)
+    except Exception as ex:
+        print(ex)
+        df = None
 
-    # Clear zeroes
-    df = df[df.perc_sequences != 0]
+    if df is not None:
+        # Clear zeroes
+        df = df[df.perc_sequences != 0]
 
-    df['variant'] = df['variant'].str.upper()
-    df['variant'] = df['variant'].str.replace("UNASSIGNED", "Other")
+        df['variant'] = df['variant'].str.upper()
+        df['variant'] = df['variant'].str.replace("UNASSIGNED", "Other")
 
     # Drop from cases countries not in list
     # locations_to_clean = list(set(df_cases_data["location"].values) - set(df["location"].values))
@@ -1720,167 +1798,169 @@ def main():
     alias_map = {x["alias_of"]: x["pango"] for x in df_pango.to_dict('records') if x["alias_of"] != x["pango"] and not x["recombinant"]}
 
     # print(json.dumps(alias_map, indent=4))
-    originals = df["variant"].unique()
-    df = parallel_df(df, replace_variant_wo_regex, alias_map)
+    if df is not None:
+        originals = df["variant"].unique()
+        df = parallel_df(df, replace_variant_wo_regex, alias_map)
 
-    updated = df["variant"].unique()
-    diff = set(originals) ^ set(updated)
-    diff = set(diff) - set(alias_map.values())
-    print("Variants on outbreak.info without alias:")
-    print(sorted(diff))
+        updated = df["variant"].unique()
+        diff = set(originals) ^ set(updated)
+        diff = set(diff) - set(alias_map.values())
+        print("Variants on outbreak.info without alias:")
+        print(sorted(diff))
 
-    print("Replace variants")
-    # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
+        print("Replace variants")
+        # df["variant"].replace(main_lineage_map, inplace=True, regex=True)
 
-    df = parallel_df(df, replace_variant, lineage_map)
+        df = parallel_df(df, replace_variant, lineage_map)
 
-    main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
-    #print("main lineages")
-    #print(main_lineage)
-    other_lineage = list(dict.fromkeys([str(l) for l in df["variant"].unique() if l not in main_lineage]))
-    #print("others lineages")
-    #print(other_lineage)
+        main_lineage = list(dict.fromkeys([v for k, v in lineage_map.items()]))
+        #print("main lineages")
+        #print(main_lineage)
+        other_lineage = list(dict.fromkeys([str(l) for l in df["variant"].unique() if l not in main_lineage]))
+        #print("others lineages")
+        #print(other_lineage)
 
     print("Save lineage map...")
     export_variants(lineage_map)
 
-    print("Transform not monitored lineage to parent...")
-    # Transform no specific lineage to parent lineage
-    lineage_to_parent = {}
-    for o in other_lineage:
-        lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
-    # df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
-    df = parallel_df(df, replace_lineage_to_parent, lineage_to_parent)
+    if df is not None:
+        print("Transform not monitored lineage to parent...")
+        # Transform no specific lineage to parent lineage
+        lineage_to_parent = {}
+        for o in other_lineage:
+            lineage_to_parent[o] = o.split(".")[0] + " (Lineage)"
+        # df["variant"].replace(lineage_to_parent, inplace=True, regex=False)
+        df = parallel_df(df, replace_lineage_to_parent, lineage_to_parent)
 
-    print("Group and calculate percentage of sequences...")
-    df['date'] = pd.to_datetime(df['date'])
+        print("Group and calculate percentage of sequences...")
+        df['date'] = pd.to_datetime(df['date'])
 
-    df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).agg(
-        {'num_sequences': 'sum'}).reset_index()
+        df = df.groupby(['location', pd.Grouper(key='date', freq='2W'), 'variant']).agg(
+            {'num_sequences': 'sum'}).reset_index()
 
-    dfb = df.groupby(['location', 'date']).agg(
-        {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
+        dfb = df.groupby(['location', 'date']).agg(
+            {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
 
-    df = pd.merge(df, dfb, on=['location', 'date'])
+        df = pd.merge(df, dfb, on=['location', 'date'])
 
-    df["perc_sequences"] = (df["num_sequences"] / df["num_sequences_total"]) * 100
+        df["perc_sequences"] = (df["num_sequences"] / df["num_sequences_total"]) * 100
 
-    df = df.drop(df[df.perc_sequences.isnull()].index)
+        df = df.drop(df[df.perc_sequences.isnull()].index)
 
-    df = df.sort_values(['location', 'date', 'variant'])
+        df = df.sort_values(['location', 'date', 'variant'])
 
-    print("Save genomics.csv...")
-    df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+        print("Save genomics.csv...")
+        df.to_csv("../data/genomics.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    print("Save gen_locations.csv...")
-    pd.DataFrame(df.location.unique(), columns=['location']).to_csv("../data/gen_locations.csv", index=False,
-                                                                    quoting=csv.QUOTE_ALL, decimal=",")
+        print("Save gen_locations.csv...")
+        pd.DataFrame(df.location.unique(), columns=['location']).to_csv("../data/gen_locations.csv", index=False,
+                                                                        quoting=csv.QUOTE_ALL, decimal=",")
 
-    print("Pivot data...")
-    df_pivoted = df.pivot(index=["location", "date"], columns=["variant"], values="perc_sequences").reset_index()
-    df_pivoted = df_pivoted.fillna(0)
+        print("Pivot data...")
+        df_pivoted = df.pivot(index=["location", "date"], columns=["variant"], values="perc_sequences").reset_index()
+        df_pivoted = df_pivoted.fillna(0)
 
-    print("Save locations...")
-    # Save a file for each location generating pivot table
-    # Exclude the last register because is noisy
-    to_date = datetime.now() - timedelta(days=14)
-    df_fit_list = []
-    for location in locations:
-        # print(f"Save Location: {location['country']}")
+        print("Save locations...")
+        # Save a file for each location generating pivot table
+        # Exclude the last register because is noisy
+        to_date = datetime.now() - timedelta(days=14)
+        df_fit_list = []
+        for location in locations:
+            # print(f"Save Location: {location['country']}")
 
-        df_location = df_pivoted[df_pivoted["location"] == location['country']]
-        df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
+            df_location = df_pivoted[df_pivoted["location"] == location['country']]
+            df_location = df_location.loc[:, (df_location != 0).any(axis=0)]  # Remove zeroes columns
 
-        if not df_location.empty:
-            if "Other" not in df_location.columns:
-                df_location["Other"] = 0  # Init the column Other when not exist
+            if not df_location.empty:
+                if "Other" not in df_location.columns:
+                    df_location["Other"] = 0  # Init the column Other when not exist
 
-            df_location.to_csv(
-                f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
-        else:
-            print("Location emptu " + location['country'])
-
-        if not df_location.empty and location["country"] in df_cases_data["location"].values:
-
-            if location["country"] not in df_location["location"].values:
-                print("Country not found in location " + location["country"])
+                df_location.to_csv(
+                    f"../data/{location['country']}.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
             else:
-                df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
-                                                                                               on=['location', 'date'],
-                                                                                               how='outer')
+                print("Location emptu " + location['country'])
 
-                df_fit = df_fit.sort_values(['location', 'date', 'cases'])
+            if not df_location.empty and location["country"] in df_cases_data["location"].values:
 
-                # Fix the cases of the last value and put the projected value
-                df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
-                if df_fit_r_data.size > 1:
-                    df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
-                        df_fit_r_data.index[-1], 'cases']
+                if location["country"] not in df_location["location"].values:
+                    print("Country not found in location " + location["country"])
+                else:
+                    df_fit = df_cases_data[df_cases_data["location"] == location["country"]].merge(df_location,
+                                                                                                   on=['location', 'date'],
+                                                                                                   how='outer')
 
-                # Fit
-                columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
-                for v in columns:
-                    df_fit[v] = df_fit["cases"] * (df_fit[v] / 100)
-                    df_fit[v] = df_fit[v].fillna(0.0)
-                    df_fit[v] = df_fit[v].apply(np.ceil).astype(int)
+                    df_fit = df_fit.sort_values(['location', 'date', 'cases'])
 
-                df_fit['Unknown'] = df_fit.loc[:, columns].sum(axis=1)
-                df_fit['Unknown'] = df_fit["cases"] - df_fit['Unknown']
-                df_fit['Unknown'] = df_fit['Unknown'].fillna(0.0)
-                df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
-                df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
+                    # Fix the cases of the last value and put the projected value
+                    df_fit_r_data = df_cases_r_data[df_cases_r_data["location"] == location['country']]
+                    if df_fit_r_data.size > 1:
+                        df_fit.loc[df_fit.index[-1], 'cases'] = df_fit_r_data.at[
+                            df_fit_r_data.index[-1], 'cases']
 
-                df_fit.drop(columns=['cases'], inplace=True)
+                    # Fit
+                    columns = [x for x in df_fit.columns.tolist() if x not in ["date", "location", "cases"]]
+                    for v in columns:
+                        df_fit[v] = df_fit["cases"] * (df_fit[v] / 100)
+                        df_fit[v] = df_fit[v].fillna(0.0)
+                        df_fit[v] = df_fit[v].apply(np.ceil).astype(int)
 
-                df_fit.to_csv(
-                    f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+                    df_fit['Unknown'] = df_fit.loc[:, columns].sum(axis=1)
+                    df_fit['Unknown'] = df_fit["cases"] - df_fit['Unknown']
+                    df_fit['Unknown'] = df_fit['Unknown'].fillna(0.0)
+                    df_fit['Unknown'] = df_fit['Unknown'].apply(np.ceil).astype(int)
+                    df_fit.loc[df_fit["Unknown"] < 0, "Unknown"] = 0
 
-                df_fit_list.append(df_fit)
+                    df_fit.drop(columns=['cases'], inplace=True)
 
-    print("Generate Variants World data...")
-    df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
+                    df_fit.to_csv(
+                        f"../data/{location['country']}_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    dfb_world = df_world.groupby(['date']).agg(
-        {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
+                    df_fit_list.append(df_fit)
 
-    df_world = pd.merge(df_world, dfb_world, on=['date'])
+        print("Generate Variants World data...")
+        df_world = df.groupby(['date', 'variant']).agg({'num_sequences': 'sum'}).reset_index()
 
-    df_world["perc_sequences"] = (df_world["num_sequences"] / df_world["num_sequences_total"]) * 100
+        dfb_world = df_world.groupby(['date']).agg(
+            {'num_sequences': 'sum'}).rename(columns={"num_sequences": "num_sequences_total"}).reset_index()
 
-    df_world = df_world.drop(df_world[df_world.perc_sequences.isnull()].index)
+        df_world = pd.merge(df_world, dfb_world, on=['date'])
 
-    df_world = df_world.sort_values(['date', 'variant'])
+        df_world["perc_sequences"] = (df_world["num_sequences"] / df_world["num_sequences_total"]) * 100
 
-    df_world_pivoted = df_world.pivot(index=["date"], columns=["variant"],
-                                      values="perc_sequences").reset_index()
-    df_world_pivoted["location"] = "World"
-    df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
-    df_world_pivoted = df_world_pivoted.fillna(0)
+        df_world = df_world.drop(df_world[df_world.perc_sequences.isnull()].index)
 
-    print("Save World.csv...")
-    df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+        df_world = df_world.sort_values(['date', 'variant'])
 
-    # Generate World Fit
-    print("Create location list...")
-    df_world_fit = pd.concat(df_fit_list)
+        df_world_pivoted = df_world.pivot(index=["date"], columns=["variant"],
+                                          values="perc_sequences").reset_index()
+        df_world_pivoted["location"] = "World"
+        df_world_pivoted.insert(0, "location", df_world_pivoted.pop("location"))
+        df_world_pivoted = df_world_pivoted.fillna(0)
 
-    # Get columns to melt
-    df_world_fit = df_world_fit.melt(id_vars=["location", "date"], var_name="variant", value_name="cases")
+        print("Save World.csv...")
+        df_world_pivoted.to_csv("../data/World.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
-    # Clear zeroes
-    df_world_fit = df_world_fit[df_world_fit.cases != 0]
-    df_world_fit = df_world_fit.drop(df_world_fit[df_world_fit.cases.isnull()].index)
+        # Generate World Fit
+        print("Create location list...")
+        df_world_fit = pd.concat(df_fit_list)
 
-    df_world_fit = df_world_fit.groupby(['date', 'variant']).agg({'cases': 'sum'}).reset_index()
+        # Get columns to melt
+        df_world_fit = df_world_fit.melt(id_vars=["location", "date"], var_name="variant", value_name="cases")
 
-    df_world_fit = df_world_fit.sort_values(['date', 'variant'])
+        # Clear zeroes
+        df_world_fit = df_world_fit[df_world_fit.cases != 0]
+        df_world_fit = df_world_fit.drop(df_world_fit[df_world_fit.cases.isnull()].index)
 
-    df_world_fit_pivoted = df_world_fit.pivot(index=["date"], columns=["variant"], values="cases").reset_index()
-    df_world_fit_pivoted["location"] = "World"
-    df_world_fit_pivoted.insert(0, "location", df_world_fit_pivoted.pop("location"))
-    df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
+        df_world_fit = df_world_fit.groupby(['date', 'variant']).agg({'cases': 'sum'}).reset_index()
 
-    df_world_fit_pivoted.to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
+        df_world_fit = df_world_fit.sort_values(['date', 'variant'])
+
+        df_world_fit_pivoted = df_world_fit.pivot(index=["date"], columns=["variant"], values="cases").reset_index()
+        df_world_fit_pivoted["location"] = "World"
+        df_world_fit_pivoted.insert(0, "location", df_world_fit_pivoted.pop("location"))
+        df_world_fit_pivoted = df_world_fit_pivoted.fillna(0)
+
+        df_world_fit_pivoted.to_csv("../data/World_fit.csv", index=False, quoting=csv.QUOTE_ALL, decimal=",")
 
     print("Generate update file...")
     update_dict = {
