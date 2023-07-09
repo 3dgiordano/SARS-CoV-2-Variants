@@ -685,8 +685,9 @@ def who_expand(data):
 def get_who_variants():
     from urllib.request import Request, urlopen
 
-    who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/" \
-                                "tracking-SARS-CoV-2-variants"
+    who_variants_tracking_url = "https://www.who.int/activities/tracking-SARS-CoV-2-variants/"
+    #  \
+    #  "tracking-SARS-CoV-2-variants"
 
     who_body = urlopen(Request(who_variants_tracking_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'})).read().decode('UTF-8')
 
@@ -945,7 +946,7 @@ def get_lineage_map():
 
     (ecdc_voc, ecdc_voi, ecdc_vum) = get_ecdc_variants()
 
-    (phe_voc, phe_vui) = get_phe_variants()
+    # (phe_voc, phe_vui) = get_phe_variants()
 
     who_voc = who_expand(who_voc)
     who_voc_old = who_expand(who_voc_old)
@@ -991,11 +992,11 @@ def get_lineage_map():
     lineage_dict_map.update(ecdc_voc_dict)
     lineage_dict_map.update(ecdc_vum_dict)
 
-    phe_voc_dict = filter_to_dict(lineage_dict_map, phe_voc, "(PHE VOC)")
-    phe_vui_dict = filter_to_dict(lineage_dict_map, phe_vui, "(PHE VUI)")
+    # phe_voc_dict = filter_to_dict(lineage_dict_map, phe_voc, "(PHE VOC)")
+    # phe_vui_dict = filter_to_dict(lineage_dict_map, phe_vui, "(PHE VUI)")
 
-    lineage_dict_map.update(phe_voc_dict)
-    lineage_dict_map.update(phe_vui_dict)
+    # lineage_dict_map.update(phe_voc_dict)
+    # lineage_dict_map.update(phe_vui_dict)
 
     lineage_dict_map.update(lineage_map)
 
@@ -1013,7 +1014,7 @@ def get_lineage_map():
             },
             # "cdc": {"vbm": cdc_vbm},
             "ecdc": {"voi": ecdc_voi, "voc": ecdc_voc, "vum": ecdc_vum},
-            "phe": {"voc": phe_voc, "vui": phe_vui},
+            # "phe": {"voc": phe_voc, "vui": phe_vui},
         }
     }
     return data
